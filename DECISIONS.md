@@ -2,6 +2,14 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-26 — Public repo, competition, time box
+
+**Public repo:** "feel free to set up a public git repo for this, this is part of a little competition and maybe i'll share the game with fellow participants after." → github.com/lamentierschweinchen/usher (public).
+
+**Ambition and time box:** "my ambition is to blow them out of the water with this. we have only a short build window of ~2.5h … we'll probably won't be able to fully build out all the chapters. but the excellence lives in the idea and its translation into an exciting mysterious fun delightful and perhaps even wry witty game and this is where we'll spend most of our time."
+
+*Replaced:* "Don't create a GitHub remote or publish anything without asking me" (for the repo only; sharing the game itself is still Lukas's call). Process compressed to fit the window: critique and refine run as one round.
+
 ## 2026-10-26 — Founding calls
 
 **Source:** "Edgar Allan Poe, 'The Fall of the House of Usher' (1839, public domain). My reading edition lives in ~/Documents/Reading/projects/fall-of-the-house-of-usher." (The edition uses the 1845 *Tales* text; exported to `source/usher-1845.md`.)
