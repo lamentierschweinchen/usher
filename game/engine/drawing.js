@@ -63,7 +63,8 @@ export function mapMarkup(titles) {
   <clipPath id="clip-left"><path d="${left}"/></clipPath>
   <clipPath id="clip-right"><path d="${right}"/></clipPath>
   <g id="grounds">${C.bank()}${C.shore()}</g>
-  <g id="house" class="house-def">${C.shell({ crack: 6 })}<g class="rooms">${C.rooms()}</g><g class="facade">${C.facadeWindows()}</g></g>
+  <!-- the closed façade's body is glass in the tarn (transparent above water), as on the board's title -->
+  <g id="house" class="house-def">${C.shell({ crack: 6 })}<g class="rooms">${C.rooms()}</g><g class="facade"><path d="M300 172h360v196H300z" style="fill:var(--lit-facade,transparent)"/>${C.facadeWindows()}</g></g>
   <g id="cast"></g>
   ${hand}
 </defs>

@@ -24,7 +24,7 @@ body {
 }
 button { font: inherit; color: inherit; }
 .noscript { font-style: italic; text-align: center; }
-.sh-defs { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
+.sh-defs { position: absolute; left: -10000px; top: 0; width: 960px; height: 640px; overflow: hidden; pointer-events: none; }
 
 /* ---- the book: running head, stage, docked band ---- */
 .frame {
@@ -66,6 +66,8 @@ button { font: inherit; color: inherit; }
 .moon.on { opacity: 1; }
 
 /* the house: closed, its eye-windows lit; once the door gives, the rooms light behind them */
+/* in the tarn the shut façade comes back as dark glass, not a slab of light */
+.sh-return { --lit-facade: #15122a; }
 .house-def .rooms { opacity: 0; transition: opacity 1.6s ease; }
 .house-def .facade { transition: opacity 1.2s ease; }
 .house-def.open .rooms { opacity: 1; }

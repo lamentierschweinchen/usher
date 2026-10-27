@@ -14,9 +14,10 @@
 <script type="module" src="engine/main.js"></script>
 </head>
 <body>
-<!-- the cut library's shared paint servers (sh- ids): first in the document and never hidden,
-     so a game's url(#sh-…) still paints while the map is hidden behind it -->
-<svg id="sh-defs" class="sh-defs" width="0" height="0" aria-hidden="true" focusable="false"></svg>
+<!-- the cut library's shared paint servers, masks and filters (sh- ids): first in the document,
+     full size and never hidden (Chrome won't render masks from a zero-size or hidden svg),
+     just parked off-screen, so a game's url(#sh-…) still works while the map is hidden behind it -->
+<svg id="sh-defs" class="sh-defs" width="960" height="640" viewBox="0 0 960 640" aria-hidden="true" focusable="false"></svg>
 <main class="frame" id="frame">
   <header class="running">
     <span>A Sojourn of Some Weeks</span>
