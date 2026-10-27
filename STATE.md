@@ -4,12 +4,12 @@
 
 **Phase: full game** (75–90 min, one evening). Lukas: integrate the critic's fixes; no single source tells the truth ("the water is fluid and reflections can be tricky"); the mirror second act (*A Burial of Some Weeks*) is in.
 
-**Now:**
+**Now:** full-game options ready (work/fullgame/OPTIONS.md): the Mirror, the Account, the Direct Line. All three designers bet on the Mirror. Critic fixes all integrated and pushed.
 - Critic's fixes in progress: the spine (an invitation to look down, outros that branch on flags, save on refresh, ledger fit), door (a puzzle first), tarn (counter matches the dots), burial (rule before the first catch), trist (threshold stroke, dragons-slain score, Roderick's line held).
 - Three full-game blueprints are being written: the house (investigation), the account (unreliable testimony), the mirror (two acts). Briefs: briefs/fullgame-*.md → work/fullgame/.
 
-**Next:** blueprints cross-critique and refine → coordinator brings Lukas 2–3 full-game options with a pick → first milestone build.
+**Next:** Lukas picks → first milestone (for the Mirror: the studio both ways, about a day) → build out.
 
-**Open with Lukas:** nothing until the options. Also pending: what red means now (the blueprints propose).
+**Open with Lukas:** pick a full-game blueprint.
 
 **Rules:** builders don't commit; the coordinator checkpoints to public `main`, github.com/lamentierschweinchen/usher.
