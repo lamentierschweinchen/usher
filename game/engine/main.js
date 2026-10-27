@@ -148,6 +148,7 @@ async function after(ch, r) {
   const outro = r.note || ch.outro;
   if (ch.id === 'door') { map.flyFacade(); map.put('guest', 'hall', 1); }
   if (ch.id === 'studio') map.hideAll(['guest', 'valet']);
+  if (ch.id === 'burial') map.coffin(true);
   if (ch.id === 'trist') fallen();
   if (ch.finale) {
     map.hideAll(['guest']); map.put('guest', 'brink', -1);
@@ -259,7 +260,7 @@ function jumpTo(index) {
 async function main() {
   layout();
   const params = new URLSearchParams(location.search);
-  // ?sealed=none opens the chapters this slice keeps sealed (their games exist)
+  // ?sealed=none opens any chapter marked sealed in story.js
   if (params.get('sealed') === 'none') for (const c of CHAPTERS) c.sealed = false;
   const want = params.get('chapter');
   // jumping to a sealed chapter opens it, so its game can be tried inside the spine

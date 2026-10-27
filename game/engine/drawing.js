@@ -36,9 +36,9 @@ export const ROOMS = {
   vault:    { rect: [300, 340, 140, 28], label: 'the vault', anchor: [370, 355], hand: [370, 324, 90] },
 };
 
-// A figure the map can move and turn: position and facing live on the spine's
-// own wrappers, so the library's cut stays untouched.
-export const actorFigure = (name, pose) => C.figure(name, { pose });
+// A figure for the map: placed with C.place(), never transformed on its outer <g>.
+export const actorFigure = (name, pose, scale = 1) => C.figure(name, { pose, scale });
+export const placeFigure = C.place;
 
 const hand = `<g id="f-hand" style="color:var(--sh-cut)">
   <rect x="-36" y="-7" width="7" height="14" fill="currentColor"/>
@@ -67,7 +67,6 @@ ${C.defs()}
 
 <g id="lights">${lights(ch => C.backdrop(ch))}</g>
 <g id="moon" class="moon">${C.moon(484, 246, 46)}</g>
-<g id="cartouche" class="cartouche">${C.card({ text: titles.above, x: 206, y: 30, w: 548, h: 92, size: 40 })}</g>
 
 <g class="above" style="color:var(--sh-cut)">
   <use href="#grounds"/>
@@ -78,6 +77,7 @@ ${C.defs()}
   </g>
   <use href="#cast"/>
 </g>
+<g id="cartouche" class="cartouche">${C.card({ text: titles.above, x: 206, y: 30, w: 548, h: 92, size: 40 })}</g>
 
 <g id="glasses">${lights(ch => C.glass(ch))}</g>
 ${C.returned('<use href="#grounds"/><use href="#house"/><use href="#cast"/>', { truth: `<g id="truths" class="truths">${TRUTHS}</g>` })}

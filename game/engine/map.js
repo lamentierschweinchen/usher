@@ -2,7 +2,7 @@
 // moves figures, lights the rooms, changes the chapter's light, shows the tarn's truths.
 
 import { svg, tween, sleep, reducedMotion } from './util.js';
-import { mapMarkup, actorFigure, ROOMS, TRUTH_IDS } from './drawing.js';
+import { mapMarkup, actorFigure, placeFigure, ROOMS, TRUTH_IDS } from './drawing.js';
 
 // Walkable points (feet), and how they join: over the bank, up the arched
 // causeway (it climbs from 350 to 336), through the hall's arch, the stair's two flights.
@@ -56,27 +56,39 @@ function route(from, to) {
   return path;
 }
 
+// A cast member: the library's figure, placed with C.place(). Facing lives on a
+// wrapper that mirrors about the figure's own x, so a turn can go edge-on
+// (scaleX 1 → 0 → −1, 160 ms) without touching the figure's outer <g>.
 class Actor {
   constructor(id, castEl) {
     this.id = id;
-    // the library bobs a figure while its wrapper is .sh-moving (Madeline never bobs)
+    // the library bobs a figure while an ancestor is .sh-moving (Madeline never bobs)
     this.g = svg('g', { class: `actor sh-${FIG[id]}`, id: 'a-' + id });
-    this.face = svg('g');
-    this.g.append(this.face);
     castEl.append(this.g);
-    this.x = 0; this.y = 0; this.dir = 1; this.node = null; this.posed = undefined;
+    this.x = 0; this.y = 0; this.dir = 1; this.s = 1; this.turning = 0; this.node = null; this.posed = null;
     this.pose();
   }
   pose(p) {
-    if (p === this.posed && this.face.firstChild) return;
+    if (p === this.posed && this.fig) return;
     this.posed = p;
-    this.face.innerHTML = actorFigure(FIG[this.id], p);
-    if (this.id === 'peasant') this.face.firstChild.setAttribute('transform', 'scale(.94)');
+    this.g.innerHTML = actorFigure(FIG[this.id], p, this.id === 'peasant' ? .94 : 1);
+    this.fig = this.g.firstElementChild;
+    placeFigure(this.fig, this.x, this.y);
+  }
+  mirror() {
+    this.g.setAttribute('transform', this.s === 1 ? '' : `translate(${this.x.toFixed(1)} 0) scale(${this.s.toFixed(3)} 1) translate(${(-this.x).toFixed(1)} 0)`);
+  }
+  turn(dir) {
+    this.dir = dir;
+    const from = this.s;
+    if (reducedMotion || !this.shown) { this.s = dir; this.mirror(); return; }
+    const t = ++this.turning;
+    tween(160, k => { if (t !== this.turning) return; this.s = from + (dir - from) * k; this.mirror(); });
   }
   place(x, y, dir) {
     this.x = x; this.y = y;
-    this.g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
-    if (dir && dir !== this.dir) { this.dir = dir; this.face.setAttribute('transform', dir < 0 ? 'scale(-1 1)' : ''); }
+    placeFigure(this.fig, x, y);
+    if (dir && dir !== this.dir) this.turn(dir); else this.mirror();
   }
   moving(on) { this.g.classList.toggle('sh-moving', on); }
   show(on) { this.g.classList.toggle('on', on); }

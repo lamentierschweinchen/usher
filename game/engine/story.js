@@ -65,7 +65,7 @@ export const CHAPTERS = [
     stub: { line: 'Hush the sunbeams, the roses, the brass band — before they reach him.', score: { 'taps hushed': 41 } },
   },
   {
-    id: 'burial', ord: 'Chapter the Fourth', num: 'IV', title: 'A Harmless Precaution', sealed: true,
+    id: 'burial', ord: 'Chapter the Fourth', num: 'IV', title: 'A Harmless Precaution',
     room: 'vault', target: 'vault',
     intro: 'His sister is no more. You help with the arrangements; you’re good at arrangements.',
     cast: { roderick: ['hallEast', -1], valet: 'hallWest' },
@@ -79,7 +79,7 @@ export const CHAPTERS = [
     stub: { line: 'Screw down the lid.', score: { 'screws turned': 4 } },
   },
   {
-    id: 'nights', ord: 'Chapter the Fifth', num: 'V', title: 'The Seventh or Eighth Night', sealed: true,
+    id: 'nights', ord: 'Chapter the Fifth', num: 'V', title: 'The Seventh or Eighth Night',
     room: 'bedroom', target: 'bedroom',
     intro: 'Your bed is directly over the vault. A coincidence, and you explain it as one.',
     encounters: [

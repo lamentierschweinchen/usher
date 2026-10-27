@@ -195,7 +195,7 @@ button { font: inherit; color: inherit; }
 
 .last { position: absolute; inset: 0; z-index: 8; opacity: 0; transition: opacity 1.2s ease; }
 .last.on { opacity: 1; }
-.last p { position: absolute; left: 8%; right: 8%; margin: 0; text-align: center; font-style: italic; font-size: max(15px, calc(var(--u) * 24)); line-height: 1.3; }
+.last p { position: absolute; left: 8%; right: 8%; margin: 0; text-align: center; font-style: italic; font-size: max(15px, calc(var(--u) * 24)); line-height: 1.3; text-shadow: 0 0 6px var(--sh-cut), 0 0 2px var(--sh-cut); }
 .last-above { top: 4%; color: var(--sh-return); }
 .last-below { top: 52%; color: var(--sh-paper); }
 .again {
