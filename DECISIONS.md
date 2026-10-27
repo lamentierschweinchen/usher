@@ -2,6 +2,14 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-26 — Build the spine; challenge every mini-game; see the look
+
+"you can build the spine. engage the storyteller, game designer, designer, and other appropriate agents and instances to craft a coherent vision. involve me where you need judgement. but for the mini games, i want you to challenge each game and improve it materially before going to production — they should fit the overall mood, not be too shallow and be fun and intriguing on their own accord and not feel tedious."
+
+"i'm going to need to see some overall design directions as they'll be somewhat difficult to change and should have a common feel (even if the individual games can have their own unique character)"
+
+*Replaced:* the art director's LOOK.md as the settled look. It's now one of three style boards for Lukas to pick from (work/look/).
+
 ## 2026-10-26 — An adventure with mini-games
 
 "again, i find all three unconvincing. what i feel might be interesting is more of a zelda (i don't play games, but i think this is the right reference, keep reading) style game where you have a main plot and then mini games you play. this then could involve a diverse array like the one above while keeping a plot, having character development, encounters, etc. we are entering the house of usher. to open the door, we need to solve something. then we play through the story itself (not necessarily all of it, not necessarily in a literal reading) and encounter various fun challenges along the way."
