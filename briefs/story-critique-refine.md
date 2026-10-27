@@ -4,6 +4,8 @@ This is time-boxed, so critique and revision happen in one pass. Work briskly.
 
 **Context you didn't have before:** this game is a competition entry. The whole window is about 2.5 hours, most of it spent on the idea; the build will be a playable slice, possibly not every chapter. Lukas wants to blow the other entrants out of the water: the excellence lives in the idea and its translation into a game that is mysterious, exciting, fun, delightful, and wry and witty where it can be. Judge everything against that bar.
 
+**What the coordinator sees across the four drafts:** all four dropped the reading-speed clock, and all four lean on the same claim: someone's silence, tact or care keeps Madeline buried. They're good, but side by side they read as four solemn games about complicity. The room needs one that is also *fun*: a pleasure to poke at, with a wit and a mystery that pull you forward. Push yours toward what only it can do, and toward delight.
+
 ## 1. Read the other three directions, in full
 
 - `~/Documents/Usher/work/story/01-narrator.md` (narrative designer, the narrator)
