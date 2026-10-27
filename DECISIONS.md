@@ -2,6 +2,12 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-26 — Licence over fidelity
+
+"the book, unless there is a really clever literal interpretation that can be a delightful game, most likely will simply provide the frame for something fascinating, horrifying, entertaining, etc. we have and should take liberty and artistic license to bend the rules and not be beholden to faithful interpretations. in fact, the unfaithful can be the delight and the joke."
+
+*Replaced:* the specialists' working assumption that the game must follow Poe's events and quote him verbatim. Poe is the frame, not the cage.
+
 ## 2026-10-26 — Design principle (no pick yet)
 
 **Delight without prior knowledge:** "keep in mind that not everyone may be intimately familiar with the words of usher. the games should be delightful and gain in delight through the depth of the understanding of the text itself but not rely on people knowing the story to get the joke. they may even read the book through the story (but we can deceive them if they think they know everything just because they know the book)"
