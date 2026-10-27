@@ -87,7 +87,7 @@ export function stub(ch) {
       root.setAttribute('viewBox', '0 0 960 640');
       root.setAttribute('class', 'g-stub');
       const light = C.LIGHT[ch.id] ? ch.id : 'tarn';
-      root.innerHTML = C.defs({ animate: false }) + C.backdrop(light, { h: 540 }) + C.glass(light, { y: 540, h: 100 }) +
+      root.innerHTML = C.backdrop(light, { h: 540 }) + C.glass(light, { y: 540, h: 100 }) +
         `<text class="sh-teach" x="44" y="76">${esc(ch.stub.line)}</text>` +
         C.card({ text: ch.title, x: 180, y: 214, w: 600, h: 92, size: 36 }) +
         `<text class="g-stub-line" x="480" y="362" text-anchor="middle">A game to come, in games/${ch.id}/.</text>

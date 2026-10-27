@@ -14,6 +14,9 @@
 <script type="module" src="engine/main.js"></script>
 </head>
 <body>
+<!-- the cut library's shared paint servers (sh- ids): first in the document and never hidden,
+     so a game's url(#sh-…) still paints while the map is hidden behind it -->
+<svg id="sh-defs" class="sh-defs" width="0" height="0" aria-hidden="true" focusable="false"></svg>
 <main class="frame" id="frame">
   <header class="running">
     <span>A Sojourn of Some Weeks</span>

@@ -4,6 +4,7 @@
 
 import { CHAPTERS, LETTER, TITLE, REMARKS } from './story.js';
 import { MapView, SPOTS, ROOM_NODE } from './map.js';
+import { sharedDefs } from './drawing.js';
 import { Band } from './band.js';
 import { Transit } from './transit.js';
 import { loadGame, mount } from './mount.js';
@@ -11,9 +12,12 @@ import { account, lastCard } from './ending.js';
 import { md, sleep, tapOrWait, reducedMotion } from './util.js';
 import { frame as laceFrame } from '../shared/cuts.js';
 
+// the shared sh- defs go in first, before anything refers to them
+const defsEl = document.getElementById('sh-defs');
+defsEl.innerHTML = sharedDefs();
 const frame = document.getElementById('frame');
 const stage = document.getElementById('stage');
-const map = new MapView(document.getElementById('map'), TITLE);
+const map = new MapView(document.getElementById('map'), TITLE, defsEl);
 const band = new Band(document.getElementById('band'));
 const transit = new Transit(stage);
 const gameLayer = document.getElementById('game');

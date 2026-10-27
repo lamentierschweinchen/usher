@@ -96,8 +96,9 @@ class Actor {
 }
 
 export class MapView {
-  constructor(el, titles) {
+  constructor(el, titles, defsEl) {
     this.el = el;
+    this.defsEl = defsEl;   // holds the animated ripple; pause it with the map
     el.innerHTML = mapMarkup(titles);
     this.cast = el.querySelector('#cast');
     this.actors = {};
@@ -110,7 +111,7 @@ export class MapView {
     this.walking = 0;
     this.open = false;
     this.buildHits();
-    if (reducedMotion) el.pauseAnimations();
+    if (reducedMotion) { el.pauseAnimations(); defsEl?.pauseAnimations(); }
   }
 
   // ---- input ------------------------------------------------------------
@@ -179,8 +180,11 @@ export class MapView {
   }
   roomPoint(room) { return ROOMS[room]?.anchor || [480, 320]; }
 
-  pause() { this.el.pauseAnimations(); this.el.classList.add('paused'); }
-  resume() { this.el.classList.remove('paused'); if (!reducedMotion) this.el.unpauseAnimations(); }
+  pause() { this.el.pauseAnimations(); this.defsEl?.pauseAnimations(); this.el.classList.add('paused'); }
+  resume() {
+    this.el.classList.remove('paused');
+    if (!reducedMotion) { this.el.unpauseAnimations(); this.defsEl?.unpauseAnimations(); }
+  }
 
   // ---- the manicule -----------------------------------------------------------
   point(room) {

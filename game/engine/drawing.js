@@ -46,6 +46,10 @@ const hand = `<g id="f-hand" style="color:var(--sh-cut)">
   <path style="fill:none;stroke:currentColor;stroke-width:.7" d="M-13 .5H-6M-14 4.5H-6"/>
 </g>`;
 
+// The library's shared defs (skies, glass, lamps, lattices, ripple, glow…), drawn
+// once into the always-rendered #sh-defs <svg> at the top of the page.
+export const sharedDefs = () => C.defs();
+
 export function mapMarkup(titles) {
   C.autoLace();
   // clip paths that split the house along its fissure, for the end
@@ -54,7 +58,6 @@ export function mapMarkup(titles) {
   const right = `M486 -3000 L${fp} L488 3000 L3000 3000 L3000 -3000Z`;
   const lights = (draw) => C.CHAPTERS.map(ch => `<g class="light" data-light="${ch}">${draw(ch)}</g>`).join('');
   return `
-${C.defs()}
 <defs>
   <clipPath id="clip-above"><rect x="-3000" y="-3000" width="7000" height="3368"/></clipPath>
   <clipPath id="clip-left"><path d="${left}"/></clipPath>

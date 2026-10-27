@@ -24,6 +24,7 @@ body {
 }
 button { font: inherit; color: inherit; }
 .noscript { font-style: italic; text-align: center; }
+.sh-defs { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
 
 /* ---- the book: running head, stage, docked band ---- */
 .frame {
