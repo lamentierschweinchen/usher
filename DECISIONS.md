@@ -2,6 +2,12 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-26 — One more lens: character × genre
+
+"pick one character and make a game 'for them' that informs regular genre. let's say 'mario kart but it's in the house of usher'. or pick a character from the story and put them in a weird/funny environment with specific usher twists."
+
+*Replaced:* nothing; a fifth concept runs alongside the three options.
+
 ## 2026-10-26 — Back to the drawing board
 
 "we're losing too much time on building prototypes of things that were ultimately already unconvincing too early in the process. the file i see for nevertheless is terribly boring for any regular player. what do we want? a delightful game experience for anyone, but esp. literary connoisseurs who will be able to be delighted in ways the regular player won't. yet, of course the genre here must be somewhat recognizable and we need a visually pleasing experience. reading blocks of text and making decisions isn't that. we need to feel the spooky house of usher with its history, its secrets. so: what is the twist, the mirror, the upside down house — what is the simple-enough graphic interface that can carry the story? i don't think we're close yet although the ideas that came from the first runs can inform clever twists and turns of what we will end up building. back to the drawing board."
