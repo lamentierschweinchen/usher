@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Cut Library</title>
+<link rel="stylesheet" href="shadow.css">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:#e7dcc4;color:#0b0809;font-family:var(--sh-serif);-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(ellipse at 50% 0%,rgba(255,250,235,.55),transparent 60%)}
+  main{max-width:1440px;margin:0 auto;padding:40px 24px 80px}
+  header{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;border-bottom:1px solid rgba(11,8,9,.5);padding-bottom:16px}
+  .kicker,.num,h2,.lbl{font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;color:#6e5f57}
+  h1{font-weight:400;font-size:68px;line-height:1;margin:6px 0 4px}
+  .dek{font-style:italic;font-size:19px;margin:6px 0 0;max-width:60ch;color:#3b302c}
+  .num{text-align:right;line-height:1.8}
+  nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin:14px 0 0}
+  nav a{color:#0b0809;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid rgba(11,8,9,.3)}
+  section{margin-top:46px}
+  h2{margin:0 0 6px}
+  .note{font-style:italic;font-size:16.5px;color:#4a3d38;margin:0 0 14px;max-width:80ch;line-height:1.45}
+  .note code,pre{font-family:var(--sh-serif);font-style:normal;background:rgba(11,8,9,.06);padding:0 4px}
+  pre{font-size:15px;line-height:1.5;padding:12px 16px;overflow:auto;margin:0}
+  .plate{position:relative;background:#0b0809;box-shadow:0 1px 0 rgba(255,255,255,.4),0 18px 40px -22px rgba(30,15,20,.55)}
+  .plate svg{display:block;width:100%;height:auto}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  .cap{display:flex;gap:12px;align-items:baseline;margin-top:9px;font-size:15.5px;font-style:italic;color:#3b302c}
+  .cap b{font-style:normal;font-weight:400;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#0b0809;white-space:nowrap}
+  .row{display:flex;gap:10px;align-items:center;margin-top:10px}
+  button{font:inherit;font-size:13px;letter-spacing:.16em;text-transform:uppercase;background:#0b0809;color:#f7d894;border:0;padding:9px 16px;cursor:pointer}
+  .two>*,header>*{min-width:0} pre{max-width:100%;white-space:pre}
+  @media (max-width:1100px){.two{grid-template-columns:minmax(0,1fr)}}
+  @media (max-width:640px){main{padding:24px 16px 60px} h1{font-size:46px} header{grid-template-columns:minmax(0,1fr)} .num{text-align:left} pre{font-size:13px}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <div class="kicker">A Sojourn of Some Weeks · game/shared</div>
+      <h1>The Cut Library</h1>
+      <p class="dek">Every recurring silhouette in the game, cut once, by one hand, and shown here against each chapter's light. Black is always paper; colour is always light; red is what really happened.</p>
+      <nav id="nav"></nav>
+    </div>
+    <div class="num">cuts.js · shadow.css<br>LOOK.md (work/design)<br>viewBox 960 × 640</div>
+  </header>
+
+  <section>
+    <h2>Using it</h2>
+<pre>import * as C from '../../shared/cuts.js';          // and link ../../shared/shadow.css
+C.autoLace();                                        // phones: about half the lace
+svg.innerHTML = C.defs() + C.backdrop('studio', {h: 500})
+  + C.figure('roderick', {x: 300, y: 452, scale: 4, pose: 'recline', cls: 'touch'})
+  + C.glass('studio', {y: 540, h: 100}) + C.frame();
+C.place(svg.querySelector('.sh-roderick'), 320, 452); C.hinge(el, '.sh-arm', -20);</pre>
+  </section>
+
+  <section id="map">
+    <h2>The map, on the tarn's light</h2>
+    <p class="note">house() with its cutaway rooms, bank(), shore(), the cast placed with figure(), the tarn as glass() and returned(): the house comes back as light, Madeline brightest, the fissure whole and red and unrippled.</p>
+    <div class="plate sh-grain" id="mapPlate"></div>
+  </section>
+
+  <section id="cast">
+    <h2>Every cut, on every chapter's light</h2>
+    <p class="note">Same cuts, same scale, eight lights. If a cut stops reading on one light, its profile is wrong, not the light.</p>
+    <div class="two" id="lights"></div>
+  </section>
+
+  <section id="touch">
+    <h2>Touchable</h2>
+    <p class="note">A lit edge where the lamp gets round the paper. Rest: nothing (phones: a faint rim). Hover or focus: a lamp rim and a 2-unit lift. Press: a hard white edge, pressed to the screen. Held (dragging): lifted off the screen, its shadow softening. The fifth is live: hover it, press it.</p>
+    <div class="plate sh-grain" id="touchPlate"></div>
+  </section>
+
+  <section id="lace">
+    <h2>Lace density</h2>
+    <p class="note">Left: desktop, full lace. Right: <code>setLace(.55)</code>, what <code>autoLace()</code> picks on phones and coarse pointers: fewer, larger curls, no hole under 3 units. Silhouettes keep their outlines; only the filigree thins.</p>
+    <div class="two" id="lacePlates"></div>
+  </section>
+
+  <section id="type">
+    <h2>Type on light</h2>
+    <p class="note">Black type on a lit card above water; paper type on a black ribbon over glass. Sound-words are cut from the same black paper, and turn red only in the tarn's truth.</p>
+    <div class="plate sh-grain" id="typePlate"></div>
+  </section>
+
+  <section id="iris">
+    <h2>The iris</h2>
+    <p class="note">A black stage with a lace-edged hole closes on the room (0.7 s), the intertitle holds, the hole opens (0.9 s). <code>irisD(cx, cy, r)</code> draws it; <code>runIris(path, cx, cy, from, to, ms)</code> runs it.</p>
+    <div class="plate sh-grain" id="irisPlate"></div>
+    <div class="row"><button id="irisBtn">Close and open</button></div>
+  </section>
+</main>
+
+<script type="module">
+import * as C from './cuts.js';
+const $ = id => document.getElementById(id);
+const svg = (inner, vb = '0 0 960 640', label = '') => `<svg class="sh-stage" viewBox="${vb}" role="img" aria-label="${label}">${C.defs({ animate: vb === '0 0 960 640' })}${inner}</svg>`;
+const ink = s => `<g style="color:var(--sh-cut)">${s}</g>`;
+
+/* ---- the map ---- */
+const cast = C.figure('roderick', { x: 541, y: 325, pose: 'sit' }) + C.figure('guest', { x: 621, y: 338, flip: true }) +
+  C.figure('valet', { x: 398, y: 338, flip: true }) + C.figure('madeline', { x: 479, y: 311, scale: .93, flip: true });
+const scene = C.bank() + C.shore() + C.house({ crack: 1 }) + cast;
+$('mapPlate').innerHTML = svg(
+  C.backdrop('tarn') + ink(scene) + C.glass('tarn') +
+  C.returned(scene, { truth: C.truthFissure() + C.figure('madeline', { x: 479, y: 311, scale: .93, flip: true, faint: false, attrs: 'filter="url(#sh-glow)" style="--gauze:#fff6e0"' }) }) +
+  C.banner({ speaker: 'Roderick', line: '“You came! Is that wool? It’s terribly loud.”', portrait: C.cameo(104, 598) }) +
+  `<text class="sh-label" x="926" y="44" text-anchor="end" style="font-size:12px;opacity:.85">III · THE CHEERFULNESS OF MY SOCIETY</text>` + C.frame(),
+  '0 0 960 640', 'The map on the tarn light');
+
+/* ---- every cut on every light ---- */
+function lineup(ch) {
+  // each row stands against its own horizon, as each scene will
+  const rows = [[14, 196], [222, 404], [430, 600]];
+  let s = rows.map(([t, b]) => C.backdrop(ch, { y: t, h: b - t, clouds: false, hills: false })).join('');
+  if (ch === 'flight') s += C.moon(470, 500, 34);
+  const band = (y, items) => {
+    let out = `<rect x="0" y="${y}" width="960" height="26" style="fill:var(--sh-cut)"/>`;
+    for (const [x, name] of items) out += `<text class="sh-label" x="${x}" y="${y + 17}" text-anchor="middle" style="font-size:10.5px;opacity:.85">${name.toUpperCase()}</text>`;
+    return out;
+  };
+  const F = (name, x, y, o = {}) => C.figure(name, { x, y, scale: 2.4, ...o });
+  s += ink(
+    F('guest', 56, 196) + F('roderick', 128, 196) + F('roderick', 192, 196, { pose: 'sit' }) + F('roderick', 372, 196, { pose: 'recline' }) +
+    F('madeline', 492, 196) + F('madeline', 622, 196, { pose: 'lie', heart: true }) + F('valet', 722, 196) + F('physician', 797, 196, { lamp: true }) + F('servant', 885, 196)) +
+    band(196, [[56, 'guest'], [128, 'roderick'], [220, 'sitting'], [372, 'reclining'], [492, 'madeline'], [617, 'lying, heart'], [722, 'valet'], [802, 'physician'], [890, 'servant']]);
+  s += ink(
+    C.figure('horse', { x: 92, y: 404, scale: 2.4 }) + C.figure('ethelred', { x: 196, y: 404, scale: 2.4, shield: true }) + C.figure('dragon', { x: 312, y: 404, scale: 1.25, flip: true }) +
+    C.coffin({ x: 470, y: 404, w: 78, trestles: true }) + C.coffin({ x: 560, y: 404, w: 78, lid: 'ajar', trestles: true }) +
+    C.door('arch', { x: 660, y: 334, w: 38, h: 70 }) + C.door('plank', { x: 720, y: 312, w: 60, h: 92 }) + C.door('iron', { x: 800, y: 312, w: 56, h: 92 }) + C.door('ebony', { x: 874, y: 304, w: 68, h: 100, open: .3 })) +
+    band(404, [[92, 'horse'], [196, 'ethelred'], [312, 'the dragon'], [509, 'coffin'], [599, 'lid ajar'], [679, 'arch'], [750, 'plank'], [828, 'iron'], [908, 'ebony']]);
+  s += ink(
+    C.tree(64, 600, { h: 112, seed: 23, crown: 46, w: 4.6 }) + C.sedges(118, 230, 600, { count: 26, seed: 4 }) +
+    `<g transform="translate(250 600) scale(.85) translate(-150 -368)">${C.causeway()}<path d="M150 368h132v4H150z"/></g>` +
+    `<g transform="translate(470 600) scale(.5) translate(-480 -368)">${C.house({ mode: 'facade' })}</g>` +
+    C.drape(600, 448, 64, 152) + C.lancet(690, 496, 34, 104) +
+    `<rect x="750" y="470" width="190" height="10"/>${C.fringe(754, 936, 480, { seed: 3, len: [6, 18], step: 6, w: 2.4 })}`) +
+    band(600, [[86, 'white trunks'], [175, 'sedges'], [306, 'causeway'], [470, 'façade'], [632, 'drape'], [707, 'lancet'], [845, 'lace fringe']]);
+  return s;
+}
+const lights = $('lights'), nav = $('nav');
+nav.innerHTML = '<a href="#map">map</a>' + C.CHAPTERS.map(ch => `<a href="#light-${ch}">${ch}</a>`).join('') + '<a href="#touch">touch</a><a href="#lace">lace</a><a href="#type">type</a><a href="#iris">iris</a>';
+lights.innerHTML = C.CHAPTERS.map(ch => `<figure style="margin:0" id="light-${ch}"><div class="plate sh-grain">${svg(lineup(ch) + C.frame(), '0 0 960 640', ch + ' light')}</div>
+  <div class="cap"><b>${ch === 'vault' ? 'trist, turned' : ch}</b>${C.LIGHT[ch].name}</div></figure>`).join('');
+
+/* ---- touch ---- */
+const states = ['', 'is-hot', 'is-pressed', 'is-held', ''];
+const names = ['rest', 'hover · focus', 'press', 'held · dragged', 'live: try it'];
+let t = C.backdrop('studio', { h: 320, hills: false });
+states.forEach((st, i) => {
+  const x = 40 + i * 182;
+  t += `<g class="touch ${st}" tabindex="0" style="color:var(--sh-cut)">${C.coffin({ x, y: 200, w: 150 })}</g>`;
+  t += `<text class="sh-label" x="${x + 75}" y="262" text-anchor="middle" style="fill:var(--sh-cut);font-size:12px">${names[i].toUpperCase()}</text>`;
+});
+$('touchPlate').innerHTML = svg(`<rect width="960" height="320" style="fill:var(--sh-cut)"/>` + t, '0 0 960 320', 'touch states');
+
+/* ---- lace ---- */
+const lacePanel = k => {
+  C.setLace(k);
+  const s = C.backdrop('door', { h: 420, hills: false }) + ink(
+    C.tree(110, 400, { h: 250, seed: 23, crown: 100, w: 8 }) + C.sedges(180, 470, 400, { count: 40, seed: 9, h: [14, 40], w: 3 }) +
+    C.figure('roderick', { x: 300, y: 400, scale: 4.4 }) + `<rect x="0" y="400" width="480" height="20"/>`);
+  C.setLace(1);
+  return svg(s, '0 0 480 420', 'lace at ' + k);
+};
+$('lacePlates').innerHTML = `<figure style="margin:0"><div class="plate">${lacePanel(1)}</div><div class="cap"><b>desktop</b>setLace(1)</div></figure>` +
+  `<figure style="margin:0"><div class="plate">${lacePanel(.55)}</div><div class="cap"><b>phone</b>setLace(.55)</div></figure>`;
+
+/* ---- type ---- */
+$('typePlate').innerHTML = svg(
+  C.backdrop('tarn', { h: 260, hills: false }) +
+  C.card({ x: 362, y: 44, w: 536, h: 96, text: 'A Sojourn of Some Weeks', sub: 'after Poe · The Fall of the House of Usher' }) +
+  `<text class="sh-teach" x="40" y="56">Spare him everything.</text>` +
+  `<text class="sh-sound" x="600" y="232" style="font-size:40px" transform="rotate(-3 600 232)">plink.</text><text class="sh-sound" x="730" y="236" style="font-size:52px">KNOCK.</text>` +
+  C.glass('tarn', { y: 260, h: 220 }) +
+  `<g transform="translate(250 312) scale(1 -1)"><text class="sh-sound truth-fill" x="0" y="0" style="font-size:40px">tap.</text></g>` +
+  `<g transform="translate(480 318)"><rect x="-250" y="-34" width="500" height="58" style="fill:var(--sh-cut)"/><path d="M-242 -27H242M-242 17H242" style="stroke:var(--sh-lamp);stroke-width:1;opacity:.6"/><text x="0" y="9" text-anchor="middle" style="font-family:var(--sh-serif);font-size:30px;fill:var(--sh-lamp)">A Harmless Precaution</text></g>` +
+  C.banner({ speaker: 'The physician', line: '“If the sister dies, send for me. Before anyone does anything.”', y: 380 }) +
+  `<text class="sh-score" x="920" y="460" text-anchor="end">TAPS HUSHED 3 · ×2 · 340</text>`,
+  '0 0 960 480', 'type on light');
+
+/* ---- iris ---- */
+const irisScene = C.backdrop('studio') + ink(C.bank() + C.shore() + C.house() + cast) + C.glass('tarn') + C.returned(C.house(), { still: true, truth: C.truthFissure() });
+$('irisPlate').innerHTML = svg(irisScene + C.iris(590, 280, 150) + C.frame(), '0 0 960 640', 'iris');
+$('irisBtn').onclick = async () => {
+  const p = document.querySelector('#irisPlate .sh-iris');
+  await C.runIris(p, 590, 280, 150, 0, 700);
+  await new Promise(r => setTimeout(r, 500));
+  await C.runIris(p, 590, 280, 0, 820, 900);
+  await C.runIris(p, 590, 280, 820, 150, 600);
+};
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelectorAll('svg').forEach(s => s.pauseAnimations && s.pauseAnimations());
+document.body.dataset.ready = '1';
+</script>
+</body>
+</html>

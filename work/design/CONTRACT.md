@@ -41,8 +41,8 @@ export default {
 ## Look (shared)
 - **Direction: Shadow Theatre** (Lukas, 2026-10-26). Follow `work/design/LOOK.md` and build every figure, house and prop from `game/shared/` (import `../../shared/cuts.js`, link `../../shared/shadow.css`), so the whole game is cut by one hand.
 - Render into an SVG with `viewBox="0 0 960 640"` (or a canvas scaled to the stage) so the game scales from phone to laptop. The stage keeps a 3:2 box.
-- CSS custom properties, defined by the spine and also by each dev harness: `--paper:#f2eee5; --ink:#29272a; --muted:#625d5a; --rule:#cbc3b8; --red:#7a3939; --serif:'IM Fell English', Georgia, serif;`. Fonts at `../../fonts/im-fell-normal.woff2` and `im-fell-italic.woff2` relative to a game's folder.
-- Ink on paper. Red only for emphasis and the tarn's truth.
+- Tokens: the `--sh-*` set in `game/shared/shadow.css` (Shadow Theatre). The old ink tokens (`--paper`, `--ink`, `--muted`, `--rule`, `--red`) remain only until each piece is recut. Fonts at `../../fonts/im-fell-normal.woff2` and `im-fell-italic.woff2` relative to a game's folder.
+- Cut paper against light (LOOK.md). Red only for the truth.
 - No audio unless synthesized in code and optional; never load-bearing. No network requests.
 - Mouse and touch. No instructions screen: teach by doing, in a line of type at most.
 - Scope each style to the game's own root class (`.g-<id>`) so games can't break the spine.

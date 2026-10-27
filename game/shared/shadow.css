@@ -1,0 +1,88 @@
+/* game/shared/shadow.css — Shadow Theatre tokens and base classes.
+   Look: work/design/LOOK.md. Shapes: shared/cuts.js. Link after the spine's style.css;
+   everything here is prefixed --sh- / .sh- or is one of the named base classes,
+   so the spine's old tokens (--paper, --ink …) keep working until the spine is recut. */
+
+@font-face { font-family: 'IM Fell English'; src: url(../fonts/im-fell-normal.woff2) format('woff2'); font-style: normal; font-display: swap; }
+@font-face { font-family: 'IM Fell English'; src: url(../fonts/im-fell-italic.woff2) format('woff2'); font-style: italic; font-display: swap; }
+
+:root {
+  /* paper: the only solid thing */
+  --sh-cut: #0b0809;
+  /* light: colour lives only here */
+  --sh-lamp: #f7d894;   --sh-amber: #e6a256;  --sh-rose: #a2646e;
+  --sh-violet: #5b4170; --sh-zenith: #241a34; --sh-ember: #cf8752;
+  --sh-copper: #b97a4c; --sh-blue: #2f4a80;   --sh-lilac: #a796bf;
+  /* water and truth */
+  --sh-glass: #13122a;  --sh-return: #f3dba2; --sh-red: #e0392b;
+  /* type and Madeline */
+  --sh-paper: #ede2cb;  --sh-gauze: #f6ead2;  --sh-speaker: #d79a6a;
+  --sh-serif: 'IM Fell English', Georgia, serif;
+  /* motion */
+  --sh-bob: 1.5px; --sh-turn: 160ms; --sh-ease: cubic-bezier(.45, 0, .25, 1);
+}
+
+/* ---- the base classes ---- */
+.cut   { fill: currentColor; color: var(--sh-cut); }          /* black paper */
+.lace  { fill: currentColor; }                                  /* fine lace; thinned on phones */
+.lamp  { fill: var(--lit, url(#sh-lamp)); }                     /* a lit panel or window */
+.glass { fill: url(#sh-glass-tarn); }                           /* the tarn; or .glass-<chapter> */
+.gauze { fill: var(--gauze, var(--sh-gauze)); opacity: var(--gauze-a, .42); }  /* Madeline above water */
+.truth { fill: none; stroke: var(--sh-red); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.truth-fill { fill: var(--sh-red); }
+.sh-return { color: var(--sh-return); }
+
+/* The stage: give the <svg> (or its wrapper) .sh-stage and a chapter class. */
+.sh-stage { display: block; width: 100%; height: auto; color: var(--sh-cut); background: var(--sh-cut); font-family: var(--sh-serif); }
+.sh-grain { position: relative; }
+.sh-grain::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .16; mix-blend-mode: overlay;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* ---- the light behind each chapter (HTML backgrounds; SVG uses url(#sh-sky-<chapter>)) ---- */
+.sky-tarn   { background: linear-gradient(180deg, #1d1530, #352646 22%, #6a4462 46%, #b46f5c 68%, #e3a157 86%, #f4cf86); }
+.sky-door   { background: linear-gradient(180deg, #120e22, #2a1f44 30%, #4b3566 55%, #7d5f92 78%, #b48fa8 93%, #d9b3b0); }
+.sky-studio { background: linear-gradient(180deg, #1f1630, #4a3150 35%, #8e5560 62%, #cf8752 88%, #eab062); }
+.sky-burial { background: linear-gradient(180deg, #0b0f11, #1c2526 35%, #3a3f39 60%, #7a5a40 85%, #b97a4c); }
+.sky-nights { background: linear-gradient(180deg, #04060f, #0b1430 40%, #1a2c5a 75%, #2f4a80 93%, #4b6896); }
+.sky-trist  { background: linear-gradient(180deg, #0f0d1e, #2c2650 40%, #6a5a8e 80%, #a796bf); }
+.sky-vault  { background: linear-gradient(180deg, #030203, #0e0a0b 50%, #24181a 85%, #3a2622); }
+.sky-flight { background: linear-gradient(180deg, #060405, #140b10 40%, #2a1216 70%, #4a1a18 92%, #5e2219); }
+.glass-tarn { fill: url(#sh-glass-tarn); }   .glass-door { fill: url(#sh-glass-door); }
+.glass-studio { fill: url(#sh-glass-studio); } .glass-burial { fill: url(#sh-glass-burial); }
+.glass-nights { fill: url(#sh-glass-nights); } .glass-trist { fill: url(#sh-glass-trist); }
+.glass-vault { fill: url(#sh-glass-vault); }  .glass-flight { fill: url(#sh-glass-flight); }
+
+/* ---- touchable: a lit edge where the lamp gets round the paper ----
+   Put .touch on an UNSCALED wrapper <g> (figure() output is fine) so the rim stays 1.6 units. */
+.touch { cursor: pointer; transition: transform 120ms var(--sh-ease); transform-box: fill-box; transform-origin: 50% 100%; }
+.touch:hover, .touch:focus-visible, .touch.is-hot { filter: url(#sh-rim); transform: translateY(-2px); outline: none; }
+.touch:active, .touch.is-pressed { filter: url(#sh-press); transform: translateY(0) scale(.985); }
+.touch.is-held { filter: url(#sh-lift); transform: translateY(-4px); }      /* grabbed: lifted off the screen */
+.touch[aria-disabled="true"] { cursor: default; filter: none; transform: none; }
+@media (hover: none) { .touch { filter: url(#sh-rim-soft); } }               /* no hover on phones: a faint rim always */
+
+/* ---- type ---- */
+.sh-teach   { font-family: var(--sh-serif); font-style: italic; font-size: 26px; fill: var(--sh-paper); }   /* one line, top left, on dark */
+.sh-score   { font-family: var(--sh-serif); font-size: 17px; letter-spacing: .16em; fill: var(--sh-lamp); }  /* write in caps; bottom right */
+.sh-sound   { font-family: var(--sh-serif); font-style: italic; fill: var(--sh-cut); }                       /* cut type above water */
+.sh-sound.truth-fill { fill: var(--sh-red); }
+.sh-label   { font-family: var(--sh-serif); font-size: 13px; letter-spacing: .16em; fill: var(--sh-lamp); }
+
+/* ---- puppet motion: sticks and hinges ---- */
+@keyframes sh-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(calc(-1 * var(--sh-bob))); } }
+@keyframes sh-flicker { 0% { opacity: 1; } 23% { opacity: .82; } 24% { opacity: 1; } 61% { opacity: .9; } 63% { opacity: 1; } 88% { opacity: .86; } 90% { opacity: 1; } }
+@keyframes sh-sway { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
+.sh-moving .sh-pose { animation: sh-bob .5s ease-in-out infinite; }   /* on a figure() while it slides; Madeline never bobs */
+.sh-madeline.sh-moving .sh-pose { animation: none; }
+.sh-sway .sh-pose { transform-box: fill-box; transform-origin: 50% 100%; animation: sh-sway 2.4s ease-in-out infinite; }  /* Ethelred's wine; her reeling */
+.sh-flicker { animation: sh-flicker 5.3s steps(1) infinite; }
+
+/* ---- reduced motion: media query, or .sh-still on a game root when api.reducedMotion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .sh-moving .sh-pose, .sh-sway .sh-pose, .sh-flicker { animation: none !important; }
+  .touch { transition: none; }
+}
+.sh-still .sh-moving .sh-pose, .sh-still .sh-sway .sh-pose, .sh-still .sh-flicker { animation: none !important; }
+.sh-still .touch { transition: none; }
