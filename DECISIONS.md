@@ -2,6 +2,14 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-27 — The full game: the Mirror
+
+"i'd follow your recommendation here. we take all the useful and interseting ideas we've collected over these sessions and fold them into the full build. what's interesting gets improved, developed, and included, what's not gets discarded. we think mostly in the interest of a first-time player who isn't really familiar with the book (yet). the literary player delights herself in recognition, inside jokes, but also warm deception, misdirection, and the like."
+
+The recommendation he followed: **the Mirror** (work/fullgame/03-mirror-v2.md), with the Direct Line's profile mystery (the physician is family) folded into its interludes. First milestone: the studio, both ways.
+
+*Replaced:* the Account and the Direct Line as standalone directions; their best ideas are to be harvested in.
+
 ## 2026-10-27 — Fixes, the full game, and delightful deceit
 
 "integrate the fixes of the critic and already start with the full game."
