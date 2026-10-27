@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ink &amp; Tarn</title>
+<link rel="icon" href="data:,">
+<style>
+@font-face{font-family:'IM Fell English';src:url(../../proto/fonts/im-fell-normal.woff2) format('woff2');font-style:normal;font-weight:400}
+@font-face{font-family:'IM Fell English';src:url(../../proto/fonts/im-fell-italic.woff2) format('woff2');font-style:italic;font-weight:400}
+:root{
+  --paper:#f2eee5;--ink:#29272a;--muted:#625d5a;--rule:#cbc3b8;--red:#7a3939;
+  --serif:'IM Fell English',Georgia,serif;
+  --tarn-red:color-mix(in srgb,var(--red),var(--paper) 35%);
+  --board:#e6e0d5; /* the mount board only; never in the game */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--board);color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased}
+.board{max-width:1440px;margin:0 auto;padding:56px 40px 80px}
+
+/* header */
+header{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;padding-bottom:20px;margin-bottom:40px;border-bottom:1.5px solid var(--ink);position:relative}
+header::after{content:"";position:absolute;left:0;right:0;bottom:-6px;border-bottom:.6px solid var(--ink)}
+.kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+h1{font-weight:400;font-size:72px;line-height:.95;letter-spacing:.005em}
+h1 i{font-size:.6em;color:var(--muted)}
+.dek{font-style:italic;font-size:21px;line-height:1.35;color:var(--muted);max-width:25em;text-align:right}
+
+/* stages */
+.stage{position:relative;background:var(--paper);box-shadow:3px 4px 0 var(--rule)}
+.stage svg{display:block;width:100%;height:auto}
+.stage::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.09;mix-blend-mode:multiply;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23g)'/%3E%3C/svg%3E")}
+figure{margin:0}
+figcaption{margin-top:16px;font-size:16px;line-height:1.5;color:var(--muted)}
+figcaption b{font-weight:400;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-right:.7em}
+
+/* hero row */
+.hero-row{display:grid;grid-template-columns:minmax(0,960px) minmax(260px,1fr);gap:44px;align-items:start}
+aside h2,.section-h{font-weight:400;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-bottom:8px;border-bottom:.6px solid var(--ink);margin-bottom:18px}
+.lines{list-style:none;counter-reset:l;margin-bottom:40px}
+.lines li{counter-increment:l;position:relative;padding-left:30px;margin-bottom:20px;font-size:18px;line-height:1.42}
+.lines li::before{content:counter(l,upper-roman) ".";position:absolute;left:0;top:0;color:var(--muted);font-size:16px}
+.lines li b{display:block;font-weight:400;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.lines em{font-style:italic}
+.swatches{display:grid;grid-template-columns:1fr 1fr;gap:18px 16px}
+.sw .chip{height:52px;box-shadow:2px 3px 0 var(--rule);margin-bottom:8px;border:.6px solid var(--ink)}
+.sw .n{font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.sw .hex{font-size:14px;color:var(--muted);margin-left:.4em}
+.sw .r{display:block;font-style:italic;font-size:14px;color:var(--muted);line-height:1.3;margin-top:2px}
+
+/* three frames */
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:36px;margin-top:64px}
+
+/* type specimen */
+.type{margin-top:64px}
+.spec{background:var(--paper);box-shadow:3px 4px 0 var(--rule);padding:12px 40px 28px}
+.row>div{min-width:0}
+.row{display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:center;padding:20px 0;border-bottom:.6px solid var(--rule)}
+.row:last-child{border-bottom:0}
+.row .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);line-height:1.6}
+.row .k i{display:block;text-transform:none;letter-spacing:0;font-size:14px}
+.caps{text-transform:uppercase;letter-spacing:.14em}
+.s-title{font-size:64px;line-height:1}
+.s-inter{background:var(--ink);color:var(--paper);text-align:center;padding:26px 20px 30px;outline:.8px solid var(--paper);outline-offset:-8px;max-width:640px}
+.s-inter .caps{font-size:14px;color:var(--rule);display:block;margin-bottom:10px}
+.s-inter span:last-child{font-size:44px;line-height:1.05}
+.s-dia{background:var(--ink);color:var(--paper);padding:14px 22px;display:flex;gap:24px;align-items:baseline;max-width:880px;outline:.6px solid var(--paper);outline-offset:-5px}
+.s-dia .caps{font-size:13px;color:var(--rule);min-width:6.5em}
+.s-dia span:last-child{font-size:22px}
+.s-stage{font-size:22px;font-style:italic}
+.s-sound{display:flex;align-items:baseline;gap:34px;flex-wrap:wrap;font-style:italic}
+.s-label{font-size:13px;color:var(--muted)}
+.s-corr{font-size:22px}
+.s-corr i{color:var(--red)}
+.foot{margin-top:40px;font-size:14px;color:var(--muted);font-style:italic;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+
+/* svg classes (shared with the game) */
+.above{color:var(--ink);--ground:var(--paper)}
+.below{color:var(--paper);--ground:transparent;--mass-o:.32}
+.ln{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ln.fine{stroke-width:1.1}
+.ln.hair{stroke-width:.6}
+.mass{fill:currentColor;fill-opacity:var(--mass-o,1)}
+.wall{fill:var(--ground);stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+.wall.fine{stroke-width:1.1}
+.wall.hair{stroke-width:.7}
+.ground{fill:var(--ground)}
+.face{fill:var(--ground);stroke:currentColor;stroke-width:1.1}
+.limb-o{fill:none;stroke:currentColor;stroke-width:3.6;stroke-linecap:round}
+.limb-i{fill:none;stroke:var(--ground);stroke-width:1.5;stroke-linecap:round}
+.fis{fill:none;stroke:var(--rule);stroke-width:.9;stroke-linejoin:round}
+.mad-robe{fill:var(--ground);stroke:currentColor;stroke-width:var(--mw,.8);stroke-linejoin:round}
+.mad-face{fill:var(--ground);stroke:currentColor;stroke-width:var(--mw,.8)}
+.mad-hair{fill:var(--hair,currentColor);stroke:currentColor;stroke-width:var(--mw,.8)}
+.truth{fill:none;stroke:var(--tarn-red);stroke-width:2.4;stroke-linejoin:round}
+svg text{font-family:var(--serif)}
+.sound{font-style:italic}
+.halo{paint-order:stroke;stroke:var(--paper);stroke-width:6;stroke-linejoin:round}
+
+/* hover labels on the map */
+.room{cursor:pointer}
+.room rect{fill:transparent}
+.room text{opacity:0;transition:opacity .25s;font-size:9.5px;letter-spacing:.14em;fill:var(--muted);text-anchor:middle;paint-order:stroke;stroke:var(--paper);stroke-width:3}
+.room:hover text,.room:focus text{opacity:1}
+
+@media (max-width:1180px){
+  .hero-row{grid-template-columns:1fr}
+  .three{grid-template-columns:1fr 1fr}
+}
+@media (max-width:760px){
+  .board{padding:28px 16px 56px}
+  header{grid-template-columns:1fr}
+  .dek{text-align:left}
+  h1{font-size:52px}
+  .three{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr;gap:10px}
+  .spec{padding:8px 18px 20px}
+  .s-title{font-size:34px}
+  .s-sound span:last-child{font-size:44px!important}
+  .s-inter span:last-child{font-size:30px}
+  .s-dia{flex-direction:column;gap:6px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ shared defs (the game's defs, copied by every screen) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<defs>
+  <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <line x1="0" y1="0" x2="0" y2="5" style="stroke:var(--ink);stroke-width:.8"/>
+  </pattern>
+  <pattern id="hatch-h" width="9" height="4" patternUnits="userSpaceOnUse">
+    <path d="M0 2h6.5" style="stroke:var(--ink);stroke-width:.7;stroke-linecap:round"/>
+  </pattern>
+  <pattern id="hatch-h2" width="9" height="4" patternUnits="userSpaceOnUse" patternTransform="translate(4.5 1.3)">
+    <path d="M0 2h6.5" style="stroke:var(--ink);stroke-width:.7;stroke-linecap:round"/>
+  </pattern>
+  <pattern id="hatch-h3" width="9" height="4" patternUnits="userSpaceOnUse" patternTransform="translate(2.2 2.6)">
+    <path d="M0 2h6.5" style="stroke:var(--ink);stroke-width:.7;stroke-linecap:round"/>
+  </pattern>
+  <!-- woodcut gouges: paper lines cut into ink -->
+  <pattern id="gouge" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
+    <path d="M0 3.5h5" style="stroke:var(--paper);stroke-width:.9;stroke-linecap:round"/>
+  </pattern>
+  <pattern id="gouge-h" width="14" height="6" patternUnits="userSpaceOnUse">
+    <path d="M1 3h9" style="stroke:var(--paper);stroke-width:.8;stroke-linecap:round"/>
+  </pattern>
+  <pattern id="stones" width="64" height="30" patternUnits="userSpaceOnUse">
+    <path d="M0 .5H64M0 15.5H64M.5 0V15M32.5 15V30" style="fill:none;stroke:var(--paper);stroke-width:.6"/>
+  </pattern>
+  <pattern id="masonry" width="36" height="14" patternUnits="userSpaceOnUse">
+    <path d="M0 .5H36M0 7.5H36M.5 0V7M18.5 7V14" style="fill:none;stroke:var(--ink);stroke-width:.5"/>
+  </pattern>
+  <pattern id="lattice" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <path d="M0 0V9M0 0H9" style="stroke:var(--ink);stroke-width:.55"/>
+  </pattern>
+  <pattern id="beam" width="10" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-23)">
+    <path d="M0 3.5h10" style="stroke:var(--ink);stroke-width:.5;stroke-dasharray:14 3"/>
+  </pattern>
+
+  <filter id="ripple" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.004 0.055" numOctaves="2" seed="7" result="n">
+      <animate attributeName="baseFrequency" dur="14s" repeatCount="indefinite" values="0.004 0.055;0.004 0.068;0.004 0.055"/>
+    </feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="ripple-still" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.005 0.06" numOctaves="2" seed="3" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="cutout" x="-10%" y="-10%" width="125%" height="125%">
+    <feOffset in="SourceAlpha" dx="2" dy="3" result="o"/>
+    <feFlood flood-color="#cbc3b8"/><feComposite in2="o" operator="in" result="s"/>
+    <feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <linearGradient id="deep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".56"/>
+    <stop offset="1" stop-color="#fff" stop-opacity=".1"/>
+  </linearGradient>
+  <mask id="depth" maskUnits="userSpaceOnUse" x="0" y="368" width="960" height="272">
+    <rect x="0" y="368" width="960" height="258" fill="url(#deep)"/>
+  </mask>
+  <mask id="depth-s" maskUnits="userSpaceOnUse" x="0" y="540" width="960" height="100">
+    <rect x="0" y="540" width="960" height="86" fill="url(#deep)"/>
+  </mask>
+  <clipPath id="inner"><rect x="14" y="14" width="932" height="612"/></clipPath>
+
+  <!-- the sky: broken horizontal hatching, denser toward the top -->
+  <g id="clouds">
+    <path id="cl-1" fill="url(#hatch-h)" d=""/>
+    <path id="cl-2" fill="url(#hatch-h2)" d=""/>
+    <path id="cl-3" fill="url(#hatch-h3)" d=""/>
+    <path id="cl-edge" class="ln hair" style="color:var(--ink)" d=""/>
+    <path id="cl-in" class="ln hair" style="color:var(--ink);opacity:.7" d=""/>
+  </g>
+
+  <!-- ===== the shell: what both the façade and the cutaway share ===== -->
+  <g id="shell">
+    <!-- bank, three white trunks, sedges [u02] -->
+    <path class="mass" d="M14 368V341C34 331 64 328 90 333C110 337 126 349 138 368Z"/>
+    <path class="wall fine" d="M33 337C34 300 35 262 37 226L40 228C40 262 42 300 44 336Z"/>
+    <path class="limb-o" d="M39 262L53 244L56 234M38 288L24 272M38 242L30 230"/>
+    <path class="limb-i" d="M39 262L53 244L56 234M38 288L24 272M38 242L30 230"/>
+    <path class="wall fine" d="M65 333C66 294 67 248 70 204L73 206C73 248 75 294 77 333Z"/>
+    <path class="limb-o" d="M72 250L88 230L90 220M72 274L57 256M71 224L63 212"/>
+    <path class="limb-i" d="M72 250L88 230L90 220M72 274L57 256M71 224L63 212"/>
+    <path class="wall fine" d="M96 340C97 316 98 290 99 262L101 266L103 260C103 290 105 316 107 340Z"/>
+    <path class="limb-o" d="M102 298L116 284"/><path class="limb-i" d="M102 298L116 284"/>
+    <path class="ln fine" d="M120 356q2-10-2-16M124 358q1-12 6-18M129 362q-1-9-6-13M712 368q1-10-3-16M716 368q0-13 4-19M721 368q2-8 7-11M884 368q-1-9 3-14M888 368q1-11-4-16"/>
+    <!-- causeway, rising to the hall's arch -->
+    <path class="wall fine" d="M128 368L128 362L280 340L280 346Z"/>
+    <path id="causeway-ticks" class="ln hair" d=""/>
+    <path class="ln fine" d="M170 362V368M220 355V368M262 349V368"/>
+    <!-- piers and turret cones, roof with its vacant eye -->
+    <rect class="mass" x="280" y="176" width="20" height="164"/>
+    <rect class="mass" x="660" y="176" width="20" height="164"/>
+    <path class="ground" d="M286 222V207Q290 198 294 207V222ZM286 272V257Q290 248 294 257V272ZM666 222V207Q670 198 674 207V222ZM666 272V257Q670 248 674 257V272Z"/>
+    <path class="mass" d="M280 177L300 118L320 177ZM640 177L660 118L680 177Z"/>
+    <path class="ln fine" d="M300 118V105M660 118V105"/>
+    <circle class="mass" cx="300" cy="103" r="1.8"/><circle class="mass" cx="660" cy="103" r="1.8"/>
+    <path class="mass" d="M318 177L480 126L642 177Z"/>
+    <circle class="ground" cx="480" cy="155" r="6"/>
+    <!-- fungi hanging from the eaves [u06] -->
+    <path class="ln hair" d="M282 177q1 5-1 9M288 177q-2 4 1 7M294 177q1 6-1 10M666 177q-1 5 1 8M672 177q2 4-1 9M678 177q-1 4 1 6"/>
+    <!-- plinth -->
+    <rect class="mass" x="280" y="340" width="400" height="28"/>
+  </g>
+
+  <!-- ===== the cutaway (house coordinates) ===== -->
+  <g id="house">
+    <use href="#shell"/>
+    <!-- room grounds -->
+    <rect class="ground" x="300" y="177" width="360" height="163"/>
+    <!-- corner hatching: the remoter angles [u08] -->
+    <path fill="url(#hatch)" d="M300 177H322L300 199ZM660 177H638L660 199ZM300 222H318L300 240ZM438 222H420L438 240ZM300 282H315L300 297ZM438 282H423L438 297ZM522 222H544L522 244ZM660 222H638L660 244Z"/>
+    <!-- gallery: ancestors in pairs, one face painted out -->
+    <path class="ln hair" d="M326 177V188M344 177V188M394 177V188M412 177V188M548 177V188M566 177V188M616 177V188M634 177V188"/>
+    <g class="wall hair">
+      <ellipse cx="326" cy="197" rx="6.5" ry="8.5"/><ellipse cx="344" cy="197" rx="6.5" ry="8.5"/>
+      <ellipse cx="394" cy="197" rx="6.5" ry="8.5"/><ellipse cx="412" cy="197" rx="6.5" ry="8.5"/>
+      <ellipse cx="548" cy="197" rx="6.5" ry="8.5"/><ellipse cx="566" cy="197" rx="6.5" ry="8.5"/>
+      <ellipse cx="616" cy="197" rx="6.5" ry="8.5"/><ellipse cx="634" cy="197" rx="6.5" ry="8.5"/>
+    </g>
+    <g class="mass">
+      <path d="M321 204C321 199 331 199 331 204ZM389 204C389 199 399 199 399 204ZM543 204C543 199 553 199 553 204ZM611 204C611 199 621 199 621 204Z"/>
+      <ellipse cx="344" cy="197" rx="4.6" ry="6.6"/><ellipse cx="412" cy="197" rx="4.6" ry="6.6"/>
+      <ellipse cx="566" cy="197" rx="4.6" ry="6.6"/><ellipse cx="634" cy="197" rx="4.6" ry="6.6"/>
+    </g>
+    <g class="face" style="stroke-width:.6">
+      <circle cx="326" cy="195" r="2.6"/><circle cx="394" cy="195" r="2.6"/><circle cx="548" cy="195" r="2.6"/><circle cx="616" cy="195" r="2.6"/>
+    </g>
+    <!-- floor slabs and partitions: the section cut is ink -->
+    <path class="mass" d="M300 218H442V222H300ZM470 218H660V222H470ZM300 278H442V282H300ZM438 222H442V238H438ZM438 282H442V300H438ZM518 222H522V300H518Z"/>
+    <!-- guest bedroom: four-poster, a lancet between black draperies [u32] -->
+    <path class="wall fine" d="M400 262V241Q408 228 416 241V262Z"/>
+    <path class="ln hair" d="M408 236V262M400 250H416"/>
+    <path class="mass" d="M390 224H426V228H390ZM392 228H399V267Q397.5 271 395.5 267Q394 271 392 267ZM417 228H424V267Q422.5 271 420.5 267Q419 271 417 267Z"/>
+    <path class="mass" d="M306 232H362V237Q359 242 355.4 237Q352 242 348.4 237Q345 242 341.4 237Q338 242 334.4 237Q331 242 327.4 237Q324 242 320.4 237Q317 242 313.4 237Q310 242 306 237Z"/>
+    <path class="ln fine" d="M310 237V278M358 237V278"/>
+    <rect class="mass" x="308" y="250" width="5" height="22"/>
+    <path fill="url(#hatch)" d="M314 262H356V272C346 275 326 275 314 272Z"/>
+    <path class="ln fine" d="M314 262H356V272C346 275 326 275 314 272Z"/>
+    <ellipse class="wall hair" cx="319" cy="261" rx="5" ry="2.6"/>
+    <!-- hall: arch onto the causeway; armorial trophy -->
+    <path class="ground" d="M282 340V316C282 307 290 300 290 300C290 300 298 307 298 316V340Z"/>
+    <path class="ln hair" d="M356 290L388 322M388 290L356 322"/>
+    <path class="mass" d="M354 288l3 1-1 2ZM390 288l-3 1 1 2Z"/>
+    <path class="wall fine" d="M364 298H380V306C380 313 372 317 372 317C372 317 364 313 364 306Z"/>
+    <path class="ln hair" d="M364 307L372 301L380 307"/>
+    <!-- stair: two flights -->
+    <path id="stair-under" fill="url(#hatch)" d=""/>
+    <path id="stair-lower" class="ln fine" d=""/>
+    <path id="stair-upper" class="mass" d=""/>
+    <path id="stair-rail" class="ln hair" d=""/>
+    <!-- studio: lofty, three lancets high up, black draperies [u08] -->
+    <path class="wall fine" d="M545 262V238Q552 224 559 238V262ZM584 262V238Q591 224 598 238V262ZM623 262V238Q630 224 637 238V262Z"/>
+    <path fill="url(#lattice)" d="M545 262V238Q552 224 559 238V262ZM584 262V238Q591 224 598 238V262ZM623 262V238Q630 224 637 238V262Z"/>
+    <path class="mass" d="M524 226H538V326Q535 331 531 326Q527 331 524 326ZM644 226H658V326Q655 331 651 326Q647 331 644 326Z"/>
+    <path class="ln hair" style="stroke:var(--ground)" d="M528 232V322M533 232V320M648 232V322M653 232V320"/>
+    <!-- sofa -->
+    <path class="wall fine" d="M593 326V320C593 316 600 314 610 315C622 316 632 317 638 322V326Z"/>
+    <path class="wall fine" d="M586 326H640V333H586Z"/>
+    <path class="wall fine" d="M586 333V318C586 312 594 312 593 318V326"/>
+    <path class="ln fine" d="M589 333L588 340M637 333L638 340"/>
+    <!-- guitar against the drapery, books on the floor -->
+    <circle class="wall hair" cx="543" cy="333" r="4"/><circle class="wall hair" cx="543.5" cy="326.5" r="3"/>
+    <path class="ln fine" d="M544 323L549 304M547 305l4-1"/>
+    <path class="wall hair" d="M574 340V335H586V340ZM576 335V331H584V335Z"/>
+    <!-- the vault, in the plinth, under bedroom and hall [u29] -->
+    <rect class="ground" x="330" y="346" width="80" height="18"/>
+    <path fill="url(#hatch)" d="M330 346H342V364H330ZM398 346H410V364H398Z"/>
+    <path fill="url(#hatch-h)" d="M330 346H342V364H330ZM398 346H410V364H398Z"/>
+    <path class="wall hair" d="M346 357L350 351H388L394 354L388 357Z"/>
+    <path class="ln hair" d="M352 357L349 364M356 357L359 364M380 357L377 364M384 357L387 364"/>
+    <!-- the fissure above water: a hairline, three segments in (chapter III) -->
+    <path class="fis" d="M486 130L476 164L490 194L478 234"/>
+  </g>
+
+  <!-- ===== the cast ===== -->
+  <g id="f-guest"> <!-- faces left; scarf trails behind -->
+    <path class="mass" d="M-4-26C-6-17-10-7-11 0H11C10-7 6-17 4-26Z"/>
+    <path class="ln fine" d="M3-25C9-24 13-19 15-15"/>
+    <ellipse class="face" cx="0" cy="-29.5" rx="3.6" ry="4.3"/>
+    <path class="mass" d="M-3.2-33V-40H3.2V-33Z"/><path class="ln" d="M-5.5-33H5.5"/>
+    <path class="wall hair" d="M8 -9h7v8h-7Z"/><path class="ln hair" d="M9.5-9q2-3 4 0"/>
+  </g>
+  <g id="f-valet"> <!-- thin, forever on tiptoe -->
+    <path class="mass" d="M-3-31C-4.5-22-4.5-12-3-6L1-6L7-2C4.5-10 4-22 3-31Z"/>
+    <path class="ln fine" d="M-1.5-6L-2.6-.4M1-6L3.8-2.6L6.8-3.6"/>
+    <path class="ln fine" d="M-2.6-.4l-2.2.2"/>
+    <ellipse class="face" cx="-.5" cy="-34.6" rx="3" ry="3.8"/>
+    <path class="mass" d="M-3.4-36.4C-3-40.2 2.6-40.2 2.8-36C1-37.6-1.5-37.6-3.4-36.4Z"/>
+    <path class="ln fine" d="M-2.6-25C-5.5-21-7.5-19-9-16"/>
+  </g>
+  <g id="f-madeline"> <!-- the only white figure; the train trails up the stair -->
+    <path class="mad-robe" d="M-3-31C-5-22-7-11-7.5 0L6 0C9.5-.8 13-2.6 16.5-5.8C11.5-5.2 8.2-5.8 5.6-7.6C5-17 4-25 3-31Z"/>
+    <path class="mad-robe" style="fill:none" d="M-2.6-24C-4.4-19-4-16-1.6-14"/>
+    <ellipse class="mad-face" cx="-.5" cy="-34.5" rx="3.3" ry="4.1"/>
+    <path class="mad-hair" d="M-3.6-36C-3-40.2 3.4-40.2 3.6-35C4.4-29 4-22 5.5-16C2.5-20 1.5-27 1.2-32C0-34-2-35-3.6-36Z"/>
+  </g>
+  <g id="cast">
+    <use href="#f-valet" transform="translate(414 340)"/>
+    <use href="#f-guest" transform="translate(568 340) scale(-1 1)"/>
+    <!-- Roderick at full length on the sofa, hair floating rather than falling [u09] -->
+    <path class="mass" d="M598 322C606 316 622 316 640 320L641 326L598 326Z"/>
+    <ellipse class="face" cx="596" cy="318" rx="3.6" ry="4.2"/>
+    <path class="ln hair" d="M593 314c-3-2-4-7 0-8c1-4 6-4 7-1c3-1 5 2 3 5M592 316c-4-1-6-5-4-8M595 309c-1-5 2-8 0-12M599 309c2-4 5-5 5-9M590 312c-3-3-3-7-1-10M597 308c0-3 3-4 2-7"/>
+    <use href="#f-madeline" transform="translate(470 314)" style="opacity:.5"/>
+  </g>
+
+  <!-- ===== the façade (title card, chapters 0–1) ===== -->
+  <g id="facade">
+    <use href="#shell"/>
+    <rect class="wall" x="300" y="177" width="360" height="163"/>
+    <rect x="301" y="178" width="358" height="161" fill="url(#masonry)" style="opacity:.3"/>
+    <path class="ln hair" d="M300 222H660M300 282H660"/>
+    <g class="mass">
+      <circle cx="340" cy="199" r="6"/><circle cx="384" cy="199" r="6"/><circle cx="576" cy="199" r="6"/><circle cx="620" cy="199" r="6"/>
+      <path d="M333 270V246Q340 232 347 246V270ZM377 270V246Q384 232 391 246V270ZM569 270V246Q576 232 583 246V270ZM613 270V246Q620 232 627 246V270Z"/>
+      <path d="M333 330V308Q340 294 347 308V330ZM377 330V308Q384 294 391 308V330ZM569 330V308Q576 294 583 308V330ZM613 330V308Q620 294 627 308V330Z"/>
+      <path d="M464 340V310C464 298 480 290 480 290C480 290 496 298 496 310V340Z"/>
+    </g>
+    <path class="ln hair" d="M306 177q1 5-1 9M314 177q-2 4 1 7M330 177q1 6-1 10M352 177q-1 4 1 7M402 177q1 5-1 8M430 177q-1 6 1 9M530 177q1 4-1 7M560 177q-1 6 1 9M598 177q1 5-1 8M640 177q-1 4 1 7M652 177q1 5-1 9"/>
+    <path class="fis" d="M486 130L476 164"/>
+  </g>
+</defs>
+</svg>
+
+<main class="board">
+
+<header>
+  <div>
+    <p class="kicker">Style board · Direction 1 of 3 · <i style="text-transform:none;letter-spacing:0">A Sojourn of Some Weeks</i></p>
+    <h1>Ink &amp; Tarn</h1>
+  </div>
+  <p class="dek">Ink line on bare paper, staged as a toy theatre. Below the waterline the house comes back as its own negative, and only the truth holds still.</p>
+</header>
+
+<section class="hero-row">
+  <figure>
+    <div class="stage">
+      <svg viewBox="0 0 960 640" role="img" aria-labelledby="hero-t">
+        <title id="hero-t">The map: the House of Usher in cutaway over its negative in the tarn</title>
+        <rect x="14" y="14" width="932" height="612" style="fill:var(--paper)"/>
+        <use href="#clouds" clip-path="url(#inner)"/>
+        <!-- the tarn -->
+        <rect x="14" y="368" width="932" height="258" style="fill:var(--ink)"/>
+        <g filter="url(#ripple)" style="stroke:var(--paper);stroke-width:.6;opacity:.4">
+          <path d="M742 382h38M792 389h22M840 380h46M760 403h18M872 397h34M716 420h26M820 428h40M900 440h22"/>
+        </g>
+        <!-- the reflection: same drawing, flipped, in paper; ripples and fades -->
+        <g class="below">
+          <g mask="url(#depth)">
+            <g transform="matrix(1 0 0 -.85 0 680.8)" filter="url(#ripple)">
+              <use href="#house"/><use href="#cast"/>
+            </g>
+          </g>
+          <!-- truths: same flip, no ripple, no fade -->
+          <g transform="matrix(1 0 0 -.85 0 680.8)">
+            <path class="truth" d="M486 130L476 164L490 194L478 234L490 280L480 330L488 368"/>
+            <use href="#f-madeline" transform="translate(470 314)" style="color:var(--tarn-red);--ground:var(--paper);--hair:var(--ink);--mw:1.5"/>
+          </g>
+        </g>
+        <text class="sound" x="370" y="406" text-anchor="middle" style="font-size:19px;fill:var(--tarn-red)">tap.</text>
+        <!-- the house upright -->
+        <g class="above"><use href="#house"/><use href="#cast"/></g>
+        <!-- rooms (labels on hover only) -->
+        <g>
+          <g class="room" tabindex="0"><rect x="300" y="177" width="360" height="41"/><text x="508" y="214">THE GALLERY</text></g>
+          <g class="room" tabindex="0"><rect x="300" y="222" width="138" height="56"/><text x="372" y="275">THE GUEST’S CHAMBER</text></g>
+          <g class="room" tabindex="0"><rect x="300" y="282" width="138" height="58"/><text x="334" y="336">THE HALL</text></g>
+          <g class="room" tabindex="0"><rect x="442" y="222" width="76" height="118"/><text x="480" y="336">THE STAIR</text></g>
+          <g class="room" tabindex="0"><rect x="522" y="222" width="138" height="118"/><text x="591" y="290">THE STUDIO</text></g>
+        </g>
+        <!-- the dialogue strip: an intertitle band in the tarn -->
+        <rect x="40" y="572" width="880" height="48" style="fill:var(--ink);stroke:var(--paper);stroke-width:.8"/>
+        <rect x="45" y="577" width="870" height="38" style="fill:none;stroke:var(--paper);stroke-width:.35"/>
+        <text x="68" y="601" style="font-size:13px;letter-spacing:.14em;fill:var(--rule)">RODERICK</text>
+        <text x="176" y="603" style="font-size:22px;fill:var(--paper)">You came! Is that wool? It’s terribly loud.</text>
+        <path d="M893 592l7 4.5-7 4.5Z" style="fill:var(--paper)"/>
+        <!-- frame: Beardsley's mount -->
+        <rect x="8" y="8" width="944" height="624" style="fill:none;stroke:var(--ink);stroke-width:1.5"/>
+        <rect x="14" y="14" width="932" height="612" style="fill:none;stroke:var(--ink);stroke-width:.6"/>
+      </svg>
+    </div>
+    <figcaption><b>The map · Chapter III</b>The guest in the studio with Roderick; the valet, on tiptoe, in the hall; Madeline on the stair, a hairline you could miss. In the tarn she is the brightest thing there, and the fissure runs whole. Truths don’t ripple. Hover a room.</figcaption>
+  </figure>
+
+  <aside>
+    <h2>Three lines</h2>
+    <ol class="lines">
+      <li><b>The idea</b>Ink on bare paper, staged as a toy theatre: flat black bands, blank-faced cut-outs, sound set as type. Under the waterline the house returns as its own negative, and only what really happened holds still, in red.</li>
+      <li><b>Why it fits Usher</b>The tale turns on a man looking down at “the re-modelled and inverted images” [u02]. Beardsley’s Usher is already bare paper against flat black, and a silent film can print every sound instead of playing it.</li>
+      <li><b>The risk</b>Restraint can read as empty. Hairlines go grey at phone width and the house is small in the frame, so the look rests on drawing quality, and thin ink forgives nothing in an hour’s build.</li>
+    </ol>
+    <h2>Palette</h2>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:var(--paper)"></div><span class="n">Paper</span><span class="hex">#f2eee5</span><span class="r">the ground; the reflection’s line</span></div>
+      <div class="sw"><div class="chip" style="background:var(--ink)"></div><span class="n">Ink</span><span class="hex">#29272a</span><span class="r">line, masses, the tarn</span></div>
+      <div class="sw"><div class="chip" style="background:var(--muted)"></div><span class="n">Muted</span><span class="hex">#625d5a</span><span class="r">labels, scores, asides</span></div>
+      <div class="sw"><div class="chip" style="background:var(--rule)"></div><span class="n">Rule</span><span class="hex">#cbc3b8</span><span class="r">cut-out shadows, the hairline fissure</span></div>
+      <div class="sw"><div class="chip" style="background:var(--red)"></div><span class="n">Red</span><span class="hex">#7a3939</span><span class="r">what really happened, on paper</span></div>
+      <div class="sw"><div class="chip" style="background:#a47875"></div><span class="n">Tarn red</span><span class="hex">#a47875</span><span class="r">the same, in the water: red + 35% paper, 4:1 on ink</span></div>
+    </div>
+  </aside>
+</section>
+
+<section class="three">
+  <!-- ===== title card ===== -->
+  <figure>
+    <div class="stage">
+      <svg viewBox="0 0 960 640" role="img" aria-labelledby="title-t">
+        <title id="title-t">Title card: A Sojourn of Some Weeks, reflected in the tarn as A Burial of Some Weeks</title>
+        <rect x="14" y="14" width="932" height="612" style="fill:var(--paper)"/>
+        <use href="#clouds" transform="translate(0 -14)" clip-path="url(#inner)"/>
+        <rect x="14" y="368" width="932" height="258" style="fill:var(--ink)"/>
+        <g class="below">
+          <g mask="url(#depth)">
+            <g transform="matrix(1 0 0 -.85 0 680.8)" filter="url(#ripple)">
+              <use href="#facade"/><use href="#f-guest" transform="translate(152 359) scale(-1 1)"/>
+            </g>
+          </g>
+          <path class="truth" style="stroke-width:1.8" transform="matrix(1 0 0 -.85 0 680.8)" d="M486 130L476 164L490 194L478 234L490 280L480 330L488 368"/>
+        </g>
+        <g class="above"><use href="#facade"/><use href="#f-guest" transform="translate(152 359) scale(-1 1)"/></g>
+        <!-- the title flat, flown in on two lines -->
+        <path class="ln hair" style="color:var(--ink)" d="M170 14V30M790 14V30"/>
+        <g filter="url(#cutout)">
+          <rect x="130" y="30" width="700" height="80" style="fill:var(--paper);stroke:var(--ink);stroke-width:1.4"/>
+        </g>
+        <rect x="136" y="36" width="688" height="68" style="fill:none;stroke:var(--ink);stroke-width:.5"/>
+        <text x="480" y="89" text-anchor="middle" style="font-size:64px;fill:var(--ink)">A Sojourn of Some Weeks</text>
+        <!-- its reflection: a negative card that reads differently -->
+        <g filter="url(#ripple)">
+          <rect x="130" y="430" width="700" height="88" style="fill:var(--ink);stroke:var(--paper);stroke-width:1.1;opacity:.85"/>
+          <rect x="136" y="436" width="688" height="76" style="fill:none;stroke:var(--paper);stroke-width:.45;opacity:.6"/>
+          <text transform="matrix(1 0 0 -1 0 948)" x="480" y="496" text-anchor="middle" style="font-size:64px;fill:var(--paper);opacity:.72">A <tspan style="fill:transparent">Burial</tspan> of Some Weeks</text>
+        </g>
+        <text transform="matrix(1 0 0 -1 0 948)" x="480" y="496" text-anchor="middle" style="font-size:64px;fill:transparent">A <tspan style="fill:var(--tarn-red)">Burial</tspan> of Some Weeks</text>
+        <rect x="8" y="8" width="944" height="624" style="fill:none;stroke:var(--ink);stroke-width:1.5"/>
+        <rect x="14" y="14" width="932" height="612" style="fill:none;stroke:var(--ink);stroke-width:.6"/>
+      </svg>
+    </div>
+    <figcaption><b>Title card</b>The title hangs from the flies like a toy-theatre flat, at dusk, façade closed. Look down: the water has its own title, and its one changed word is the only thing that doesn’t ripple.</figcaption>
+  </figure>
+
+  <!-- ===== studio ===== -->
+  <figure>
+    <div class="stage">
+      <svg viewBox="0 0 960 640" class="g-studio above" role="img" aria-labelledby="studio-t">
+        <title id="studio-t">Studio mini-game: Roderick on the sofa, a sunbeam, a rose, a brass band, and a red tap in the floor</title>
+        <rect x="14" y="14" width="932" height="612" style="fill:var(--paper)"/>
+        <!-- crack on the wall: the room's patience -->
+        <path class="ln hair" style="stroke:var(--muted)" d="M770 14L758 46L776 80L760 122L778 164L764 206L772 236"/>
+        <!-- three lancets, trellised panes -->
+        <g>
+          <path class="wall" d="M264 300V128Q300 54 336 128V300Z"/><path fill="url(#lattice)" d="M264 300V128Q300 54 336 128V300Z"/>
+          <path class="wall" d="M434 300V128Q470 54 506 128V300Z"/><path fill="url(#lattice)" d="M434 300V128Q470 54 506 128V300Z"/>
+          <path class="wall" d="M604 300V128Q640 54 676 128V300Z"/>
+          <path class="ln fine" d="M300 84V300M470 84V300M640 84V300M264 190H336M434 190H506M604 190H676M256 302H344M426 302H514M596 302H684"/>
+        </g>
+        <!-- the sunbeam, creeping toward his face -->
+        <path fill="url(#beam)" d="M606 300L676 300L452 430L404 404Z"/>
+        <path class="ln hair" style="stroke-dasharray:2 4" d="M606 300L404 404M676 300L452 430"/>
+        <!-- a drape half drawn over the first window, and the mime -->
+        <path class="ln" d="M246 62H354"/>
+        <path class="mass" d="M250 64C266 66 284 64 300 66L304 302C298 306 292 300 286 306C280 300 272 306 266 302C260 306 254 300 250 304Z"/>
+        <path class="ln hair" style="stroke:var(--paper)" d="M262 76V292M276 74V294M290 72V294"/>
+        <path class="ln fine" style="stroke-dasharray:1 5" d="M312 186C330 180 350 180 368 186"/>
+        <path class="mass" d="M368 186l-9-5 1 9Z"/>
+        <!-- the draperies: this screen's black mass -->
+        <path class="ln" d="M24 34H160M800 34H936"/>
+        <path class="mass" d="M28 36H150C140 160 150 320 140 470C130 480 120 466 110 474C100 464 90 480 80 470C70 480 58 466 48 474C40 466 32 476 28 470Z"/>
+        <path class="mass" d="M846 36H932V470C926 478 918 466 910 474C902 466 894 478 886 470C878 478 870 466 862 472C860 330 850 160 846 36Z"/>
+        <path class="ln hair" style="stroke:var(--paper)" d="M58 50C60 200 56 330 60 462M90 48C92 200 88 330 92 466M120 50C124 200 118 330 122 462M876 50C874 200 878 330 874 462M904 50C902 200 906 330 904 466"/>
+        <!-- teaching line -->
+        <text x="176" y="46" style="font-size:20px;font-style:italic;fill:var(--ink)">Spare him everything.</text>
+        <!-- the rose and its winged odour [u21] -->
+        <g transform="translate(40 0)">
+        <path class="ln fine" d="M758 500L762 404M772 500L768 404M744 402H786"/>
+        <path class="wall fine" d="M752 402C746 386 752 374 756 368H774C778 374 784 386 778 402Z"/>
+        <path class="ln fine" d="M765 368C762 340 770 322 766 306"/>
+        <path class="mass" d="M765 340c-10-7-17-1-19 2c8 4 14 2 19-2ZM767 326c8-6 15-3 17 0c-7 4-13 3-17 0Z"/>
+        <circle class="wall fine" cx="766" cy="294" r="13"/>
+        <path class="ln fine" d="M766 302c-7 0-11-6-7-12c5-5 13-2 13 5c0 6-8 8-11 3c-2-3 2-6 4-4"/>
+        <path class="ln fine" style="stroke-dasharray:1 6" d="M748 290C706 268 652 304 610 286C572 270 540 300 506 286"/>
+        <path class="ln hair" d="M505 286c-3-6-9-7-12-3M505 286c-1-7-6-10-10-7"/>
+        </g>
+        <!-- the sofa and Roderick, hand to his brow against the light [u11] -->
+        <path class="wall" d="M300 476V420C300 398 330 398 330 420V476Z"/>
+        <path class="wall" d="M330 440C420 420 560 420 640 440V454H330Z"/>
+        <path class="wall" d="M326 454H646V478H326Z"/>
+        <path class="wall" d="M640 478V440C640 430 656 430 656 440V478Z"/>
+        <path class="ln" d="M308 478L304 500M650 478L654 500M480 478V496"/>
+        <path fill="url(#hatch)" d="M300 476V420C300 398 330 398 330 420V476Z"/>
+        <path class="mass" d="M340 444C390 428 480 426 560 432C592 435 614 440 630 448L630 456C560 452 420 452 340 454Z"/>
+        <path class="mass" d="M628 444l14 3-1 7-14-2Z"/>
+        <ellipse class="face" style="stroke-width:1.6" cx="322" cy="416" rx="12" ry="14"/>
+        <path class="ln hair" style="stroke-width:.8" d="M314 404c-9-6-12-20-2-26c2-12 16-14 21-5c9-5 19 2 14 12M310 408c-12-3-18-14-12-22M318 394c-2-12 6-18 1-30M326 393c5-9 13-12 12-22M306 400c-8-6-9-15-3-22M330 396c8-5 16-4 18-12M312 390c-6-10-2-18-6-26"/>
+        <path class="mass" d="M352 444C346 432 340 420 338 410L347 407C349 418 355 430 362 442Z"/>
+        <ellipse class="face" style="stroke-width:1.3" cx="337" cy="405" rx="8" ry="5.5" transform="rotate(-25 337 405)"/>
+        <!-- TAN-TARA, a brass band in type, marching in -->
+        <text class="halo" transform="rotate(-4 770 400)" x="770" y="400" text-anchor="end" style="font-size:46px;letter-spacing:.06em;fill:var(--ink)">TAN-TARA!</text>
+        <!-- the floor: eight boards over the black vault -->
+        <rect x="14" y="540" width="932" height="86" style="fill:var(--ink)"/>
+        <g mask="url(#depth-s)" filter="url(#ripple-still)" class="below">
+          <path class="wall fine" d="M392 600L404 584H556L570 592L556 600Z"/>
+          <path class="ln fine" d="M410 600L404 618M420 600L426 618M540 600L534 618M550 600L556 618"/>
+        </g>
+        <g id="boards"></g>
+        <!-- the thumbprint of a tap already hushed; the red tap, unhushed -->
+        <g class="ln hair" style="stroke-width:.7">
+          <ellipse cx="664" cy="520" rx="12" ry="9"/><ellipse cx="664" cy="520" rx="8.5" ry="6"/><ellipse cx="664" cy="520" rx="5" ry="3.4"/><ellipse cx="664" cy="520" rx="2" ry="1.2"/>
+        </g>
+        <text class="sound" x="300" y="529" text-anchor="middle" style="font-size:30px;fill:var(--red)">tap.</text>
+        <text x="920" y="612" text-anchor="end" style="font-size:13px;letter-spacing:.14em;fill:var(--rule)">TAPS HUSHED 3 · ×2</text>
+        <rect x="8" y="8" width="944" height="624" style="fill:none;stroke:var(--ink);stroke-width:1.5"/>
+        <rect x="14" y="14" width="932" height="612" style="fill:none;stroke:var(--ink);stroke-width:.6"/>
+      </svg>
+    </div>
+    <figcaption><b>Studio · the hush</b>Spare him everything. Sunbeam, rose and brass band are ink; the black mass is the draperies. The only red is the <i>tap.</i> in the floorboards, over the black vault.</figcaption>
+  </figure>
+
+  <!-- ===== trist: the page turned over ===== -->
+  <figure>
+    <div class="stage">
+      <svg viewBox="0 0 960 640" class="g-trist" role="img" aria-labelledby="trist-t">
+        <title id="trist-t">Trist mini-game, page turned over: Madeline climbs out of the vault, white on black, under the room where the romance is read</title>
+        <rect x="14" y="14" width="932" height="612" style="fill:var(--ink)"/>
+        <rect x="14" y="40" width="932" height="586" fill="url(#stones)" style="opacity:.16"/>
+        <!-- above: the room where you read aloud -->
+        <g class="above">
+          <rect x="14" y="14" width="932" height="136" style="fill:var(--paper)"/>
+          <path fill="url(#hatch)" d="M14 14H44L14 44ZM946 14H916L946 44Z"/>
+          <g transform="translate(300 148) scale(2)">
+            <use href="#f-guest" transform="scale(-1 1)"/>
+            <path class="wall hair" d="M2-22l6 2 6-2v-8l-6 2-6-2Z"/>
+          </g>
+          <path class="ln fine" d="M420 148V122M408 122H432"/>
+          <path class="wall fine" d="M413 122C413 112 427 112 427 122Z"/>
+          <path class="ln hair" d="M417 112V98H423V112"/>
+          <ellipse class="ground" cx="420" cy="94" rx="2.4" ry="4" style="stroke:var(--ink);stroke-width:.6"/>
+          <!-- Roderick has turned his chair to face the door [u45] -->
+          <g transform="translate(640 148) scale(2)">
+            <path class="mass" d="M-15 0V-54C-15-60-9-60-9-54V-20H12V-17H-9V0Z"/>
+            <path class="ln fine" d="M10-17V0M-13 0V-4"/>
+            <path class="mass" d="M-8-20C-10-32-6-42 1-46C7-42 8-32 8-22H18L20-2H13L11-16H-6Z"/>
+            <ellipse class="face" cx="6" cy="-49" rx="3.8" ry="4.6"/>
+            <path class="ln hair" d="M3-52c-3-3-2-8 2-8c2-3 7-2 7 2M2-50c-4-2-5-7-2-10M6-55c0-4 3-6 2-10M9-53c3-3 6-3 6-7"/>
+            <path class="ln hair" d="M-20-30c-3 3-3 7 0 10M-23-34c-5 5-5 13 0 18"/>
+          </g>
+          <path class="mass" d="M818 150V72C818 52 862 52 862 72V150Z"/>
+          <path class="ln hair" style="stroke:var(--ground)" d="M840 58V150"/>
+        </g>
+        <!-- the corrected caption -->
+        <g style="font-size:22px;font-style:italic">
+          <text id="struck" x="48" y="204" style="fill:var(--paper)">made room in the plankings</text>
+          <path id="strike" d="M46 197H268" style="stroke:var(--paper);stroke-width:1.4"/>
+          <text x="48" y="236" style="fill:var(--tarn-red)">say, rather, the rending of her coffin.</text>
+        </g>
+        <!-- the coppered archway [u29] -->
+        <path fill="url(#gouge)" fill-rule="evenodd" d="M150 560V380C150 300 300 252 480 248C660 252 810 300 810 380V560H770V386C770 322 640 290 480 288C320 290 190 322 190 386V560Z"/>
+        <path style="fill:none;stroke:var(--paper);stroke-width:1.2" d="M150 560V380C150 300 300 252 480 248C660 252 810 300 810 380V560M190 560V386C190 322 320 290 480 288C640 290 770 322 770 386V560"/>
+        <!-- the floor: this screen's black mass -->
+        <path d="M14 560H946" style="stroke:var(--paper);stroke-width:1.2"/>
+        <rect x="14" y="566" width="932" height="60" fill="url(#gouge-h)" style="opacity:.26"/>
+        <!-- the blows, scratched on the wall -->
+        <path id="tally" style="fill:none;stroke:var(--paper);stroke-width:2;stroke-linecap:round" d=""/>
+        <!-- the coffin on its trestles; the lid slid off, your blows re-cut in red -->
+        <path style="fill:none;stroke:var(--paper);stroke-width:1.2" d="M244 500L232 560M256 500L268 560M374 500L362 560M386 500L398 560M238 530H262M368 530H392"/>
+        <path style="fill:var(--ink);stroke:var(--paper);stroke-width:1.3;stroke-linejoin:round" d="M218 500L230 474H402L416 488L402 500Z"/>
+        <path style="fill:none;stroke:var(--paper);stroke-width:.6" d="M236 480H398M234 487H404M232 494H406"/>
+        <g transform="rotate(-11 300 460) translate(-26 -30)">
+          <path style="fill:var(--paper);stroke:var(--ink);stroke-width:1" d="M214 470L226 448H398L412 462L398 470Z"/>
+          <path style="fill:none;stroke:var(--red);stroke-width:3;stroke-linecap:round" d="M250 451l26 12M282 450l32 13M318 453l20 8M352 450l-14 14"/>
+        </g>
+        <!-- the iron door, open [u29] -->
+        <path style="fill:var(--ink);stroke:var(--paper);stroke-width:1.3;stroke-linejoin:round" d="M450 560V338L512 352V548Z"/>
+        <path style="fill:none;stroke:var(--paper);stroke-width:2" d="M450 380L506 390M450 520L506 512"/>
+        <g id="rivets" style="fill:var(--paper)"></g>
+        <!-- five stairs up -->
+        <path id="vault-stair" style="fill:none;stroke:var(--paper);stroke-width:1.3;stroke-linejoin:round" d=""/>
+        <path id="vault-risers" style="fill:none;stroke:var(--paper);stroke-width:.7" d=""/>
+        <!-- Madeline, white on black, climbing on her heartbeat -->
+        <g transform="translate(608 500)">
+          <path style="fill:var(--paper);stroke:var(--ink);stroke-width:1" d="M-14 0C-30 6-48 18-62 36C-40 32-22 20-6 4Z"/>
+          <path style="fill:var(--paper);stroke:var(--ink);stroke-width:1" d="M-14 0C-18-30-14-70-8-96C-4-104 6-104 10-96C14-72 18-36 26 0C10 5-4 5-14 0Z"/>
+          <path style="fill:none;stroke:var(--ink);stroke-width:.8" d="M-6-90C-8-60-10-30-10-2M2-92C2-60 4-30 6-2M8-88C12-60 14-30 18-2M-2-70C-12-40-30-10-50 26"/>
+          <path style="fill:none;stroke:var(--paper);stroke-width:4.4;stroke-linecap:round" d="M6-90C20-100 34-116 44-132M4-84C22-88 40-98 54-110"/>
+          <path style="fill:none;stroke:var(--ink);stroke-width:.7" d="M44-132l3-6M44-132l6-3M54-110l4-5M54-110l6-2"/>
+          <ellipse cx="3" cy="-110" rx="8" ry="10" style="fill:var(--paper);stroke:var(--ink);stroke-width:1"/>
+          <path style="fill:var(--ink);stroke:var(--paper);stroke-width:.8" d="M-5-116C2-124 12-122 12-112C9-116 4-117 0-115C-4-104-8-86-10-62C-16-82-15-104-5-116Z"/>
+          <path style="fill:var(--red)" d="M4-76c-6-5-8-9-4-11c2-1 4 0 4 2c0-2 2-3 4-2c4 2 2 6-4 11Z"/>
+        </g>
+        <text x="920" y="612" text-anchor="end" style="font-size:13px;letter-spacing:.14em;fill:var(--rule)">BLOWS 14</text>
+        <rect x="8" y="8" width="944" height="624" style="fill:none;stroke:var(--ink);stroke-width:1.5"/>
+        <rect x="14" y="14" width="932" height="612" style="fill:none;stroke:var(--ink);stroke-width:.6"/>
+      </svg>
+    </div>
+    <figcaption><b>Trist · the page turned over</b>A one-colour woodcut, white cut into black: you are Madeline now, climbing on her heartbeat. The romance’s caption is corrected in red, and the strokes on her lid are the ones you drew on the hermit’s door.</figcaption>
+  </figure>
+</section>
+
+<section class="type">
+  <h2 class="section-h">Type · IM Fell English, regular and italic, nothing else</h2>
+  <div class="spec">
+    <div class="row"><div class="k">Title<i>64</i></div><div class="s-title">A Sojourn of Some Weeks</div></div>
+    <div class="row"><div class="k">Intertitle<i>44 · numeral 14 caps · paper on ink</i></div>
+      <div class="s-inter"><span class="caps">Chapter the Third</span><span>The Cheerfulness of My Society</span></div></div>
+    <div class="row"><div class="k">Dialogue<i>22, never under 16px · speaker 13 caps</i></div>
+      <div class="s-dia"><span class="caps">You</span><span>It’s a coat, Roderick.</span></div></div>
+    <div class="row"><div class="k">Stage line<i>22 italic</i></div><div class="s-stage">(passes slowly through a remote part of the room, without having noticed you.)</div></div>
+    <div class="row"><div class="k">Sound-words<i>18 to 64, set where the sound is; never played</i></div>
+      <div class="s-sound"><span style="font-size:18px;color:var(--red)">tap.</span><span style="font-size:26px">plink.</span><span style="font-size:34px">crack, rip.</span><span style="font-size:46px;font-style:normal;letter-spacing:.06em">TAN-TARA!</span><span style="font-size:64px;font-style:normal;letter-spacing:.04em">CLANGOUR.</span></div></div>
+    <div class="row"><div class="k">Labels, scores<i>13 caps, muted, never under 10px</i></div><div class="s-label caps">The studio · taps hushed 41 · stones set 8</div></div>
+    <div class="row"><div class="k">The correction<i>22 · ink entry, red italic</i></div><div class="s-corr">Taps hushed: 41 · <i>say, rather:</i> she knocked 41 times.</div></div>
+  </div>
+</section>
+
+<p class="foot"><span>Everything above is inline SVG and CSS from the shared defs in LOOK.md; nothing is an image.</span><span>Red is only ever the truth: the tarn’s, one per game, the moon, the corrections.</span></p>
+
+</main>
+
+<script>
+// repeated marks, computed once
+const $ = id => document.getElementById(id);
+(function () {
+  // causeway planks
+  let d = '';
+  for (let i = 1; i < 16; i++) { const t = i / 16, x = 128 + 152 * t; d += `M${x.toFixed(1)} ${(362 - 22 * t).toFixed(1)}V${(368 - 22 * t).toFixed(1)}`; }
+  $('causeway-ticks').setAttribute('d', d);
+
+  // clouds: billows with a hairline lower edge, hatching denser toward the top
+  let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  function billow(y0, amp, wmin, wmax, edgeOnly) {
+    let x = 946, y = y0 + (rnd() - .5) * 6, d = edgeOnly ? `M${x} ${y.toFixed(1)}` : `M14 14H946V${y.toFixed(1)}`, inner = '';
+    while (x > 14) {
+      const w = wmin + rnd() * (wmax - wmin), nx = Math.max(14, x - w), ny = y0 + (rnd() - .5) * 10, b = amp * (.55 + rnd() * .7);
+      d += `C${(x - w * .08).toFixed(1)} ${(y + b).toFixed(1)} ${(nx + w * .08).toFixed(1)} ${(ny + b).toFixed(1)} ${nx.toFixed(1)} ${ny.toFixed(1)}`;
+      if (rnd() > .45 && w > 50) { const ix = x - w * .25, iw = w * .45; inner += `M${ix.toFixed(1)} ${(y + b * .2).toFixed(1)}c${(-iw * .1).toFixed(1)} ${(b * .5).toFixed(1)} ${(-iw * .9).toFixed(1)} ${(b * .5).toFixed(1)} ${(-iw).toFixed(1)} 0`; }
+      x = nx; y = ny;
+    }
+    return edgeOnly ? [d, inner] : d + 'Z';
+  }
+  seed = 11; $('cl-1').setAttribute('d', billow(84, 22, 46, 96));
+  seed = 11; const [edge, inner] = billow(84, 22, 46, 96, true);
+  $('cl-edge').setAttribute('d', edge); $('cl-in').setAttribute('d', inner);
+  seed = 29; $('cl-2').setAttribute('d', billow(50, 16, 40, 80));
+  seed = 47; $('cl-3').setAttribute('d', billow(26, 10, 36, 70));
+
+  // stair: lower flight (hatched beneath), upper flight (a black band), rail and balusters
+  let lo = 'M442 340'; for (let k = 0; k < 9; k++) lo += 'v-6.5h8'; lo += 'h4';
+  $('stair-lower').setAttribute('d', lo);
+  $('stair-under').setAttribute('d', lo + 'V340Z');
+  let up = 'M518 282'; for (let k = 0; k < 9; k++) up += 'v-6.5h-8'; up += 'h-4V232L518 291Z';
+  $('stair-upper').setAttribute('d', up);
+  let rail = 'M446 318L514 262M446 318V340';
+  for (let x = 454; x <= 510; x += 16) { const k = Math.ceil((x - 442) / 8); rail += `M${x} ${340 - 6.5 * k}V${(318 - (x - 446) * 56 / 68).toFixed(1)}`; }
+  $('stair-rail').setAttribute('d', rail);
+
+  // studio floorboards
+  const ns = 'http://www.w3.org/2000/svg', g = $('boards');
+  for (let i = 0; i < 8; i++) {
+    const x = 14 + i * 116.5, r = document.createElementNS(ns, 'path');
+    r.setAttribute('class', 'wall fine');
+    r.setAttribute('d', `M${x} 500h116.5v40H${x}Z`);
+    g.appendChild(r);
+    const gr = document.createElementNS(ns, 'path');
+    gr.setAttribute('class', 'ln hair');
+    gr.setAttribute('d', `M${x + 8} 512c30 -3 60 3 100 0M${x + 14} 528c26 2 54 -3 92 1M${x + 6} 505h0M${x + 110} 535h0`);
+    g.appendChild(gr);
+  }
+
+  // tally of blows on the vault wall: two fives and four
+  let t = '', x0 = 834;
+  for (let grp = 0; grp < 3; grp++) {
+    const n = grp < 2 ? 4 : 4;
+    for (let j = 0; j < n; j++) { const x = x0 + j * 7; t += `M${x} ${300 + (j % 2)}l${(j % 3) - 1} 30`; }
+    if (grp < 2) t += `M${x0 - 4} ${324}L${x0 + 25} ${306}`;
+    x0 += 36;
+  }
+  $('tally').setAttribute('d', t);
+
+  // iron door rivets
+  const rv = $('rivets');
+  for (let row = 0; row < 7; row++) for (let c = 0; c < 3; c++) {
+    const cx = 460 + c * 19, cy = 358 + row * 28 + c * 2.6 - row * 0.4, ci = document.createElementNS(ns, 'circle');
+    ci.setAttribute('cx', cx); ci.setAttribute('cy', cy); ci.setAttribute('r', 1.8); rv.appendChild(ci);
+  }
+
+  // five vault stairs
+  let s = 'M512 560', r2 = '';
+  for (let k = 0; k < 5; k++) { const y = 560 - 30 * k, xx = 540 + 44 * k; s += `H${xx}V${y - 30}`; for (let j = 1; j < 5; j++) r2 += `M${xx + 1} ${y - 30 + j * 6}h${40 - j * 3}`; }
+  s += 'H790';
+  $('vault-stair').setAttribute('d', s);
+  $('vault-risers').setAttribute('d', r2);
+
+  // the strikethrough fits the struck words once the font is in
+  document.fonts.ready.then(() => { const L = $('struck').getComputedTextLength(); $('strike').setAttribute('d', `M45 197H${(50 + L).toFixed(1)}`); });
+
+  // reduced motion: the tarn holds still
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelectorAll('svg').forEach(v => v.pauseAnimations && v.pauseAnimations());
+})();
+</script>
+</body>
+</html>
