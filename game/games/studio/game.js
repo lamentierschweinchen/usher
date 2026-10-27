@@ -296,7 +296,8 @@ function core(svg, scope, u, cfg) {
     let poseNow = 'calm', poseUntil = 0, sighUntil = 0, endPose = null;
     const ledgerMarks = Array.from({ length: 8 }, () => ({ prints: 0, ticks: 0, visits: 0 }));
     let shownHud = '';
-    // act one's record (api.record): the game's clock as t, never allowed to touch play
+    // act one's record (api.record): the game's clock as t, never allowed to touch play. The pest's type goes
+    // in `pest`: the spine stores {type, t, ...data}, so a field called `type` would overwrite the event's own.
     const r2 = n => Math.round(n * 100) / 100;
     const rec = (type, data) => { if (!record) return; try { record(type, { t: r2(T), ...data }); } catch (e) { /* the spine owns the save */ } };
 
@@ -529,7 +530,7 @@ function core(svg, scope, u, cfg) {
     // ---- outcomes ----
     function hush(p, viaKnock, at) {
       if (!p.alive) return;
-      rec('hush', viaKnock ? { type: p.type, board: null, react: r2(T - p.born), site: p.site, via: 'knock' } : { type: p.type, board: null, react: r2(T - p.born), site: p.site });
+      rec('hush', viaKnock ? { pest: p.type, board: null, react: r2(T - p.born), site: p.site, via: 'knock' } : { pest: p.type, board: null, react: r2(T - p.born), site: p.site });
       const m = viaKnock ? 5 : mult, pts = VALUE[p.type] * m;
       score += pts; counts[p.type]++;
       if (!viaKnock) taught[p.type] = true;
@@ -552,7 +553,7 @@ function core(svg, scope, u, cfg) {
       }
     }
     function reach(p) {
-      rec('reach', { type: p.type, site: p.site });
+      rec('reach', { pest: p.type, site: p.site });
       crack = Math.min(6, crack + 1);
       mult = 1;
       poseUntil = T + 1.2; sighUntil = 0;
@@ -561,7 +562,7 @@ function core(svg, scope, u, cfg) {
       remove(p, 0.3, (s, k) => { p.node.style.opacity = 1 - k; });
     }
     function hushTap(p) {
-      rec('hush', { type: 'tap', board: p.board, react: r2(T - p.born) });
+      rec('hush', { pest: 'tap', board: p.board, react: r2(T - p.born) });
       const x = p.x, y = 472;
       score += VALUE.tap * mult;
       word(x, 436, 'hush.', VALUE.tap * mult);
@@ -707,7 +708,7 @@ function core(svg, scope, u, cfg) {
           if (e.onEnd) e.onEnd();
         }
       }
-      if (ended && !doneSent && T >= endT + 3) finish();
+      if (!replay && ended && !doneSent && T >= endT + 3) finish();   // the replay never ends a chapter
     }
 
     function render() {
@@ -933,7 +934,7 @@ function core(svg, scope, u, cfg) {
 
     // ---- replay hooks (act two): the recorded outcomes, applied on their old timings ----
     function replayHush(e) {            // a recorded hush of a sunbeam, rose or band
-      const p = pests.find(q => q.alive && q.site === e.site) || pests.find(q => q.alive && q.type === e.type);
+      const p = pests.find(q => q.alive && q.site === e.site) || pests.find(q => q.alive && q.type === e.pest);
       if (p && p.type !== 'tap' && p.type !== 'knock') hush(p, false);
     }
     function replayTapHush() {          // act one's freeze and sigh, without the tap: she is the tapper now
@@ -961,7 +962,7 @@ function core(svg, scope, u, cfg) {
       T += dt;
       step(dt);
       render();
-      if (record && ptr && T >= nextPtr) {
+      if (record && ptr && !doneSent && T >= nextPtr) {
         rec('ptr', { x: f(ptr.x), y: f(ptr.y), down: ptr.down });
         nextPtr = (Math.floor(T * 10 + 1e-6) + 1) / 10;
       }
@@ -1030,7 +1031,7 @@ function mirrorScene(u) {
   const rib = (x0, x1) => { const m = (x0 + x1) / 2, y = CEIL_B + 66; return `<path d="M${x0 - 6} ${y}Q${x0 - 6} ${CEIL_B - 4} ${m} ${CEIL_B - 4}Q${x1 + 6} ${CEIL_B - 4} ${x1 + 6} ${y}H${x1 - 6}Q${x1 - 6} ${CEIL_B + 8} ${m} ${CEIL_B + 8}Q${x0 + 6} ${CEIL_B + 8} ${x0 + 6} ${y}Z"/>`; };
   const vault = pillar(48) + pillar(480) + pillar(912) + rib(48, 480) + rib(480, 912) +
     C.fringe(16, 944, CEIL_B, { seed: 7, len: [2, 7], step: 6, w: 1.2 }) +
-    C.coffin({ x: 136, y: 574, w: 170, lid: 'off', trestles: true }) +
+    C.coffin({ x: 136, y: 574, w: 170, lid: 'ajar', trestles: true }) +
     C.door('iron', { x: 700, y: 452, w: 100, h: 136, light: '--lit-vault-door', fallback: '#b97a4c' }) +
     `<path d="M0 ${VFLOOR}H960V640H0Z"/>`;
   return `
@@ -1234,10 +1235,15 @@ function mountBurial(stage, api) {
 
   // ---- the ghost: your act one, or the fixture (a builder's real run) when it's missing or thin ----
   let G = null, synthetic = false, ready = false, dead = false;
-  const hushCount = ev => (Array.isArray(ev) ? ev.filter(e => e && e.type === 'hush').length : 0);
+  const PESTS = ['sun', 'rose', 'band', 'tap'];
+  // a hush is {type:'hush', pest}; tolerate records whose pest type overwrote the event type
+  const kindOf = e => e.event || e.type;   // the spine keeps the recorded name in `event`
+  const isHush = e => e && (kindOf(e) === 'hush' || (PESTS.includes(e.type) && 'react' in e));
+  const pestOf = e => e.pest || (e.type !== 'hush' ? e.type : null);
+  const hushCount = ev => (Array.isArray(ev) ? ev.filter(isHush).length : 0);
   const given = api.ghost && Array.isArray(api.ghost.events) ? api.ghost : null;
-  if (given && hushCount(given.events) >= 10) begin(given.events, !!given.synthetic);
-  else {
+  function loadGhost() {                   // called once the state below exists
+    if (given && hushCount(given.events) >= 10) return begin(given.events, !!given.synthetic);
     let url = 'ghost.json';
     try { url = new URL('./ghost.json', import.meta.url).href; } catch (e) { /* relative */ }
     fetch(url).then(r => (r.ok ? r.json() : Promise.reject(new Error('ghost ' + r.status))))
@@ -1247,14 +1253,14 @@ function mountBurial(stage, api) {
   function prepare(events) {
     const num = v => typeof v === 'number' && isFinite(v);
     const ev = (events || []).filter(e => e && typeof e === 'object');
-    const ptr = ev.filter(e => e.type === 'ptr' && num(e.t) && num(e.x) && num(e.y)).map(e => ({ t: e.t, x: e.x, y: e.y, down: !!e.down })).sort((a, b) => a.t - b.t);
-    const gest = ev.filter(e => e.type === 'gesture' && num(e.t0) && num(e.t1)).map(e => [e.t0, e.t1]);
-    const hush = ev.filter(e => e.type === 'hush' && num(e.t) && !e.via).sort((a, b) => a.t - b.t);
-    const taps = hush.filter(e => e.type === 'tap');
+    const ptr = ev.filter(e => kindOf(e) === 'ptr' && num(e.t) && num(e.x) && num(e.y)).map(e => ({ t: e.t, x: e.x, y: e.y, down: !!e.down })).sort((a, b) => a.t - b.t);
+    const gest = ev.filter(e => kindOf(e) === 'gesture' && num(e.t0) && num(e.t1)).map(e => [e.t0, e.t1]);
+    const hush = ev.filter(e => isHush(e) && num(e.t) && !e.via).map(e => ({ ...e, pest: pestOf(e) })).sort((a, b) => a.t - b.t);
+    const taps = hush.filter(e => e.pest === 'tap');
     const reacts = taps.map(e => e.react).filter(num).sort((a, b) => a - b), m = reacts.length;
     const median = m ? clamp(m % 2 ? reacts[(m - 1) / 2] : (reacts[m / 2 - 1] + reacts[m / 2]) / 2, 0.35, 1.2) : null;
-    const knock = ev.find(e => e.type === 'knock' && num(e.t)) || null;
-    const queue = hush.map(e => ({ t: e.t, k: e.type === 'tap' ? 'tap' : 'hush', e }));
+    const knock = ev.find(e => kindOf(e) === 'knock' && num(e.t)) || null;
+    const queue = hush.map(e => ({ t: e.t, k: e.pest === 'tap' ? 'tap' : 'hush', e }));
     if (knock) queue.push({ t: knock.t, k: 'knock', e: knock });
     queue.sort((a, b) => a.t - b.t);
     return { ptr, gest, median, knock, queue, n: taps.length + (knock && knock.result === 'hushed' ? 1 : 0) };
@@ -1292,7 +1298,7 @@ function mountBurial(stage, api) {
   let K = null, hold = null, knockUsed = false;
   let ending = false, endClock = 0, doneSent = false;
   let hot = null;
-  const visits = Array(8).fill(0);
+  const visits = Array(8).fill(0), marksOn = Array(8).fill(0);
   const said = {}, lineQ = [];
   let lineT = -9;
   function say(key) { if (said[key]) return; said[key] = true; lineQ.push(LINES[key]); }
@@ -1325,8 +1331,8 @@ function mountBurial(stage, api) {
     tap.alive = false;
     if (tap.beat3) {                         // heard: unhushed and on beat three
       heard++;
-      const n = heard - 1, x = tap.board * 120 + 12 + (n % 10) * 9;
-      el('path', { class: 'gm-tick', d: `M${x} ${CEIL + 30}L${x + 4} ${CEIL + 18}` }, marks);
+      const n = (tap.ticks = (marksOn[tap.board] = (marksOn[tap.board] || 0) + 1)) - 1, x = tap.board * 120 + 12 + (n % 10) * 9;
+      if (n < 10) el('path', { class: 'gm-tick', d: `M${x} ${CEIL + 30}L${x + 4} ${CEIL + 18}` }, marks);   // a board holds ten
       say('hand'); say('heard');               // the learn lines keep their order
       fadeOut(tap.node, 0.6);
       if (heard === 3 && !broke) breakRecording();
@@ -1604,6 +1610,9 @@ function mountBurial(stage, api) {
   svg.addEventListener('pointerleave', onLeave);
   svg.addEventListener('contextmenu', noMenu);
 
+  // read-only state for tests
+  root.__mirror = () => ({ T, heard, hushed: hushedN, broke, knock: knockState, lag, ready, synthetic, free, hand, taps: taps.map(t => ({ b: t.board, born: +t.born.toFixed(2), beat3: t.beat3, alive: t.alive })), stillUntil, ending });
+  loadGhost();
   raf = requestAnimationFrame(frame);
   return () => {
     dead = true;
