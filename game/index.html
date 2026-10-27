@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A Sojourn of Some Weeks</title>
+<meta name="description" content="A small game after Edgar Allan Poe’s “The Fall of the House of Usher”.">
+<meta name="theme-color" content="#f2eee5">
+<link rel="preload" href="fonts/im-fell-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/im-fell-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 9L8 3l6 6z' fill='%2329272a'/%3E%3Cpath d='M2 10l6 6 6-6z' fill='%23625d5a'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="engine/main.js"></script>
+</head>
+<body>
+<main class="frame" id="frame">
+  <header class="running">
+    <span>A Sojourn of Some Weeks</span>
+    <span id="running-chapter"></span>
+  </header>
+  <div class="stage" id="stage">
+    <svg id="map" class="map" viewBox="0 0 960 640" role="img" aria-label="The House of Usher in cutaway, standing over its reflection in a black tarn"></svg>
+    <div id="game" class="game" hidden>
+      <div id="game-stage" class="game-stage"></div>
+      <svg class="game-frame" viewBox="0 0 960 640" preserveAspectRatio="none" aria-hidden="true"><rect class="frame-a" x="8" y="8" width="944" height="624"/><rect class="frame-b" x="14" y="14" width="932" height="612"/></svg>
+    </div>
+    <div id="band" class="band" aria-live="polite"></div>
+    <div id="letter" class="letter" hidden></div>
+  </div>
+  <div id="band-dock" class="band-dock"></div>
+</main>
+<noscript><p class="noscript">This little book needs JavaScript to turn its pages.</p></noscript>
+</body>
+</html>
