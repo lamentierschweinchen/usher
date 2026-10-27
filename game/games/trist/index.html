@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trist harness</title>
+<style>
+  @font-face{font-family:'IM Fell English';src:url(../../fonts/im-fell-normal.woff2) format('woff2');font-style:normal;font-display:swap}
+  @font-face{font-family:'IM Fell English';src:url(../../fonts/im-fell-italic.woff2) format('woff2');font-style:italic;font-display:swap}
+  :root{--paper:#f2eee5;--ink:#29272a;--muted:#625d5a;--rule:#cbc3b8;--red:#7a3939;--serif:'IM Fell English',Georgia,serif}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif)}
+  main{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 16px}
+  .box{position:relative;width:min(calc(100vw - 32px),calc((100vh - 64px) * 1.5));aspect-ratio:3/2}
+  .stage{position:absolute;inset:0;container-type:inline-size;background:var(--paper)}
+  .frame{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .frame rect{fill:none;stroke:var(--ink)}
+  .bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:15px;color:var(--muted)}
+  .bar button{font:inherit;color:var(--ink);background:none;border:1px solid var(--rule);padding:2px 10px;cursor:pointer}
+  #out{color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+  <div class="box">
+    <div class="stage" id="stage"></div>
+    <!-- stands in for the spine's double-rule frame -->
+    <svg class="frame" viewBox="0 0 960 640" aria-hidden="true">
+      <rect x="8" y="8" width="944" height="624" style="stroke-width:1.5"/>
+      <rect x="14" y="14" width="932" height="612" style="stroke-width:.6"/>
+    </svg>
+  </div>
+  <div class="bar">
+    <button id="again" type="button">Mount again</button>
+    <label><input type="checkbox" id="rm"> reduced motion</label>
+    <span id="out">playing…</span>
+  </div>
+</main>
+<script type="module">
+  import game from './game.js';
+  const stage = document.getElementById('stage'), out = document.getElementById('out');
+  const rm = document.getElementById('rm');
+  rm.checked = matchMedia('(prefers-reduced-motion: reduce)').matches || /[?&]rm=1/.test(location.search);
+  let cleanup = null;
+  window.tristLog = [];
+  function start() {
+    if (cleanup) cleanup();
+    stage.replaceChildren();
+    const flags = {};
+    let calls = 0;
+    out.textContent = 'playing…';
+    const api = {
+      state: Object.freeze({}),
+      reducedMotion: rm.checked,
+      setFlag(k, v) { flags[k] = v; window.tristLog.push(['setFlag', k, v]); },
+      done(r) {
+        calls++;
+        window.tristLog.push(['done', r, calls]);
+        console.log('trist done', r, flags, 'calls:', calls);
+        out.textContent = `done ×${calls} · ${JSON.stringify(r.score)} · “${r.note}” · flags ${JSON.stringify(flags)}`;
+      },
+    };
+    cleanup = game.mount(stage, api);
+  }
+  document.getElementById('again').onclick = start;
+  rm.onchange = start;
+  start();
+</script>
+</body>
+</html>
