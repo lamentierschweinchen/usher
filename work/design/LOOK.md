@@ -83,7 +83,7 @@ A black stage with a lace-edged round hole (`C.irisD`) closes on the room (0.7 s
 
 ## 9. Red, exactly
 
-Only: the tarn's truths and fissure; one truth per mini-game (the studio's *tap.*, the Trist's upside-down *crack.* and Madeline's heart, the lid's sliver); the flight's blood-red moon [u50]; the confession's *say, rather:*; the changed word in the title's reflection (*Burial*). Never UI, hovers, touch states, eyes, blood, the title itself, or any light. It is the one colour on the glass, not behind it.
+Only: the tarn's truths and fissure; one truth per mini-game (the studio's *tap.*, the Trist's upside-down *crack.* and Madeline's heart, the lid's sliver); the flight's blood-red moon [u50]; the confession's *say, rather:*; the changed word in the title's reflection, *A Burial of Some Weeks* (confirmed: Lukas picked the board that has it). Never UI, hovers, touch states, eyes, blood, the title itself, or any light. It is the one colour on the glass, not behind it.
 
 ## 10. For builders
 

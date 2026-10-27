@@ -289,11 +289,20 @@ export function door(kind = 'plank', { x = 0, y = 0, w = 90, h = 130, planks = 6
       `<circle cx="${r1(x + w * .78)}" cy="${r1(y + h * .55)}" r="${r1(w * .08)}" style="fill:none;stroke:#c98a52;stroke-width:1.6"/>`, 'class="sh-door sh-door-iron"');
   }
   // ebony: two tall carved panels that "threw slowly back" [u49]
-  const half = w / 2, sx = Math.max(.02, 1 - open);
+  // open 0–1 swings each leaf back on its outer hinge (to ~83°): the free edge comes in and, being farther, shortens.
+  const half = w / 2, th = Math.max(0, Math.min(1, open)) * 1.45, c = Math.cos(th), sn = Math.sin(th), fw = half - .5, shrink = .14 * sn;
   const leaf = (side) => {
-    let holes = ''; for (let yy = y + 18; yy < y + h - 12; yy += 26) { const cx = side < 0 ? x + half * .5 : x + half * 1.5; holes += circ(cx, yy, 3.2) + circ(cx - 4, yy + 4, 1.6) + circ(cx + 4, yy + 4, 1.6) + circ(cx, yy + 8, 1.6); }
-    const ox = side < 0 ? x : x + w;
-    return `<g transform="translate(${ox} 0) scale(${r1(sx * 100) / 100} 1) translate(${-ox} 0)"><path fill-rule="evenodd" d="M${side < 0 ? x : x + half + .5} ${y + h}V${y}H${side < 0 ? x + half - .5 : x + w}V${y + h}Z${holes}"/></g>`;
+    const hx = side < 0 ? x : x + w, dir = side < 0 ? 1 : -1;
+    const P = (u, v) => [hx + dir * u * fw * c, y + h * (v + u * shrink * (1 - 2 * v))];   // u across the leaf, v down it
+    const q = [P(0, 0), P(1, 0), P(1, 1), P(0, 1)];
+    let d = `M${q.map(p => r1(p[0]) + ' ' + r1(p[1])).join('L')}Z`;
+    if (c > .08) for (let yy = y + 18; yy < y + h - 12; yy += 26) {
+      for (const [du, dy, rr] of [[0, 0, 3.2], [-4, 4, 1.6], [4, 4, 1.6], [0, 8, 1.6]]) {
+        const u = (half * .5 + dir * du * (side < 0 ? 1 : -1) * (side < 0 ? 1 : 1)) / fw, [ex, ey] = P(u, (yy + dy - y) / h), rx = Math.max(.3, rr * c), ry = rr * (1 - shrink * u);
+        d += `M${r1(ex - rx)} ${r1(ey)}a${r1(rx)} ${r1(ry)} 0 1 0 ${r1(2 * rx)} 0a${r1(rx)} ${r1(ry)} 0 1 0 ${r1(-2 * rx)} 0`;
+      }
+    }
+    return `<path fill-rule="evenodd" d="${d}"/>`;
   };
   return g(`<path d="M${x - gap} ${y + h}V${y - gap}H${x + w + gap}V${y + h}Z" ${lit(light, fallback)}/>${leaf(-1)}${leaf(1)}${scallops(x - gap, x + w + gap, y - gap, 2.4, 7)}`, 'class="sh-door sh-door-ebony"');
 }
@@ -311,10 +320,26 @@ export function drape(x, y, w, h, { side = 'left', tie = .5 } = {}) {
 }
 
 /* ---------- figures: feet at 0,0, 40 tall, facing right ---------- */
+// Hair "of a more than web-like softness", that "floated rather than fell" [u09]: S-curved strands of
+// uneven length and weight drifting up and back, finer wisps between them, a few loose rings.
 function hair(cx, cy, { n = 13, from = PI * .55, to = PI * 1.6, r = 3, len = [6, 10.5], w = 1.2, seed = 5, rings = [] } = {}) {
   const R = rng(seed); let s = ''; const m = Math.max(6, Math.round(n * (LACE < 1 ? .75 : 1)));
-  for (let k = 0; k < m; k++) { const a = from + k * (to - from) / (m - 1); s += curl(cx + Math.cos(a) * r, cy + Math.sin(a) * r, a + (R() - .5) * .3, len[0] + R() * (len[1] - len[0]), (k % 2 ? 1 : -1) * (1.1 + R() * .6), w, .25, 14); }
-  for (const [x, y, rr] of rings) s += `<circle cx="${x}" cy="${y}" r="${rr || .9}" style="fill:none;stroke:currentColor;stroke-width:${r1((rr || .9) * .6)}"/>`;
+  const strand = (a, l, k, ww, rr) => {
+    const x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr;
+    const head = a + (-PI / 2 - a) * .12 + (R() - .5) * .35;          // drift a little upward: it floats
+    return `<path d="${taper(walk(x, y, head, l, -k * .22, k, 18), ww, .22)}"/>`;
+  };
+  for (let k = 0; k < m; k++) {
+    const a = from + (k + .5 + (R() - .5) * .7) * (to - from) / m;
+    const l = len[0] + R() * (len[1] - len[0]), dir = R() < .62 ? (k % 2 ? 1 : -1) : (k % 2 ? -1 : 1);
+    s += strand(a, l, dir * (.8 + R() * .7) * 9 / Math.max(6, l), w * (.75 + R() * .4), r * (.75 + R() * .35));
+  }
+  const wisps = Math.round(m * .7 * Math.max(LACE, .5));
+  for (let k = 0; k < wisps; k++) {
+    const a = from + R() * (to - from), l = (len[0] + R() * (len[1] - len[0])) * (1.15 + R() * .35);
+    s += strand(a, l, (R() < .5 ? -1 : 1) * (.5 + R() * .5) * 9 / Math.max(6, l), w * .42, r * (.9 + R() * .3));
+  }
+  for (const [x, y, rr] of rings) s += `<circle cx="${x}" cy="${y}" r="${rr || .9}" style="fill:none;stroke:currentColor;stroke-width:${r1((rr || .9) * .5)}"/>`;
   return s;
 }
 const FIG = {
@@ -327,7 +352,7 @@ const FIG = {
   roderick: { faces: 1, h: 46, hinges: { arm: [2.4, -27] }, draw: (o) => {
     if (o.pose === 'sit') return `<path d="M-3.4-21C-5.8-14-6.8-6-6.6 0H6C5.6-7 4.4-14 2.6-21Z"/><path d="M2-4.8C11-5.4 20-5.2 28-3.6L29.8-1.8C30.6-.4 29.6.4 28.4 0H2Z"/>
 <g class="sh-arm" data-hinge="1.6 -17"><path d="M1.6-18C6-15.6 10-14.8 13.8-16.4L14.2-15C10.2-12.6 5.6-12.6.6-14.6Z"/></g>
-<path d="M-2.4-21.6C-3.6-23-4-25.6-3.2-27.6C-2.2-30 .6-30.6 2.4-29.4C3.4-28.6 3.6-27.4 3.4-26.6L4.9-25.1 3.6-24.6C3.6-23 3-22 1.6-21.6Z"/>${hair(-.6, -26.2, { rings: [[-7, -28], [-6, -32.5], [-2.6, -34.4], [-8.2, -24.4], [1.6, -34]] })}`;
+<path d="M-2.4-21.6C-3.6-23-4-25.6-3.2-27.6C-2.2-30 .6-30.6 2.4-29.4C3.4-28.6 3.6-27.4 3.4-26.6L4.9-25.1 3.6-24.6C3.6-23 3-22 1.6-21.6Z"/>${hair(-.6, -26.2, { n: 15, w: 1.35, rings: [[-7, -28], [-6, -32.5], [-2.6, -34.4], [-8.2, -24.4], [1.6, -34]] })}`;
     if (o.pose === 'recline') { // full length on a chaise, an arm across his eyes; 58 long, head at left
       return `<g transform="scale(.25) translate(-310 -452)"><path d="M206 420C224 414 244 420 268 428C304 436 352 440 402 440C414 440 422 446 416 452H202C192 444 194 428 206 420Z"/><path d="M246 452C252 466 268 474 296 472C326 474 354 466 374 452Z"/>${scallops(256, 368, 470, 2.6, 7)}<path d="M402 438c6-6 14-8 22-6c2 2 0 4-2 4c-6 0-12 3-16 6z"/><path d="M196 418C190 410 190 398 198 392C204 388 212 388 216 392L222 386L222 393C226 398 226 406 222 412C218 418 206 422 196 418Z"/><g class="sh-arm" data-hinge="226 420"><path d="M222 424C232 414 236 402 230 392C226 386 218 384 210 386L208 392C214 392 220 394 222 400C224 408 220 414 214 420Z"/></g>${hair(205, 404, { n: 26, from: PI * .38, to: PI * 1.58, r: 10, len: [26, 50], w: 3.6, seed: 9, rings: [[160, 396, 2.4], [166, 372, 2], [180, 356, 2.6], [204, 350, 2], [158, 420, 2], [226, 356, 1.8], [150, 404, 1.6]] })}</g>`;
     }
@@ -335,9 +360,11 @@ const FIG = {
 <g class="sh-arm" data-hinge="2.6 -28"><path d="M2.4-29C6-26 7.8-21.4 7.6-16.6C8.6-15.6 8.6-14.2 7.4-13.8C6.4-14.6 5.8-15.6 6-16.8C5.8-21 4.2-24.4 1.2-27Z"/>${curl(7.2, -14.2, PI / 2 + .3, 3.4, 1.2, 1, .25, 8)}</g>
 <path d="M-.9-31C-1.7-32.2-2.8-33.4-3-35.8C-3.3-39.6-1.4-42.2 1.4-42C3.8-41.8 4.9-40 4.5-38L4.7-36.6 6.1-35 4.5-34.5C4.7-33.4 4.2-32.6 3.3-32.4L3.2-31.6C2.6-30.8 1.4-30.5.2-30.6Z"/>${hair(.4, -37.4, { n: 19, from: PI * .45, to: PI * 1.75, r: 4, len: [8, 15], w: .95, rings: [[-9, -39, .8], [-7.4, -45, 1], [-2, -48, .8], [-10.6, -33.4, .9], [4, -47, .7], [-11, -44, .6]] })}`; } },
   madeline: { faces: -1, h: 44, gauze: true, draw: (o) => {
-    const hx = o.pose === 'lie' ? -9 : -1.6, hy = o.pose === 'lie' ? -9.4 : -30.4;
+    const hx = o.pose === 'lie' ? -10.4 : -1.6, hy = o.pose === 'lie' ? -8.6 : -30.4;
     const heart = o.heart ? `<path d="M${hx} ${hy}c0-1.4 1.8-2 2.4-.6c.6-1.4 2.4-.8 2.4.6c0 1.4-2.4 2.8-2.4 2.8s-2.4-1.4-2.4-2.8z" style="fill:var(--sh-red,#e0392b)"/>` : '';
-    if (o.pose === 'lie') return `<path d="M-17-6C-8-8.6 6-8 16-6C20-5 22-3.4 22-1.4C22 0 21 .6 19 .6H-17C-19.4.6-20-5-17-6Z"/><path d="M-1-8.2c2-1.6 5-1.6 6 0z"/><circle cx="-21" cy="-3.6" r="3.4"/>${hair(-21, -3.6, { n: 9, from: PI * .7, to: PI * 1.3, r: 3, len: [5, 9], w: 1, seed: 6 })}${heart}`;
+    // same footprint as before (x −24.4…22, top ≈ −9), so she still fits the coffins builders have sized
+    if (o.pose === 'lie') return `<g transform="matrix(.879 0 0 1 -2.25 0)"><path d="M-24.4 0C-25.2-2.6-24.4-6.4-21.6-7.6C-20.4-8.2-19.2-8-18.6-7.4L-17.2-9.6-16.9-7.9-16.5-7.6-16.6-6.9-16.2-6.6C-16-6.2-15.4-5.8-14.6-5.8C-12.6-6.4-11-7.8-8.6-8C-7.4-9.4-4.6-9.6-3.4-8.6C-1-7.6 2-7.2 5-7.6C8-8 10.4-7.4 13-6.6C15.6-6 18.2-6.2 19.6-7.2L21.2-9.6 22.4-9.2C23.4-7 24.2-4 25-2.2C25.8-1 26.8-.4 27.6 0Z"/>${scallops(-13, 26, 0, .7, 1.9)}
+${[[PI - .3, 8, -.6], [PI - .6, 10, .7], [PI - .9, 11, -.5], [PI - 1.15, 9, .8], [PI - 1.35, 12, -.4]].map(([a, l, k]) => `<path d="${taper(walk(-23.2, -2.6, a, l, -k * .2, k, 16), 1.2, .2)}"/>`).join('')}${heart}</g>`;
     return `<path d="M-1.4-43.2C-3.8-43-4.8-40.6-4.2-38.2C-4.6-37-5.4-35.6-5.6-33.6C-6.6-27-7-17-7.6-8C-8-4-8.4-1-8.8 0H4C10 0 18-.2 25 .7C18-1.6 10-2.6 5.6-5C4-12 3.6-22 3.2-30C3-33 2.6-35 1.8-36.6C2.4-39.6 1.2-43.2-1.4-43.2Z"/><path d="M1.4-40.4C4.2-36.4 5-30 4.2-23.6L3-23.8C3.4-30 2.8-35 .4-38.4Z"/>${heart}`; } },
   valet: { faces: -1, h: 40, hinges: { arm: [-2.6, -27] }, draw: () =>
     `<path d="M-1.8-15L-2.6-2.2-3.4 0H-1.7L-.6-15ZM1-15L2.2-2.6 1.9 0H3.3L2.6-15Z"/>
@@ -356,14 +383,23 @@ const FIG = {
 <path d="M-5-29C-7-24-7-18-6-12C-8-8-9.2-5-9.4-2.6L-6.6-3.6C-4.6-7.6-2.2-11.4-1-13H4C5.2-18 6-24 4-29C2-31-3-31-5-29Z"/>
 <g class="sh-arm" data-hinge="2.6 -26"><path d="M3-27C7-25 9.4-22 11.4-20.6L11-19.4C8.4-20.2 5.4-22 2.4-24Z"/><path d="M11.2-20.4C14-18 17-17 20-17.2" style="fill:none;stroke:currentColor;stroke-width:.6"/></g>
 <path d="M.6-29.4C-.6-31-.6-34 1.4-35.2C3.6-36.4 6-35 6.4-33L7.8-31.4 6.2-31C6.4-29.6 5-28.4 3.2-28.6Z"/>${curl(-.2, -33.4, PI + .3, 3.6, .9, 1, .2, 10)}${curl(.2, -31.6, PI - .2, 3.2, -.9, 1, .2, 10)}` },
-  horse: { faces: 1, h: 41, draw: () => {
-    const leg = (x, y, bend) => `<path d="${taper(walk(x, y, PI / 2 + bend, 13.4, -bend * .05, bend * .3, 12), 2.8, 1.5)}"/>`;
-    let mane = ''; for (let t = .1; t < .95; t += LACE < 1 ? .2 : .12) { const x = 9 + 8 * t, y = -25 - 13 * t; mane += curl(x, y, PI + .9, 4.4, -1.1, 1.2, .25, 10); }
-    return `<path d="M-18-24C-12-27 4-27 12-25.4C16-24.4 18-20 17-16.4C16-13.4 12-12.4 6-12.6H-10C-16-12.4-20-15-20.6-19C-20.8-21.6-20-23.2-18-24Z"/>
-<path d="M8.6-25C11-30.4 13.6-35.2 16.8-38.4L17.8-41.2 19.4-38.8C22-37.6 25.6-35.6 28.4-32.2C29.6-30.6 29-29 27.2-29.2C24.4-29.6 22-30.2 20.4-30.4C18.6-27.2 16.6-23 15-19.8Z"/>
-<circle cx="21.6" cy="-35.4" r=".7" style="fill:var(--lit,#f7d894)"/>${leg(-15, -14, .08)}${leg(-10.6, -13, -.12)}${leg(8.6, -13, .1)}${leg(13, -14, -.06)}
-<path d="M-17.2 0h3.8v-1.4h-3.4zM-11.4 0h3.6v-1.4h-3.4zM7.8 0h3.6v-1.4h-3.4zM13.2 0h3.6v-1.4h-3.4z"/>
-${curl(-19.6, -22, PI + .5, 16, -.24, 3.2, .4, 20)}${curl(-19.8, -20.6, PI + 1, 14, .3, 2.4, .3, 18)}${curl(-19.4, -19, PI + 1.3, 11, -.5, 1.6, .3, 16)}${mane}` } },
+  horse: { faces: 1, h: 43, draw: () => {
+    const smooth = (pts, n = 6) => { const out = []; for (let i = 0; i < pts.length - 1; i++) { const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+      for (let j = 0; j < n; j++) { const t = j / n, t2 = t * t, t3 = t2 * t; out.push([0, 1].map(c => .5 * (2 * p1[c] + (-p0[c] + p2[c]) * t + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t2 + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t3))); } }
+      out.push(pts[pts.length - 1]); return out; };
+    const leg = pts => `<path d="${taper(smooth(pts), 3.6, 1.5)}"/>`;
+    const hoof = x => `<path d="M${r1(x - 1.6)} 0L${r1(x - 1.1)}-1.8H${r1(x + 1.3)}L${r1(x + 2)} 0Z"/>`;
+    let mane = ''; const steps = LACE < 1 ? 5 : 8;
+    for (let i = 0; i <= steps; i++) { const t = i / steps, x = 11.4 + 7.4 * t, y = -31 - 9.4 * t; mane += curl(x - .6, y + .4, PI * .82 + t * .25, 4.6 + (1 - t) * 2.4, i % 2 ? -1.1 : -.8, 1.3, .22, 12); }
+    const sweep = walk(-19.4, -24.6, PI * .86, 15, .02, -.1, 20);
+    let tail = `<path d="${taper(sweep, 5.4, 2.2)}"/>`; const end = sweep[sweep.length - 1], mid = sweep[12];
+    [[end, PI * .62, 9, -.5, 2], [end, PI * .72, 11, .45, 1.6], [end, PI * .55, 7, .7, 1.4], [mid, PI * .78, 9, -.4, 1.4], [mid, PI * .66, 8, .6, 1.1]].slice(0, LACE < 1 ? 3 : 5)
+      .forEach(([p0, a, l, k, ww]) => (tail += `<path d="${taper(walk(p0[0], p0[1], a, l, -k * .3, k, 18), ww, .25)}"/>`));
+    return `<path d="M-17-26.5C-12-28.4-2-27.6 5-27.8C8-28 10-29 11.6-31C13.6-34.6 16-38.4 19-40.6L19.6-43.4 21-40.8C23-40.2 25-38.6 27.4-35.2C28.6-33.6 29.4-32 28.8-30.8C28.2-29.8 26.8-29.8 25.6-30.4C23.6-31.4 21.8-32.2 20.4-32C18.4-29.6 17-26 15.6-22.4C15-19 14-16.4 11.6-15C6-13.6-6-13.8-11-14.4C-15-15-18.6-17-19.6-20.4C-20.4-23-19.4-25.4-17-26.5Z"/>
+<circle cx="23.2" cy="-36.6" r=".6" style="fill:var(--lit,#f7d894)"/><path d="M26.6-31.8l1.2-.2" style="stroke:var(--lit,#f7d894);stroke-width:.4;opacity:.7"/>
+${leg([[10.6, -16], [11.6, -8.6], [11.4, -2.6], [12.2, -.6]])}${leg([[7.4, -15], [8.6, -8.4], [8.4, -2.6], [9, -.6]])}
+${leg([[-15.4, -18], [-17.6, -8.4], [-16.6, -2.6], [-15.8, -.6]])}${leg([[-11.4, -15.6], [-13.4, -7.8], [-12.4, -2.4], [-11.6, -.6]])}
+${hoof(12.4)}${hoof(9.2)}${hoof(-15.6)}${hoof(-11.4)}${tail}${mane}${curl(20.6, -40.4, -.3, 4.6, .9, 1.2, .2, 10)}` } },
   ethelred: { faces: 1, h: 46, hinges: { arm: [3, -31] }, draw: (o) => {
     let spikes = ''; for (let k = 0; k < 8; k++) { const a = k * PI / 4, cx = 1.4, cy = -53.6; spikes += `M${r1(cx + Math.cos(a - .3) * 2.4)} ${r1(cy + Math.sin(a - .3) * 2.4)}L${r1(cx + Math.cos(a) * 4.6)} ${r1(cy + Math.sin(a) * 4.6)}L${r1(cx + Math.cos(a + .3) * 2.4)} ${r1(cy + Math.sin(a + .3) * 2.4)}Z`; }
     let plume = ''; const R = rng(4); const m = LACE < 1 ? 5 : 8; for (let k = 0; k < m; k++) plume += curl(-.4 + k * .3, -43, -PI / 2 - 1.5 + k * (1.3 / (m - 1)), 8 + R() * 5, (k % 2 ? 1 : -1) * (.5 + R() * .4), 1.6, .3, 18);
