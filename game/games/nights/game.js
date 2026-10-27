@@ -1,8 +1,11 @@
 // V. The Seventh or Eighth Night: Papers, Please for the noises under your bed.
-// Spec: work/design/games/nights.md. Contract: work/design/CONTRACT.md.
-// Every colour, stroke and texture goes through CSS custom properties and classes
-// (--paper, --ink, --muted, --rule, --red, --g-nights-*); no colours in SVG attributes.
+// Spec: work/design/games/nights.md. Contract: work/design/CONTRACT.md. Look: work/design/LOOK.md (Shadow Theatre).
+// Cut from the shared library (../../shared/cuts.js); colour comes only from --sh-* tokens and this game's
+// own light gradients. The rules, timings, hit areas, flags and scores are unchanged from the ink build.
 
+import * as C from '../../shared/cuts.js';
+
+const PI = Math.PI;
 const NS = 'http://www.w3.org/2000/svg';
 
 // ---------- data ----------
@@ -100,44 +103,79 @@ function fails(s, id, night) {
   return out;
 }
 
-// ---------- art ----------
+// ---------- art: cut paper against the night's light (work/design/LOOK.md) ----------
+// Everything solid is black paper (fill="currentColor" under a wrapper set to --sh-cut). Colour is only
+// light: the night's deep blue in the bedroom, a candle's own lamp, violet on the stair, lamplight on the
+// slips and cards, moonlight on the back page. Red is only the truth, in the reveal.
 
-const ROOM = `
-<rect x="36" y="70" width="764" height="16" fill="url(#gn-hatch-h)"/>
-<path d="M36 86H80L36 124Z" fill="url(#gn-hatch)"/>
-<path d="M680 86H644L680 106Z" fill="url(#gn-hatch)"/>
-<path class="gn-ln" d="M36 70H800M36 86H924M36 70V186M680 86V108M800 70V86"/>
-<path class="gn-mass" d="M680 108L702 114V181L680 186Z"/>
-<g class="gn-drapes">
-  <path class="gn-ln gn-fine" d="M48 96H172"/>
-  <circle class="gn-mass" cx="48" cy="96" r="3"/><circle class="gn-mass" cx="172" cy="96" r="3"/>
-  <g class="gn-panel"><path class="gn-mass" d="M56 97C60 120 52 150 58 182L64 175 70 184 76 174 84 183C82 150 90 120 94 97Z"/>
-    <path class="gn-ln gn-fine gn-paperline" d="M70 104C72 130 66 156 70 172M82 104C84 128 80 150 82 166"/></g>
-  <g class="gn-panel gn-panel-b"><path class="gn-mass" d="M126 97C124 128 134 150 128 180L136 173 142 183 150 175 158 184C158 150 168 128 166 97Z"/>
-    <path class="gn-ln gn-fine gn-paperline" d="M140 104C138 130 146 152 142 170M154 104C154 128 160 150 156 168"/></g>
-</g>
-<path class="gn-ln gn-fine" d="M266 158H304M271 158V186M299 158V186M268 172H302"/>
-<path class="gn-wall" d="M282 158V145H288V158Z"/>
-<path class="gn-mass" d="M285 142C281.5 138 284 133 285.5 129C287.5 134 289 138 285 142Z"/>
-<path class="gn-ln" d="M338 98V186M522 98V186"/>
-<rect class="gn-mass" x="330" y="93" width="200" height="9"/>
-<path class="gn-ln gn-fine" d="M332 102q12.25 11 24.5 0t24.5 0t24.5 0t24.5 0t24.5 0t24.5 0t24.5 0t24.5 0"/>
-<path class="gn-wall" d="M340 104C342 124 360 134 352 150C348 158 343 164 341 176H347C352 160 368 136 356 104Z"/>
-<path class="gn-wall" d="M520 104C518 124 500 134 508 150C512 158 517 164 519 176H513C508 160 492 136 504 104Z"/>
-<rect class="gn-wall" x="346" y="149" width="168" height="15"/>
-<path class="gn-wall" d="M384 147C424 141 470 143 514 147V166C470 170 424 168 384 165Z"/>
-<ellipse class="gn-wall" cx="366" cy="145" rx="17" ry="7"/>
-<path class="gn-ln gn-fine" d="M404 152C434 150 462 151 500 153M414 159C444 158 472 159 506 161"/>
-<path class="gn-wall" d="M580 160V118Q610 84 640 118V160Z"/>
-<path class="gn-ln gn-fine" d="M610 97V160M580 132H640M572 161H648"/>
-<g class="gn-rain"><path class="gn-ln gn-fine" d="M587 120l4 8M598 108l4 8M620 106l4 8M630 118l4 8M586 140l4 8M598 137l4 8M618 138l4 8M628 144l4 8"/></g>
-<path class="gn-ln gn-fine" d="M806 150L924 180M818 153V186M842 159V186M866 165V186M890 171V186M914 177V186"/>
-<rect class="gn-band" x="36" y="186" width="888" height="46"/>
-<path class="gn-ln" d="M36 186H924"/>
-<g class="gn-onink">
-  <path class="gn-ln gn-fine" d="M682 232V211Q712 190 742 211V232"/>
-  <path class="gn-ln gn-fine" d="M800 186V192H820V199H840V206H860V213H880V220H900V227H918"/>
-</g>`;
+// Marks that sit on black paper (the beam, the floor band): their curls and words are light through holes.
+const ON_PAPER = new Set(['roof', 'below', 'archway', 'stair']);
+
+const cutG = (s, extra = '') => `<g fill="currentColor" style="color:var(--sh-cut)" ${extra}>${s}</g>`;
+const thread = (d, w = 1.2) => `<path d="${d}" style="fill:none;stroke:currentColor;stroke-width:${w};stroke-linecap:round"/>`;
+const rainD = (x, y, w, h, step) => {
+  let d = '';
+  for (let yy = y + 4, row = 0; yy < y + h - 6; yy += step, row++) {
+    for (let xx = x + 3 + (row % 2) * step * .5; xx < x + w - 2; xx += step) d += `M${xx.toFixed(1)} ${yy.toFixed(1)}l3 8`;
+  }
+  return `<path d="${d}"/>`;
+};
+
+// A lit card in a cut frame: black paper, a lit panel, lace along its long edges, a curl in each corner.
+function litCard(w, ht, i = 8, light = 'url(#sh-lamp)', cl = 13) {
+  const corners = [[i + 1.5, i + 1.5, PI / 4, 1], [w - i - 1.5, i + 1.5, PI * 3 / 4, -1],
+    [i + 1.5, ht - i - 1.5, -PI / 4, -1], [w - i - 1.5, ht - i - 1.5, -PI * 3 / 4, 1]];
+  return `<rect width="${w}" height="${ht}" style="fill:var(--sh-cut)"/><rect x="${i}" y="${i}" width="${w - 2 * i}" height="${ht - 2 * i}" fill="${light}"/>` +
+    cutG(C.scallops(i + 7, w - i - 7, i, 2.2, 7.2) + C.scallops(i + 7, w - i - 7, ht - i, 2.2, 7.2) +
+      corners.map(([x, y, a, k]) => C.curl(x, y, a, cl, k * 1.1, 2.6, .35, 16)).join(''));
+}
+// A black ribbon over the glass (the reveal): paper type on it, lamp hairlines, lace top and bottom.
+function ribbon(w, ht) {
+  return cutG(`<path d="M0 0H${w}V${ht}H0Z"/>` + C.scallops(6, w - 6, 0, 2.2, 7.4) + C.scallops(6, w - 6, ht, 2.2, 7.4)) +
+    `<path d="M10 5.5H${w - 10}M10 ${ht - 5.5}H${w - 10}" style="fill:none;stroke:var(--sh-lamp);stroke-width:.6;opacity:.4"/>`;
+}
+
+// The bedroom, the passage, the stair, and what lies beneath the floor. Built at mount, after autoLace().
+function roomArt() {
+  const light =
+    `<rect x="36" y="84" width="646" height="104" fill="url(#gn-room)"/>` +
+    `<rect x="680" y="84" width="248" height="104" style="fill:var(--lit-stair,url(#gn-pass))"/>` +
+    `<circle class="sh-flicker" cx="285" cy="138" r="92" fill="url(#gn-candle)"/>`;
+  const cut =
+    // beam, walls, and the floor with what lies beneath it
+    `<path d="M26 66H934V86H26ZM26 66H38V234H26ZM926 66H934V234H926ZM26 186H934V234H26Z"/>` +
+    C.fringe(40, 674, 86, { seed: 5, len: [3, 8], step: 5 }) + C.fringe(706, 922, 86, { seed: 6, len: [2, 6], step: 5.5 }) +
+    `<path d="M38 86H78L38 120Z"/>` + C.curl(39, 119, PI / 2 - .2, 8, -1.1, 2.2, .3, 12) +
+    `<path d="M676 86H646L676 104Z"/>` + C.curl(647, 87, PI / 2 + .3, 7, 1.1, 2, .3, 12) +
+    // the door to the passage, ajar
+    `<path d="M673 86H686V108H673ZM680 108L702 114V181L680 186Z"/>` +
+    // draperies on their rod; each panel sways in a draught
+    `<path d="M44 91h134v3H44z"/><circle cx="44" cy="92.5" r="3.2"/><circle cx="178" cy="92.5" r="3.2"/>` +
+    `<g class="gn-panel"><g transform="translate(52 94) scale(.5)">${C.drape(0, 0, 88, 182, { side: 'left', tie: .42 })}</g></g>` +
+    `<g class="gn-panel gn-panel-b"><g transform="translate(126 94) scale(.5)">${C.drape(0, 0, 88, 182, { side: 'right', tie: .42 })}</g></g>` +
+    // a night table and its candle; the flame is light
+    `<path d="M262 155h46v4h-46zM267 159h3.4l-2.6 27h-3zM303 159h-3.4l2.6 27h3zM268 171h34v2.6h-34zM277 155v-2.6h16v2.6zM283.4 152.4v-9h3.2v9zM279.5 143.4v-2h11v2zM283.2 141.4v-11h3.6v11z"/>` +
+    C.curl(262, 157, PI - .2, 9, -1.2, 2.2, .3, 12) + C.curl(308, 157, .2, 9, 1.2, 2.2, .3, 12) +
+    `<path d="M285 128.4c-3.2-3.6-1.6-8.4 0-12.6c1.6 4.2 3.2 9 0 12.6z" style="fill:var(--lit,#fff0c2)"/>` +
+    // the bed: the cut library's canopy bed (shared/cuts.js rooms()), cut again at this scale
+    `<g transform="translate(338 186) scale(2.2) translate(-321 -278)"><path d="M325 238h3v40h-3zM397 238h3v40h-3zM321 234h83v4.5h-83zM328 252h4v14h-4zM330 262h68v7h-68zM333 262c2-6 12-6 13 0z"/><circle cx="326.5" cy="232.5" r="2"/><circle cx="398.5" cy="232.5" r="2"/><path d="M328 238C333 248 326 258 331 268L335 268C331.5 258 338 249 333 238ZM397 238C392 248 399 258 394 268L390 268C393.5 258 387 249 392 238Z"/>${C.scallops(331, 395, 239, 1.6, 4.6)}${C.scallops(332, 397, 269.5, 1.2, 3.6)}</g>` +
+    // the window: a lancet onto the storm
+    C.lancet(582, 98, 56, 62, { light: '--gn-win', fallback: 'url(#gn-win)' }) +
+    `<path d="M574 159h72v4h-72z"/>` + C.curl(575, 162, PI / 2 + .3, 7, 1.1, 2, .3, 12) + C.curl(645, 162, PI / 2 - .3, 7, -1.1, 2, .3, 12) +
+    // the stair: newel, rail and balusters as cut thread
+    `<path d="M802 148h7v38h-7z"/>` + C.curl(805.5, 148.5, -PI / 2 - .1, 9, 1.2, 2.4, .3, 12) +
+    thread('M806 151L926 181', 2.6) + thread('M818 154V186M842 160V186M866 166V186M890 172V186M914 178V186', 1.3);
+  const holes =
+    `<path d="M38 186.7H926" style="fill:none;stroke:#a9bfe2;stroke-width:.8;opacity:.35"/>` +
+    `<path d="M684 232V213Q712 193 740 213V232Z" fill="url(#gn-hole)"/>` +                              // the archway, beneath
+    `<path d="M800 187H925V227H900V220H880V213H860V206H840V199H820V192H800Z" fill="url(#gn-hole)"/>` +   // the stair, going down
+    `<g class="gn-rain" clip-path="url(#gn-clip-win)">${rainD(582, 98, 56, 62, 11)}</g>`;
+  return light + cutG(cut, 'style="color:var(--sh-cut);--lit-fold:#a9bfe2"') + holes;
+}
+
+// A noise stirring: a little spray of curls.
+const markArt = () => C.curl(-10, 5, -PI / 2 - .75, 10, -1.3, 2.1, .3, 14) + C.curl(0, 6, -PI / 2, 12, 1.25, 2.3, .3, 14) +
+  C.curl(10, 5, -PI / 2 + .75, 10, 1.3, 2.1, .3, 14);
 
 // Her route, in red, drawn only in the reveal.
 const ROUTE = `
@@ -148,113 +186,110 @@ const ROUTE = `
 <text class="gn-t-snd gn-truth-low" x="712" y="221" text-anchor="middle">scrape.</text>
 <text class="gn-t-snd gn-truth-hi" x="836" y="140" text-anchor="middle">steps.</text>`;
 
-const DRAW = {
-  draperies: `<path class="gn-ln gn-fine" d="M138 54H196"/><circle class="gn-mass" cx="138" cy="54" r="2.5"/><circle class="gn-mass" cx="196" cy="54" r="2.5"/>
-    <path class="gn-mass" d="M142 55C145 78 138 100 144 126L149 120 153 127 157 119 161 125C159 98 165 76 166 55Z"/>
-    <path class="gn-mass" d="M170 55C172 80 180 100 176 124L181 118 185 126 189 119 193 124C192 98 194 78 193 55Z"/>
-    <path class="gn-ln gn-fine gn-paperline" d="M153 62C154 82 151 100 153 116M182 62C183 84 186 100 184 114"/>`,
-  storm: `<path class="gn-wall" d="M148 128V82Q168 54 188 82V128Z"/><path class="gn-ln gn-fine" d="M168 64V128M148 102H188"/>
-    <path class="gn-ln gn-fine" d="M152 86l4 8M160 76l4 8M174 78l4 8M180 88l4 8M153 108l4 8M160 112l4 8M174 106l4 8M180 114l4 8"/>
-    <path class="gn-ln gn-fine" d="M134 70q5 -6 10 0t10 0M182 58q5 -6 10 0"/>`,
-  roderick: `<path class="gn-mass" d="M167 64C161 80 157 106 152 130H184C179 106 174 80 171 64Z"/>
-    <ellipse class="gn-face" cx="169" cy="57" rx="5" ry="6.5"/>
-    <path class="gn-ln gn-hair" d="M162 54c-6-4-3-12 3-11c1-7 10-7 11-1c7-2 9 6 4 10M161 58c-5 1-7-4-4-7M177 57c5 1 6-4 3-7M165 44c-2-4 2-7 5-5"/>
-    <path class="gn-ln gn-fine" d="M163 80L149 88"/><path class="gn-wall" d="M142 88h9v11h-9z"/>
-    <path class="gn-ln gn-fine" d="M146.5 88v-4M138 92l-5-2M138 97l-5 2"/>`,
-  fancy: `<ellipse class="gn-wall" cx="168" cy="121" rx="26" ry="8"/>
-    <path class="gn-ln gn-fine gn-dots" d="M146 66q4.5 -8 9 0t9 0t9 0t9 0"/>
-    <path class="gn-ln gn-fine gn-dots" d="M150 79q4 -7 8 0t8 0t8 0t8 0"/>
-    <circle class="gn-ln gn-fine" cx="161" cy="106" r="2"/><circle class="gn-ln gn-fine" cx="156" cy="95" r="3.2"/>`,
-};
+// Each excuse's emblem, cut in black on its card (card-local units, right of the limits).
+function emblem(id) {
+  if (id === 'draperies') {
+    return cutG(`<path d="M134 50h62v2.6h-62z"/><circle cx="134" cy="51.3" r="2.6"/><circle cx="196" cy="51.3" r="2.6"/>` +
+      `<g transform="translate(137 53) scale(.42)">${C.drape(0, 0, 66, 176, { side: 'left', tie: .42 })}</g>` +
+      `<g transform="translate(166 53) scale(.42)">${C.drape(0, 0, 66, 176, { side: 'right', tie: .42 })}</g>`);
+  }
+  if (id === 'storm') {
+    return cutG(C.lancet(152, 60, 38, 64, { light: '--gn-win', fallback: 'url(#gn-win)' }) + `<path d="M146 123h50v4h-50z"/>` +
+      C.curl(140, 56, -.15, 20, .7, 2.2, .3, 20) + C.curl(162, 50, .05, 16, .8, 1.8, .3, 16)) +
+      `<g class="gn-rainlines" clip-path="url(#gn-clip-cardwin)">${rainD(152, 60, 38, 64, 9)}</g>`;
+  }
+  if (id === 'roderick') return cutG(C.figure('roderick', { x: 166, y: 130, scale: 1.62 }));
+  // fancy: a pillow, and what rises from it
+  let s = `<path d="M144 129c-5-1-5-8 1-9.4c12-2.4 34-2.4 46 0c6 1.4 6 8.4 1 9.4c-14 2-34 2-48 0z"/>` +
+    C.curl(145, 121, PI + .6, 6, -1.2, 1.8, .3, 10) + C.curl(191, 121, -.6, 6, 1.2, 1.8, .3, 10);
+  for (let k = 0; k < 5; k++) s += C.curl(160 + k * 4, 119, -PI / 2 + (k - 2) * .24, 46 + (k % 2) * 12, (k % 2 ? 1 : -1) * .3, 2.4, .3, 30);
+  return cutG(s + '<circle cx="146" cy="74" r="2.4"/><circle cx="192" cy="66" r="2"/><circle cx="170" cy="52" r="2.6"/>');
+}
+
+// Defs of this game's own light (the shared ones come from C.defs()).
+const DEFS = `<defs>
+<radialGradient id="gn-room" cx=".6" cy=".82" r=".72"><stop offset="0" stop-color="#bccbe6"/><stop offset=".45" stop-color="#7f97c4"/><stop offset="1" stop-color="#2f4a80"/></radialGradient>
+<radialGradient id="gn-pass" cx=".35" cy=".7" r=".85"><stop offset="0" stop-color="#9a80a8"/><stop offset="1" stop-color="#3e2c54"/></radialGradient>
+<radialGradient id="gn-candle"><stop offset="0" stop-color="#f7d894" stop-opacity=".55"/><stop offset=".5" stop-color="#e6a256" stop-opacity=".16"/><stop offset="1" stop-color="#e6a256" stop-opacity="0"/></radialGradient>
+<linearGradient id="gn-win" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1430"/><stop offset=".6" stop-color="#1a2c5a"/><stop offset="1" stop-color="#2f4a80"/></linearGradient>
+<linearGradient id="gn-hole" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a3b68"/><stop offset="1" stop-color="#241a34"/></linearGradient>
+<linearGradient id="gn-moon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e0f1"/><stop offset="1" stop-color="#a3b6da"/></linearGradient>
+<clipPath id="gn-clip-win"><path d="${C.lancetD(582, 98, 56, 62)}"/></clipPath>
+<clipPath id="gn-clip-cardwin"><path d="${C.lancetD(152, 60, 38, 64)}"/></clipPath>
+</defs>`;
 
 const CSS = `
 .g-nights{
-  --g-nights-ground:var(--paper); --g-nights-line:var(--ink); --g-nights-piece:var(--paper);
-  --g-nights-band:var(--ink); --g-nights-band-line:var(--paper); --g-nights-shadow:var(--rule);
-  --g-nights-hair:var(--rule); --g-nights-faint:var(--muted); --g-nights-stamp:var(--ink);
-  --g-nights-truth:var(--red); --g-nights-truth-low:color-mix(in srgb,var(--red),var(--paper) 35%);
-  --g-nights-w:2px; --g-nights-w-fine:1.1px; --g-nights-w-hatch:.8px;
+  --g-nights-moon:#c9d6ee;
   position:relative;width:100%;height:100%;overflow:hidden;
-  background:var(--g-nights-ground);color:var(--g-nights-line);font-family:var(--serif);
+  background:var(--sh-cut,#0b0809);color:var(--sh-paper,#ede2cb);font-family:var(--sh-serif,'IM Fell English',Georgia,serif);
   user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .g-nights svg{display:block;width:100%;height:100%}
 .g-nights .gn-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.g-nights text{font-family:var(--serif);fill:currentColor}
-.g-nights .gn-ln{fill:none;stroke:currentColor;stroke-width:var(--g-nights-w);stroke-linecap:round;stroke-linejoin:round}
-.g-nights .gn-fine{stroke-width:var(--g-nights-w-fine)}
-.g-nights .gn-hair{stroke-width:.6px}
-.g-nights .gn-mass{fill:currentColor}
-.g-nights .gn-wall{fill:var(--g-nights-ground);stroke:currentColor;stroke-width:var(--g-nights-w-fine);stroke-linejoin:round}
-.g-nights .gn-face{fill:var(--g-nights-piece);stroke:currentColor;stroke-width:var(--g-nights-w-fine)}
-.g-nights .gn-paperline{stroke:var(--g-nights-band-line);opacity:.5}
-.g-nights .gn-dots{stroke-dasharray:1.5 3.2}
-.g-nights .gn-band{fill:var(--g-nights-band)}
-.g-nights .gn-onink{color:var(--g-nights-band-line)}
-.g-nights .gn-pat{stroke:var(--g-nights-line);stroke-width:var(--g-nights-w-hatch);stroke-linecap:round}
-.g-nights .gn-flood{flood-color:var(--g-nights-shadow)}
-.g-nights .gn-piece{fill:var(--g-nights-piece);stroke:currentColor;stroke-width:1.5px}
-.g-nights .gn-hairrule{fill:none;stroke:var(--g-nights-hair);stroke-width:1px}
-.g-nights .gn-rulel{stroke:var(--g-nights-hair);stroke-width:1px}
-.g-nights .gn-blot{fill:var(--g-nights-line)}
-.g-nights .gn-dot{fill:var(--g-nights-line);stroke:var(--g-nights-line);stroke-width:1.5px;transition:fill .3s}
-.g-nights .gn-dot.spent{fill:none;stroke:var(--g-nights-hair)}
+.g-nights text{font-family:var(--sh-serif,'IM Fell English',Georgia,serif);fill:var(--sh-paper,#ede2cb)}
+/* type on lit paper is cut paper */
+.g-nights .gn-slip text,.g-nights .gn-card text,.g-nights .gn-back text,.g-nights .gn-t-boom{fill:var(--sh-cut,#0b0809)}
+.g-nights .gn-rulel{stroke:var(--sh-cut,#0b0809);stroke-width:1px;opacity:.5}
+.g-nights .gn-dot{fill:var(--sh-lamp);stroke:var(--sh-lamp);stroke-width:1.5px;transition:fill .3s}
+.g-nights .gn-dot.spent{fill:none;stroke-opacity:.4}
 /* type, in viewBox units */
-.g-nights .gn-t-line{font-size:24px;font-style:italic}
-.g-nights .gn-t-label{font-size:14px;letter-spacing:.14em;fill:var(--g-nights-faint)}
-.g-nights .gn-t-rule{font-size:18px;font-style:italic;fill:var(--g-nights-faint)}
+.g-nights .gn-t-line{font-size:26px;font-style:italic}
+.g-nights .gn-t-label{font-size:14px;letter-spacing:.16em;fill:var(--sh-lamp)}
+.g-nights .gn-t-rule{font-size:18px;font-style:italic;opacity:.75}
 .g-nights .gn-t-kind{font-size:50px;font-style:italic}
 .g-nights .gn-t-field{font-size:36px}
 .g-nights .gn-t-time{font-size:34px}
-.g-nights .gn-t-remark{font-size:22px;font-style:italic;fill:var(--g-nights-faint)}
-.g-nights .gn-t-snd{font-size:18px;font-style:italic}
+.g-nights .gn-t-remark{font-size:22px;font-style:italic;opacity:.72}
+.g-nights .gn-t-snd{font-size:21px;font-style:italic}
 .g-nights .gn-t-title{font-size:24px}
 .g-nights .gn-t-limit{font-size:17px}
 .g-nights .gn-t-back{font-size:23px;font-style:italic}
-.g-nights .gn-t-hint{font-size:16px;font-style:italic;fill:var(--g-nights-faint)}
+.g-nights .gn-t-hint{font-size:16px;font-style:italic;opacity:.7}
 .g-nights .gn-t-entry{font-size:18px}
-.g-nights .gn-t-stamp{font-size:40px;letter-spacing:.12em;fill:var(--g-nights-stamp)}
-.g-nights .gn-t-stampby{font-size:19px;font-style:italic;fill:var(--g-nights-stamp)}
+.g-nights .gn-slip .gn-t-stamp{font-size:38px;letter-spacing:.14em;fill:var(--sh-lamp)}
+.g-nights .gn-slip .gn-t-stampby{font-size:19px;font-style:italic;fill:var(--sh-paper)}
 .g-nights .gn-t-boom{font-size:42px;font-style:italic;letter-spacing:.04em}
-.g-nights .gn-t-inter{font-size:44px;font-style:italic;fill:var(--g-nights-band-line)}
-.g-nights .gn-t-interrule{font-size:22px;font-style:italic;fill:var(--g-nights-hair)}
+.g-nights .gn-t-inter{font-size:44px;font-style:italic;fill:var(--sh-lamp)}
+.g-nights .gn-t-interrule{font-size:22px;font-style:italic;opacity:.8}
 .g-nights .gn-t-borrowed{font-size:26px}
-.g-nights .gn-t-say{font-size:20px;font-style:italic;fill:var(--g-nights-truth)}
-.g-nights .gn-t-orig{font-size:26px;font-style:italic;fill:var(--g-nights-truth)}
+.g-nights .gn-t-say{font-size:20px;font-style:italic;fill:var(--sh-red)}
+.g-nights .gn-t-orig{font-size:26px;font-style:italic;fill:var(--sh-red)}
 .g-nights .gn-t-prompt{font-size:22px;font-style:italic}
-/* pieces */
+.g-nights .gn-t-score{font-size:17px;letter-spacing:.16em;fill:var(--sh-lamp)}
+/* marks: black paper on the lit rooms, light through holes on the black beam and band */
+.g-nights .gn-mark{color:var(--sh-cut)}
+.g-nights .gn-mark.gn-dark{color:var(--g-nights-moon)}
+.g-nights .gn-mark text,.g-nights .gn-sq{fill:currentColor}
+.g-nights .gn-mark .gn-sq{animation:gn-stir 1.1s ease-in-out infinite alternate}
+@keyframes gn-stir{from{opacity:.3}to{opacity:1}}
+/* touchables: shared .touch gives the lit edge; these say when it should show without a hover */
 .g-nights [data-act]{cursor:pointer}
 .g-nights [data-act]:focus{outline:none}
-.g-nights [data-act]:focus-visible .gn-focus{stroke:var(--g-nights-line);stroke-width:2px;stroke-dasharray:4 4}
+.g-nights [data-act]:focus-visible .touch,.g-nights.gn-armed .gn-slip.cur .touch,.g-nights .gn-card.up .touch,
+.g-nights .gn-back.beckon .touch{filter:url(#sh-rim)}
 .g-nights .gn-slip{transition:transform .62s cubic-bezier(.2,.7,.2,1),opacity .3s}
-.g-nights .gn-slip-rule{fill:none;stroke:var(--g-nights-hair);stroke-width:1px;transition:stroke .2s,stroke-width .2s}
-.g-nights.gn-armed .gn-slip.cur .gn-slip-rule{stroke:var(--g-nights-line);stroke-width:2px}
 .g-nights .gn-card{transition:transform .5s cubic-bezier(.2,.7,.2,1),opacity .4s}
 .g-nights .gn-lift{transition:transform .22s cubic-bezier(.2,.7,.2,1);transform-box:fill-box;transform-origin:50% 100%}
 .g-nights .gn-card.up .gn-lift{transform:translateY(-16px) rotate(-1.2deg)}
-.g-nights .gn-card.up .gn-card-edge{stroke-width:2.5px}
 .g-nights .gn-card.nudge .gn-lift{transform:translateY(-5px) rotate(1deg)}
 @media (hover:hover){.g-nights .gn-card:not(.up):hover .gn-lift{transform:translateY(-5px)}}
 .g-nights .gn-fv{transition:opacity .3s ease}
 .g-nights .gn-fv:not(.on){opacity:0}
 .g-nights .gn-imp{opacity:0}
-.g-nights .gn-imp.on{opacity:.9}
-.g-nights .gn-imp-box{fill:var(--g-nights-piece);fill-opacity:.55;stroke:var(--g-nights-stamp);stroke-width:4px}
-.g-nights .gn-imp-box2{fill:none;stroke:var(--g-nights-stamp);stroke-width:1.4px}
-.g-nights .gn-smudge{fill:var(--g-nights-line);opacity:0;transition:opacity .3s ease-out}
-.g-nights .gn-smudge.on{opacity:.2;transition:none}
-.g-nights .gn-mark .gn-sq{animation:gn-stir 1.1s ease-in-out infinite alternate}
-@keyframes gn-stir{from{opacity:.25}to{opacity:1}}
+.g-nights .gn-imp.on{opacity:1}
+.g-nights .gn-smudge{fill:var(--sh-cut);opacity:0;transition:opacity .3s ease-out}
+.g-nights .gn-smudge.on{opacity:.34;transition:none}
 .g-nights .gn-panel{transform-box:fill-box;transform-origin:50% 0}
 .g-nights .windy .gn-panel{animation:gn-sway 3.4s ease-in-out infinite alternate}
 .g-nights .windy .gn-panel-b{animation-duration:2.8s;animation-delay:-1.3s}
 @keyframes gn-sway{from{transform:rotate(-1.8deg)}to{transform:rotate(1.8deg)}}
 .g-nights .gn-rain{opacity:0;transition:opacity .6s}
 .g-nights .windy .gn-rain{opacity:1}
+.g-nights .gn-rain path,.g-nights .gn-rainlines path{fill:none;stroke:var(--g-nights-moon);stroke-width:1px;stroke-linecap:round;opacity:.75}
 .g-nights .gn-backbody{transform-box:fill-box;transform-origin:50% 100%;transition:transform .3s}
 .g-nights .gn-back.beckon .gn-backbody{animation:gn-beckon 1.3s ease-in-out infinite alternate}
 .g-nights.gn-rm .gn-back.beckon .gn-backbody{transform:translateY(-8px) rotate(-1deg)}
 @keyframes gn-beckon{from{transform:translateY(0)}to{transform:translateY(-9px) rotate(-1deg)}}
-.g-nights .gn-back.beckon .gn-back-edge{stroke-width:2.5px}
 .g-nights .gn-entry{opacity:0;transition:opacity .5s}
 .g-nights .gn-entry.on{opacity:1}
 .g-nights .gn-boom{opacity:1;transition:opacity .6s}
@@ -262,22 +297,41 @@ const CSS = `
 .g-nights .gn-fade{opacity:0;transition:opacity .6s}
 .g-nights .gn-nc{opacity:0;transition:opacity .3s}
 .g-nights .gn-nc.on{opacity:1}
+.g-nights .gn-nc .gn-nc-t{opacity:0;transition:opacity .16s}
+.g-nights .gn-nc.on .gn-nc-t{opacity:1;transition-delay:.16s}
+.g-nights .gn-nc-rule{fill:none;stroke:var(--sh-lamp);stroke-width:1px;opacity:.6}
 .g-nights .gn-route{opacity:0;transition:opacity 1.4s}
 .g-nights .gn-route.on{opacity:1}
-.g-nights .gn-route-low{fill:none;stroke:var(--g-nights-truth-low);stroke-width:2.6px;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:.1 7}
-.g-nights .gn-route-hi{fill:none;stroke:var(--g-nights-truth);stroke-width:2.6px;stroke-linecap:round;stroke-dasharray:.1 7}
-.g-nights .gn-route-dot{fill:var(--g-nights-truth)}
-.g-nights .gn-truth-low{fill:var(--g-nights-truth-low)}
-.g-nights .gn-truth-hi{fill:var(--g-nights-truth)}
+.g-nights .gn-route-low{fill:none;stroke:var(--sh-red);stroke-width:2.6px;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:.1 7;opacity:.8}
+.g-nights .gn-route-hi{fill:none;stroke:var(--sh-red);stroke-width:2.6px;stroke-linecap:round;stroke-dasharray:.1 7}
+.g-nights .gn-route-dot{fill:var(--sh-red)}
+.g-nights .gn-truth-low{fill:var(--sh-red);opacity:.85}
+.g-nights .gn-truth-hi{fill:var(--sh-red)}
 .g-nights .gn-rv-slip{opacity:0;transition:opacity .45s}
 .g-nights .gn-rv-slip.on{opacity:1}
 .g-nights .gn-rv-red{opacity:0;transition:opacity .6s}
 .g-nights .gn-rv-red.on{opacity:1}
-.g-nights .gn-strike{stroke:var(--g-nights-line);stroke-width:1.6px;stroke-linecap:round}
+.g-nights .gn-strike{stroke:var(--sh-paper);stroke-width:1.6px;stroke-linecap:round}
 .g-nights .gn-show{opacity:0;transition:opacity .6s}
 .g-nights .gn-show.on{opacity:1}
-.g-nights .gn-lamp{fill:var(--g-nights-band);opacity:0;transition:opacity .9s;pointer-events:none}
+.g-nights .gn-lamp{fill:var(--sh-cut);opacity:0;transition:opacity .9s;pointer-events:none}
 .g-nights .gn-lamp.on{opacity:.9}
+/* phones: the stage is ~.39 px a unit, so the type grows and the card emblems give it room */
+.g-nights.gn-phone .gn-emb{display:none}
+.g-nights.gn-phone .gn-t-line{font-size:30px}
+.g-nights.gn-phone .gn-t-label{font-size:20px;letter-spacing:.1em}
+.g-nights.gn-phone .gn-t-rule{font-size:22px}
+.g-nights.gn-phone .gn-t-remark{font-size:26px}
+.g-nights.gn-phone .gn-t-snd{font-size:28px}
+.g-nights.gn-phone .gn-t-title{font-size:29px}
+.g-nights.gn-phone .gn-t-limit{font-size:23px}
+.g-nights.gn-phone .gn-t-back{font-size:28px}
+.g-nights.gn-phone .gn-t-hint{font-size:22px}
+.g-nights.gn-phone .gn-t-borrowed,.g-nights.gn-phone .gn-t-orig{font-size:30px}
+.g-nights.gn-phone .gn-t-say{font-size:24px}
+.g-nights.gn-phone .gn-t-prompt{font-size:28px}
+.g-nights.gn-phone .gn-t-score{font-size:22px;letter-spacing:.1em}
+.g-nights.gn-phone .gn-t-interrule{font-size:28px}
 .g-nights.gn-rm *{transition:none!important;animation:none!important}
 `;
 
@@ -299,8 +353,9 @@ export default {
     };
 
     // --- scaffold
+    C.autoLace();          // lace density is decided at generation: phones and coarse pointers get about half
     const root = document.createElement('div');
-    root.className = 'g-nights' + (RM ? ' gn-rm' : '');
+    root.className = 'g-nights' + (RM ? ' gn-rm sh-still' : '');
     const style = document.createElement('style');
     style.textContent = CSS;
     root.appendChild(style);
@@ -311,27 +366,30 @@ export default {
     live.setAttribute('aria-live', 'polite');
     root.appendChild(live);
     stage.appendChild(root);
+    // phones: the stage is about .39 px a unit there, so type grows (see .gn-phone in CSS)
+    let PHONE = root.clientWidth > 0 && root.clientWidth < 620;
+    root.classList.toggle('gn-phone', PHONE);
 
-    h('defs', {}, svg).innerHTML = `
-      <pattern id="gn-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="gn-pat" x1="0" y1="0" x2="0" y2="5"/></pattern>
-      <pattern id="gn-hatch-h" width="9" height="4" patternUnits="userSpaceOnUse"><path class="gn-pat" d="M0 2h6.5"/></pattern>
-      <filter id="gn-cutout" x="-10%" y="-10%" width="125%" height="125%"><feOffset in="SourceAlpha" dx="2" dy="3" result="o"/><feFlood class="gn-flood"/><feComposite in2="o" operator="in" result="s"/><feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <filter id="gn-bleed" x="-40%" y="-40%" width="180%" height="180%"><feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="34" xChannelSelector="R" yChannelSelector="G"/></filter>`;
+    h('g', { class: 'gn-defs' }, svg).innerHTML = C.defs({ animate: false }) + DEFS;
 
     const L = {};
-    for (const n of ['room', 'marks', 'route', 'top', 'left', 'back', 'cards', 'slips', 'fx', 'reveal', 'nc', 'lamp']) {
+    for (const n of ['bg', 'room', 'marks', 'route', 'top', 'left', 'back', 'cards', 'slips', 'fx', 'reveal', 'nc', 'lamp', 'frame']) {
       L[n] = h('g', { class: 'gn-L-' + n }, svg);
     }
+    // the night's light above, the tarn's dark glass below the floor; the lace frame over everything
+    L.bg.innerHTML = C.backdrop('nights', { y: 0, h: 232, clouds: false, hills: false }) + C.glass('nights', { y: 232, h: 408 });
+    L.frame.innerHTML = C.frame();
 
-    // --- text fitting (squeeze, never overflow)
+    // --- text fitting (squeeze, never overflow); max may be [desktop, phone]
     const fits = new Map();
     function fit(el, max) {
       fits.set(el, max);
+      const m = Array.isArray(max) ? max[PHONE ? 1 : 0] : max;
       try {
         el.removeAttribute('textLength');
         el.removeAttribute('lengthAdjust');
-        if (el.getComputedTextLength() > max) {
-          el.setAttribute('textLength', max);
+        if (el.getComputedTextLength() > m) {
+          el.setAttribute('textLength', m);
           el.setAttribute('lengthAdjust', 'spacingAndGlyphs');
         }
       } catch (e) { /* not rendered yet */ }
@@ -347,7 +405,7 @@ export default {
 
     // --- room
     const room = h('g', { class: 'gn-room' }, L.room);
-    room.innerHTML = ROOM;
+    room.innerHTML = roomArt();
     const route = h('g', { class: 'gn-route' }, L.route);
 
     // --- top strip: teaching line (left), night and its rule (right)
@@ -367,9 +425,11 @@ export default {
     // --- back page: Unaccounted for
     const back = h('g', { class: 'gn-back', 'data-act': 'back', role: 'button', tabindex: '0',
       'aria-label': 'Unaccounted for: set the slip aside', transform: 'translate(712 244) rotate(1.2)' }, L.back);
-    const backBody = h('g', { class: 'gn-backbody' }, back);
-    h('rect', { class: 'gn-piece gn-back-edge gn-focus', x: 0, y: 0, width: 208, height: 214, filter: 'url(#gn-cutout)' }, backBody);
-    h('path', { class: 'gn-ln gn-fine', d: 'M186 0V22H208' }, backBody);
+    const backTouch = h('g', { class: 'touch' }, back);
+    const backBody = h('g', { class: 'gn-backbody' }, backTouch);
+    // a page lit by the moon, not the lamp; its corner folded back
+    h('g', {}, backBody).innerHTML = litCard(208, 214, 8, 'url(#gn-moon)') +
+      cutG(`<path d="M178 8H200V30Z"/>` + C.curl(178, 9, PI * .25, 9, 1.1, 2, .3, 12));
     h('text', { class: 'gn-t-back', x: 16, y: 36 }, backBody, 'Unaccounted for');
     h('line', { class: 'gn-rulel', x1: 16, y1: 46, x2: 192, y2: 46 }, backBody);
     const entriesG = h('g', {}, backBody);
@@ -404,13 +464,14 @@ export default {
       const c = CARDS[id];
       const g = h('g', { class: 'gn-card', 'data-act': 'card', 'data-id': id, role: 'button', tabindex: '0',
         'aria-pressed': 'false', 'aria-label': `${c.title}: ${c.gloss}. ${c.limits.join(', ')}.` });
-      const lift = h('g', { class: 'gn-lift', filter: 'url(#gn-cutout)' }, g);
-      h('rect', { class: 'gn-piece gn-card-edge gn-focus', x: 0, y: 0, width: 204, height: 140 }, lift);
-      h('rect', { class: 'gn-hairrule', x: 5, y: 5, width: 194, height: 130 }, lift);
+      // position (style transform) › lit edge (.touch) › lifted (.gn-lift) › the card itself
+      const touch = h('g', { class: 'touch' }, g);
+      const lift = h('g', { class: 'gn-lift' }, touch);
+      h('g', {}, lift).innerHTML = litCard(204, 140, 6, 'url(#sh-lamp)', 9);
+      h('g', { class: 'gn-emb' }, lift).innerHTML = emblem(id);
       fit(h('text', { class: 'gn-t-title', x: 14, y: 33 }, lift, c.title), 178);
       h('line', { class: 'gn-rulel', x1: 14, y1: 43, x2: 190, y2: 43 }, lift);
-      c.limits.forEach((t, i) => fit(h('text', { class: 'gn-t-limit', x: 14, y: 66 + i * 20 }, lift, t), 122));
-      h('g', {}, lift).innerHTML = DRAW[id];
+      c.limits.forEach((t, i) => fit(h('text', { class: 'gn-t-limit', x: 14, y: 66 + i * 20 }, lift, t), [122, 180]));
       return { g };
     }
     function layoutCards(ids, animateIn) {
@@ -445,7 +506,7 @@ export default {
       inkG.innerHTML = '';
       h('text', { class: 'gn-t-label', x: 52, y: 392 }, inkG, 'INK');
       for (let i = 0; i < NIGHTS[ni].ink; i++) {
-        h('circle', { class: 'gn-dot' + (i < ink ? '' : ' spent'), cx: 112 + i * 30, cy: 387, r: 9 }, inkG);
+        h('circle', { class: 'gn-dot' + (i < ink ? '' : ' spent'), cx: (PHONE ? 128 : 112) + i * 30, cy: 387, r: 9 }, inkG);
       }
       countEl.textContent = `EXPLAINED ${stamped.length}`;
     }
@@ -455,11 +516,10 @@ export default {
     function showMark(s) {
       L.marks.innerHTML = '';
       const p = PLACES[s.place];
-      const g = h('g', { class: 'gn-mark' + (p.ink ? ' gn-onink' : ''), transform: `translate(${p.x} ${p.y})` }, L.marks);
-      const sq = h('g', { class: 'gn-sq' }, g);
-      h('path', { class: 'gn-ln gn-fine', d: 'M-15 -3q3.75 -6 7.5 0t7.5 0t7.5 0t7.5 0' }, sq);
-      h('path', { class: 'gn-ln gn-fine', d: 'M-11 4q2.75 -5 5.5 0t5.5 0t5.5 0t5.5 0' }, sq);
-      h('text', { class: 'gn-t-snd', x: p.w[0], y: p.w[1], 'text-anchor': p.w[2] }, g, KINDS[s.kind].word);
+      const g = h('g', { class: 'gn-mark' + (ON_PAPER.has(s.place) ? ' gn-dark' : ''), transform: `translate(${p.x} ${p.y})` }, L.marks);
+      h('g', { class: 'gn-sq' }, g).innerHTML = markArt();
+      // a sound-word: cut type, lowercase with a stop, tilted a little
+      h('text', { class: 'gn-t-snd', x: p.w[0], y: p.w[1], 'text-anchor': p.w[2], transform: `rotate(-3 ${p.w[0]} ${p.w[1]})` }, g, KINDS[s.kind].word);
     }
 
     // --- the slip
@@ -484,10 +544,9 @@ export default {
       };
     }
     function makeSlip(s, n) {
-      const g = h('g', { class: 'gn-slip cur', 'data-act': 'slip', role: 'button', tabindex: '0' });
-      const body = h('g', { filter: 'url(#gn-cutout)' }, g);
-      h('rect', { class: 'gn-piece gn-focus', x: 0, y: 0, width: 420, height: 220 }, body);
-      h('rect', { class: 'gn-slip-rule', x: 9, y: 9, width: 402, height: 202 }, g);
+      const g0 = h('g', { class: 'gn-slip cur', 'data-act': 'slip', role: 'button', tabindex: '0' });
+      const g = h('g', { class: 'touch' }, g0);      // its lit edge shows once an excuse is lifted
+      h('g', {}, g).innerHTML = litCard(420, 220, 9);
       h('text', { class: 'gn-t-label', x: 26, y: 40 }, g, `NO. ${n}`);
       const F = {
         time: field(g, 394, 46, 'gn-t-time', 'end', 140),
@@ -496,13 +555,16 @@ export default {
         loud: field(g, 26, 202, 'gn-t-field', 'start', 250),
       };
       if (s.remark) h('text', { class: 'gn-t-remark', x: 26, y: 130 }, g, s.remark);
-      const smudge = h('ellipse', { class: 'gn-smudge', cx: 210, cy: 120, rx: 70, ry: 34, filter: 'url(#gn-bleed)' }, g);
+      // a refused stamp: the lamp behind the slip gutters for a moment
+      const smudge = h('rect', { class: 'gn-smudge', x: 9, y: 9, width: 402, height: 202 }, g);
+      // the stamp: a black ribbon, its word cut out of it so the lamp shows through
       const imp = h('g', { class: 'gn-imp', transform: 'translate(252 128) rotate(-8)' }, g);
-      h('rect', { class: 'gn-imp-box', x: -140, y: -46, width: 280, height: 92, rx: 6 }, imp);
-      h('rect', { class: 'gn-imp-box2', x: -131, y: -37, width: 262, height: 74, rx: 3 }, imp);
+      imp.innerHTML = cutG(`<path d="M-140 -40H140V40H-140Z"/>` + C.scallops(-133, 133, -40, 2.4, 7.4) + C.scallops(-133, 133, 40, 2.4, 7.4) +
+        C.curl(-139, 0, PI + .1, 20, -.6, 8, .6, 24) + C.curl(139, 0, -.1, 20, .6, 8, .6, 24)) +
+        `<path d="M-126 -31H126M-126 33H126" style="fill:none;stroke:var(--sh-lamp);stroke-width:.8;opacity:.6"/>`;
       h('text', { class: 'gn-t-stamp', x: 0, y: 6, 'text-anchor': 'middle' }, imp, 'EXPLAINED');
-      const impBy = h('text', { class: 'gn-t-stampby', x: 0, y: 29, 'text-anchor': 'middle' }, imp);
-      return { s, el: g, F, imp, impBy, smudge };
+      const impBy = h('text', { class: 'gn-t-stampby', x: 0, y: 28, 'text-anchor': 'middle' }, imp);
+      return { s, el: g0, F, imp, impBy, smudge };
     }
     function slipLabel(s, n) {
       return `Slip ${n}: ${KINDS[s.kind].label}${s.remark ? ', ' + s.remark : ''}, ${PLACES[s.place].label}, ${s.loud}, ${s.time}.`;
@@ -650,6 +712,7 @@ export default {
       el.removeAttribute('data-act');
       el.removeAttribute('tabindex');
       el.removeAttribute('role');
+      untouch(el);
       setLifted(null);
       L.marks.innerHTML = '';
       later(() => {
@@ -670,6 +733,7 @@ export default {
       if (s.stair) stairResult = 'unexplained';
       el.classList.remove('cur');
       el.removeAttribute('data-act');
+      untouch(el);
       el.style.transform = 'translate(744px, 300px) scale(.3) rotate(4deg)';
       el.style.opacity = '0';
       back.classList.remove('beckon');
@@ -684,7 +748,7 @@ export default {
       backHint.style.display = aside.length ? 'none' : '';
       const n = aside.length;
       const lh = Math.min(25, 150 / Math.max(n, 1));
-      const fs = Math.min(18, lh * 0.78);
+      const fs = PHONE ? Math.min(22, lh * 0.9) : Math.min(18, lh * 0.78);
       aside.forEach((a, i) => {
         const t = h('text', { class: 'gn-t-entry gn-entry' + (fresh && i === n - 1 ? '' : ' on'),
           x: 16, y: 70 + i * lh, style: `font-size:${fs}px` }, entriesG, '— ' + words(a.s));
@@ -711,18 +775,19 @@ export default {
       const n = NIGHTS[i];
       L.nc.innerHTML = '';
       const g = h('g', { class: 'gn-nc' }, L.nc);
-      h('rect', { class: 'gn-band', x: 0, y: 0, width: 960, height: 640 }, g);
-      const o = h('g', { class: 'gn-onink' }, g);
-      h('rect', { class: 'gn-ln', x: 36, y: 36, width: 888, height: 568 }, o);
-      h('rect', { class: 'gn-ln gn-fine', x: 44, y: 44, width: 872, height: 552 }, o);
-      h('text', { class: 'gn-t-inter', x: 480, y: 312, 'text-anchor': 'middle' }, g, n.name + '.');
-      h('text', { class: 'gn-t-interrule', x: 480, y: 364, 'text-anchor': 'middle' }, g, n.rule);
+      // the iris: a black stage with a lace-edged hole closes on the room, the intertitle holds, it opens
+      const ir = h('path', { class: 'sh-iris', 'fill-rule': 'evenodd', d: C.irisD(480, 320, RM ? 0 : 300), style: 'fill:var(--sh-cut)' }, g);
+      h('path', { class: 'gn-nc-rule gn-nc-t', d: 'M300 262H660M300 386H660' }, g);
+      h('text', { class: 'gn-t-inter gn-nc-t', x: 480, y: 312, 'text-anchor': 'middle' }, g, n.name + '.');
+      h('text', { class: 'gn-t-interrule gn-nc-t', x: 480, y: 364, 'text-anchor': 'middle' }, g, n.rule);
       g.getBoundingClientRect();
       g.classList.add('on');
+      if (!RM) C.runIris(ir, 480, 320, 300, 0, 320);
       L.fx.innerHTML = '';
       later(() => setupNight(i, true), dur(320));
       later(() => {
         g.classList.remove('on');
+        if (!RM) C.runIris(ir, 480, 320, 0, 600, 320);
         layoutCards(n.cards, true);   // a new excuse slides in, if there is one
         later(() => { L.nc.innerHTML = ''; deal(); }, dur(320));
       }, dur(320) + 1200);
@@ -744,6 +809,7 @@ export default {
       L.left.classList.add('gn-fade');
       back.removeAttribute('data-act');
       back.removeAttribute('tabindex');
+      backTouch.setAttribute('aria-disabled', 'true');
       weather(true);
       route.innerHTML = ROUTE;
       route.getBoundingClientRect();
@@ -762,7 +828,7 @@ export default {
         for (const r of persuaded) {
           const b = h('g', { class: 'gn-rv-slip', transform: `translate(0 ${y})` }, wrap);
           const H = 38 + r.swaps.length * 36;
-          h('rect', { class: 'gn-piece', x: 0, y: 0, width: 640, height: H, filter: 'url(#gn-cutout)' }, b);
+          h('g', {}, b).innerHTML = ribbon(640, H);
           h('text', { class: 'gn-t-label', x: 20, y: 25 }, b, `NO. ${r.no} · EXPLAINED · ${CARDS[r.card].title.toUpperCase()}`);
           const reds = [];
           const order = { kind: 0, place: 1, loud: 2 };
@@ -794,7 +860,7 @@ export default {
         later(() => blk.reds.forEach(r => r.classList.add('on')), t + dur(450));
         t += dur(420);
       }
-      const score = h('text', { class: 'gn-t-label gn-show', x: 924, y: 604, 'text-anchor': 'end' }, L.reveal,
+      const score = h('text', { class: 'gn-t-score gn-show', x: 922, y: 604, 'text-anchor': 'end' }, L.reveal,
         `NOISES EXPLAINED ${n} · UNACCOUNTED FOR ${m} · SAW REASON ${k}`);
       fit(score, 600);
       const prompt = h('text', { class: 'gn-t-prompt gn-show', x: 816, y: 500, 'text-anchor': 'middle' }, L.reveal, 'Tap to put out the lamp.');
@@ -868,6 +934,18 @@ export default {
     root.addEventListener('click', onClick);
     window.addEventListener('keydown', onKey);
 
+    // --- phones: re-fit the type when the stage crosses the phone width
+    const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(() => {
+      const p = root.clientWidth > 0 && root.clientWidth < 620;
+      if (p === PHONE || !alive) return;
+      PHONE = p;
+      root.classList.toggle('gn-phone', p);
+      renderInk();
+      renderEntries(false);
+      refit();
+    }) : null;
+    if (ro) ro.observe(root);
+
     // --- go
     const start = Math.max(1, Math.min(3, (api.dev && +api.dev.startNight) || 1)) - 1;
     for (let i = 0; i < start; i++) no += NIGHTS[i].slips.length;
@@ -878,6 +956,7 @@ export default {
 
     return () => {
       alive = false;
+      if (ro) ro.disconnect();
       for (const id of timers) clearTimeout(id);
       timers.clear();
       root.removeEventListener('click', onClick);
@@ -886,6 +965,9 @@ export default {
     };
   },
 };
+
+// A slip that has left the desk is no longer touchable: no lit edge.
+function untouch(el) { const t = el.querySelector('.touch'); if (t) t.classList.remove('touch'); }
 
 function h(tag, attrs = {}, parent, text) {
   const e = document.createElementNS(NS, tag);

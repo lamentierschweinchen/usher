@@ -5,28 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nights · dev harness</title>
 <link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../shared/shadow.css">
 <style>
-@font-face{font-family:'IM Fell English';src:url('../../fonts/im-fell-normal.woff2') format('woff2');font-style:normal;font-display:swap}
-@font-face{font-family:'IM Fell English';src:url('../../fonts/im-fell-italic.woff2') format('woff2');font-style:italic;font-display:swap}
-/* contract tokens (the spine defines these too) */
-:root{--paper:#f2eee5;--ink:#29272a;--muted:#625d5a;--rule:#cbc3b8;--red:#7a3939;--serif:'IM Fell English',Georgia,serif}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif)}
+html,body{margin:0;background:#e7dcc4;color:var(--sh-cut);font-family:var(--sh-serif)}
 .wrap{max-width:1120px;margin:0 auto;padding:16px}
-.stage{position:relative;width:min(100%,calc((100svh - 16px) * 1.5));margin:0 auto;aspect-ratio:3/2;overflow:hidden;container-type:inline-size;--u:calc(100cqw/960);
-  outline:1px solid var(--rule);background:var(--paper)}
-.stage::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.08;mix-blend-mode:multiply;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23g)'/%3E%3C/svg%3E")}
-.bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;margin:12px 0;font-size:15px;color:var(--muted)}
-.bar b{font-weight:normal;letter-spacing:.14em;text-transform:uppercase;font-size:12px;color:var(--ink)}
-.bar a,.bar button{font:inherit;color:var(--ink);background:none;border:0;border-bottom:1px solid var(--rule);padding:0;cursor:pointer;text-decoration:none}
-pre{white-space:pre-wrap;font:13px/1.45 ui-monospace,Menlo,monospace;color:var(--ink);border-top:1px solid var(--rule);padding-top:8px;min-height:3em}
+.stage{position:relative;width:min(100%,calc((100svh - 16px) * 1.5));margin:0 auto;aspect-ratio:3/2;overflow:hidden;
+  background:var(--sh-cut);box-shadow:0 1px 0 rgba(255,255,255,.4),0 18px 40px -22px rgba(30,15,20,.55)}
+.bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;margin:12px 0;font-size:15px;color:#4a3d38}
+.bar b{font-weight:normal;letter-spacing:.16em;text-transform:uppercase;font-size:12px;color:var(--sh-cut)}
+.bar a,.bar button{font:inherit;color:var(--sh-cut);background:none;border:0;border-bottom:1px solid rgba(11,8,9,.35);padding:0;cursor:pointer;text-decoration:none}
+pre{white-space:pre-wrap;font:13px/1.45 ui-monospace,Menlo,monospace;color:var(--sh-cut);border-top:1px solid rgba(11,8,9,.3);padding-top:8px;min-height:3em}
 @media (max-width:600px){.wrap{padding:8px}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="stage" id="stage"></div>
+  <div class="stage sh-grain" id="stage"></div>
   <div class="bar">
     <b>Nights · harness</b>
     <button id="restart">restart</button>
