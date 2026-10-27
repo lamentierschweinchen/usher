@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shadow Theatre</title>
+<style>
+@font-face{font-family:"IM Fell English";src:url("../../proto/fonts/im-fell-normal.woff2") format("woff2");font-style:normal;font-weight:400;font-display:block}
+@font-face{font-family:"IM Fell English";src:url("../../proto/fonts/im-fell-italic.woff2") format("woff2");font-style:italic;font-weight:400;font-display:block}
+:root{
+  --ink:#0b0809;      /* silhouette: every figure, house, tree, frame */
+  --lamp:#f7d894;     /* hottest backlight; the tarn's returned light */
+  --amber:#e6a256;    /* dusk horizon, lit rooms */
+  --rose:#a2646e;     /* mid sky, ember rooms, speaker names */
+  --violet:#5b4170;   /* upper sky, distance, the stair */
+  --zenith:#241a34;   /* top of sky, gauze */
+  --glass:#13122a;    /* the tarn: dark coloured glass */
+  --red:#e0392b;      /* what really happened */
+  --paper:#ede2cb;    /* type on glass; the board */
+  --refl:#f3dba2;
+  --board:#e7dcc4;
+  --muted:#6e5f57;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--board);color:var(--ink);font-family:"IM Fell English",Georgia,serif;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(ellipse at 50% 0%,rgba(255,250,235,.55),transparent 60%)}
+.board{max-width:1440px;margin:0 auto;padding:40px 24px 64px}
+
+/* header */
+.hd{display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px;border-bottom:1px solid rgba(11,8,9,.5);padding-bottom:18px;margin-bottom:28px;position:relative}
+.hd::after{content:"";position:absolute;left:0;right:0;bottom:-5px;border-bottom:.5px solid rgba(11,8,9,.4)}
+.kicker{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+h1{font-weight:400;font-size:76px;line-height:.95;margin:6px 0 0;letter-spacing:-.005em}
+.dek{font-style:italic;font-size:20px;margin:10px 0 0;color:#3b302c;max-width:46ch}
+.hd .num{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-align:right;line-height:1.7}
+
+/* stages */
+.stage{position:relative;background:var(--ink);box-shadow:0 1px 0 rgba(255,255,255,.4),0 18px 40px -22px rgba(30,15,20,.55)}
+.stage svg{display:block;width:100%;height:auto}
+.stage::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.16;mix-blend-mode:overlay;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E")}
+figure{margin:0}
+figcaption{display:flex;gap:14px;align-items:baseline;margin-top:12px;font-size:16px;line-height:1.35;color:#3b302c}
+figcaption b{font-weight:400;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);white-space:nowrap}
+figcaption i{color:#4a3d38}
+
+.row1{display:grid;grid-template-columns:960px 1fr;gap:32px;align-items:start}
+.lines{padding-top:4px}
+.lines h2,.sec h2{font-weight:400;font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 14px;color:var(--muted)}
+.lines ol{list-style:none;margin:0;padding:0;counter-reset:l}
+.lines li{counter-increment:l;position:relative;padding:0 0 20px 40px;margin-bottom:20px;border-bottom:1px solid rgba(11,8,9,.18);font-size:19px;line-height:1.42}
+.lines li:last-child{border-bottom:0}
+.lines li::before{content:counter(l,upper-roman)".";position:absolute;left:0;top:1px;font-size:15px;letter-spacing:.06em;color:var(--muted)}
+.lines li em{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-style:normal;color:var(--muted);margin-bottom:4px}
+.lines li.risk::before{color:var(--red)}
+.lines .notes{font-size:15px;line-height:1.5;color:#4a3d38;font-style:italic;margin-top:8px}
+.lines .notes span{font-style:normal;color:var(--red)}
+
+.row2{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:44px}
+.row3{display:grid;grid-template-columns:1fr 1.15fr;gap:40px;margin-top:52px;border-top:1px solid rgba(11,8,9,.5);padding-top:26px}
+
+/* palette */
+.sw{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.chip{display:grid;grid-template-rows:82px auto;background:#efe6d2;box-shadow:0 1px 0 rgba(255,255,255,.6),0 8px 18px -14px rgba(30,15,20,.6)}
+.chip .c{position:relative}
+.chip .t{padding:9px 11px 11px;font-size:14px;line-height:1.3}
+.chip .t b{display:block;font-weight:400;font-size:17px}
+.chip .t code{font-family:inherit;font-size:13px;letter-spacing:.16em;color:#5a4c45}
+.chip .t small{display:block;font-style:italic;font-size:13.5px;color:#4a3d38;margin-top:3px}
+.ramp{grid-column:1/-1;height:46px;background:linear-gradient(90deg,#1d1530,#352646 18%,#6a4462 40%,#b46f5c 62%,#e3a157 80%,#f4cf86);position:relative}
+.ramp span{position:absolute;bottom:-20px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.rampwrap{grid-column:1/-1;margin:2px 0 22px}
+
+/* type */
+.spec{display:grid;gap:0}
+.tr{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(11,8,9,.16)}
+.tr .r{font-size:11.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted);line-height:1.45}
+.tr .r small{display:block;letter-spacing:.06em;text-transform:none;font-style:italic;font-size:13px}
+.glassbar{background:linear-gradient(180deg,#221c38,#13122a 60%,#0b0a14);padding:14px 18px;color:var(--paper)}
+.s-title{font-size:46px;line-height:1.05}
+.s-inter{font-size:40px;color:var(--lamp);text-align:center;padding:16px 10px;background:var(--ink);position:relative}
+.s-inter::before,.s-inter::after{content:"";position:absolute;left:8px;right:8px;border-top:1px solid rgba(247,216,148,.6)}
+.s-inter::before{top:7px}.s-inter::after{bottom:7px}
+.s-chap{font-size:14px;letter-spacing:.16em;text-transform:uppercase}
+.s-line{font-size:22px}
+.s-spk{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#d79a6a;display:block;margin-bottom:2px}
+.s-teach{font-style:italic;font-size:24px}
+.s-sound{font-style:italic;font-size:26px}
+.s-sound .red{color:var(--red)}
+.s-label{font-size:13px;letter-spacing:.16em;text-transform:uppercase}
+
+/* svg classes */
+.m{fill:currentColor}
+.hl{fill:none;stroke:currentColor;stroke-linecap:round}
+.lg{fill:var(--l-gal)}.lb{fill:var(--l-bed)}.lh{fill:var(--l-hall)}.ls{fill:var(--l-stair)}.lst{fill:var(--l-studio)}
+.lv{fill:var(--l-vault)}.ll{fill:var(--l-lamp)}.lt{fill:var(--l-trunk)}.lat{fill:var(--l-lat)}
+.gauze{fill:var(--gauze);opacity:.42}
+.crk{fill:none;stroke:var(--l-crack);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.flick{fill:var(--l-flick);animation:flick 5.3s steps(1) infinite}
+.above{color:var(--ink);--l-gal:url(#gGal);--l-bed:url(#gBed);--l-hall:url(#gHall);--l-stair:url(#gStair);--l-studio:url(#gStudio);
+  --l-vault:#3a2a4c;--l-lamp:url(#gLamp);--l-trunk:url(#gTrunk);--l-lat:url(#lattice);--gauze:#f6ead2;--l-crack:#ffe7ae;--l-flick:url(#gFlick)}
+.below{color:var(--refl);--l-gal:#17132b;--l-bed:#17132b;--l-hall:#17132b;--l-stair:#120f24;--l-studio:#1a142c;
+  --l-vault:#0d0b18;--l-lamp:#15122a;--l-trunk:#15122a;--l-lat:none;--gauze:transparent;--l-crack:transparent;--l-flick:transparent}
+.truth{fill:none;stroke:var(--red);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.t{font-family:"IM Fell English",Georgia,serif}
+.caps{text-transform:uppercase;letter-spacing:.16em}
+@keyframes flick{0%{opacity:1}23%{opacity:.82}24%{opacity:1}61%{opacity:.9}63%{opacity:1}88%{opacity:.86}90%{opacity:1}}
+
+@media (max-width:1460px){
+  .row1{grid-template-columns:minmax(0,2.4fr) minmax(280px,1fr)}
+}
+@media (max-width:1000px){
+  .row1{grid-template-columns:1fr}
+  .row2{grid-template-columns:1fr 1fr}
+  .row3{grid-template-columns:1fr}
+  h1{font-size:56px}
+}
+@media (max-width:640px){
+  .board{padding:24px 16px 48px}
+  .row2{grid-template-columns:1fr}
+  .sw{grid-template-columns:1fr 1fr}
+  .tr{grid-template-columns:1fr;gap:6px}
+  .hd{grid-template-columns:1fr}
+  .hd .num{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){.flick{animation:none}}
+</style>
+</head>
+<body>
+
+<!-- shared drawing: every stage uses these; nothing here renders on its own -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+  <!-- backdrop light -->
+  <linearGradient id="skyHero" gradientUnits="userSpaceOnUse" x1="0" y1="14" x2="0" y2="368">
+    <stop offset="0" stop-color="#1d1530"/><stop offset=".22" stop-color="#352646"/><stop offset=".46" stop-color="#6a4462"/>
+    <stop offset=".68" stop-color="#b46f5c"/><stop offset=".86" stop-color="#e3a157"/><stop offset="1" stop-color="#f4cf86"/>
+  </linearGradient>
+  <linearGradient id="skyTitle" gradientUnits="userSpaceOnUse" x1="0" y1="14" x2="0" y2="368">
+    <stop offset="0" stop-color="#150f24"/><stop offset=".3" stop-color="#2c2040"/><stop offset=".58" stop-color="#5a3b5c"/>
+    <stop offset=".8" stop-color="#a7645a"/><stop offset=".94" stop-color="#df9a52"/><stop offset="1" stop-color="#efc57c"/>
+  </linearGradient>
+  <radialGradient id="halo" gradientUnits="userSpaceOnUse" cx="500" cy="330" r="430">
+    <stop offset="0" stop-color="#fde6ae" stop-opacity=".6"/><stop offset=".45" stop-color="#f3c47c" stop-opacity=".18"/><stop offset="1" stop-color="#f3c47c" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="glass" gradientUnits="userSpaceOnUse" x1="0" y1="368" x2="0" y2="628">
+    <stop offset="0" stop-color="#30243f"/><stop offset=".07" stop-color="#1f1a35"/><stop offset=".45" stop-color="#13122a"/><stop offset="1" stop-color="#07060d"/>
+  </linearGradient>
+  <linearGradient id="glassBand" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#241d3a"/><stop offset=".5" stop-color="#13122a"/><stop offset="1" stop-color="#08070e"/>
+  </linearGradient>
+  <linearGradient id="deep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".62"/><stop offset=".5" stop-color="#fff" stop-opacity=".34"/><stop offset="1" stop-color="#fff" stop-opacity=".08"/>
+  </linearGradient>
+  <mask id="depth" maskUnits="userSpaceOnUse" x="0" y="368" width="960" height="272">
+    <rect x="0" y="368" width="960" height="272" fill="url(#deep)"/>
+  </mask>
+  <!-- room light: graded paper, each room its own lamp -->
+  <radialGradient id="gGal" cx=".5" cy=".7" r=".7"><stop offset="0" stop-color="#f8d993"/><stop offset="1" stop-color="#cf8a4e"/></radialGradient>
+  <radialGradient id="gBed" cx=".55" cy=".55" r=".75"><stop offset="0" stop-color="#f6e2b0"/><stop offset="1" stop-color="#c58a5a"/></radialGradient>
+  <radialGradient id="gHall" cx=".35" cy=".7" r=".8"><stop offset="0" stop-color="#eeb066"/><stop offset="1" stop-color="#94574f"/></radialGradient>
+  <radialGradient id="gStair" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#8e6f9c"/><stop offset="1" stop-color="#3e2c54"/></radialGradient>
+  <radialGradient id="gStudio" cx=".6" cy=".25" r=".9"><stop offset="0" stop-color="#f6c172"/><stop offset=".55" stop-color="#d08655"/><stop offset="1" stop-color="#8a4f58"/></radialGradient>
+  <radialGradient id="gFlick" cx=".7" cy=".2" r=".6"><stop offset="0" stop-color="#ffe9b5" stop-opacity=".35"/><stop offset="1" stop-color="#ffe9b5" stop-opacity="0"/></radialGradient>
+  <linearGradient id="gLamp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0c2"/><stop offset="1" stop-color="#f2c06e"/></linearGradient>
+  <linearGradient id="gTrunk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f5e3b8"/><stop offset="1" stop-color="#d9a76a"/></linearGradient>
+  <pattern id="lattice" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <path d="M0 0V4M0 0H4" style="stroke:#0b0809;stroke-width:.7"/>
+  </pattern>
+  <pattern id="latticeL" width="13" height="13" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <path d="M0 0V13M0 0H13" style="stroke:#0b0809;stroke-width:1.6"/>
+  </pattern>
+
+  <!-- water -->
+  <filter id="ripple" x="-5%" y="-10%" width="110%" height="120%" color-interpolation-filters="sRGB">
+    <feTurbulence type="turbulence" baseFrequency="0.006 0.09" numOctaves="2" seed="7" result="n">
+      <animate attributeName="baseFrequency" dur="14s" repeatCount="indefinite" values="0.006 0.09;0.006 0.115;0.006 0.09"/>
+    </feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G" result="d"/>
+    <feGaussianBlur in="d" stdDeviation="2.4" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="d"/></feMerge>
+  </filter>
+  <filter id="rippleStill" x="-5%" y="-20%" width="110%" height="140%" color-interpolation-filters="sRGB">
+    <feTurbulence type="turbulence" baseFrequency="0.008 0.11" numOctaves="2" seed="3" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G" result="d"/>
+    <feGaussianBlur in="d" stdDeviation="1.8" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="d"/></feMerge>
+  </filter>
+  <filter id="shine" x="-60%" y="-30%" width="220%" height="160%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="3.2" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter>
+
+  <!-- ===== figures (feet at 0,0; 40 tall; fill set by the <use>) ===== -->
+  <g id="guest">
+    <path d="M-2.6-13L-3.4-.9-6.4 0-6.2.8H-1.8L-1-13ZM1-13L1.5-.9-.5 0-.3.8H3.2L2.8-13Z"/>
+    <path d="M-3.6-26.5C-5.4-21-6.6-15-8.6-8.8C-6.2-8.2-3.2-9.2-1.6-10.6H2.4C4.2-9.4 6.4-8.4 8.4-8.8C7-15 5.2-21 3.6-26.5Z"/>
+    <path d="M-3-24.6C-6.8-22.4-9.6-20.2-12.2-19.8L-12.3-18.4C-9.2-18.4-6.2-19.6-2.6-21.6Z"/>
+    <path d="M-1.6-27.4C-1.6-29-2.4-29.6-3.6-30.4L-4.8-31.2-3.4-31.9C-3.4-34.6-1.2-35.6.8-35.4C3-35.2 4-33.6 3.8-31C3.6-29 2.6-28 1.6-27.2Z"/>
+    <path d="M-3.1-34.4L-2.7-42.6H3.3L3.6-34.4ZM-6.4-34.8Q.2-33.2 6.6-34.8L6.6-33.4Q.2-31.8-6.4-33.4Z"/>
+    <g id="guest-scarf"></g>
+  </g>
+  <g id="valet">
+    <path d="M-1.8-15L-2.6-2.2-3.4 0H-1.7L-.6-15ZM1-15L2.2-2.6 1.9 0H3.3L2.6-15Z"/>
+    <path d="M-3.2-31C-4-25-4.2-19-3.2-15H3C3.6-12.6 5.2-8 8.2-4.2L8.9-4.9C6.8-9 5.6-14 4.6-19C4.4-24 3.8-28 3-31Z"/>
+    <path d="M-2.8-28C-6-25.4-8-23.8-10.2-24.4L-10.5-23.2C-8-22-5.6-22.8-2.4-25.2Z"/>
+    <path d="M-11.4-29.6h1.4v5.6h-1.4zM-12.9-24.3h4.4v1h-4.4z"/>
+    <path d="M-1.6-31.4C-2.6-33-3.6-34-6.2-34.4L-3.7-35.7C-3.6-38.3-1.6-39.5.6-39.1C2.8-38.5 3.4-36 2.6-33.4C2.2-32 1.4-31.4.8-31Z"/>
+  </g>
+  <g id="madeline">
+    <path d="M-1.4-43.2C-3.8-43-4.8-40.6-4.2-38.2C-4.6-37-5.4-35.6-5.6-33.6C-6.6-27-7-17-7.6-8C-8-4-8.4-1-8.8 0H4C10 0 18-.2 25 .7C18-1.6 10-2.6 5.6-5C4-12 3.6-22 3.2-30C3-33 2.6-35 1.8-36.6C2.4-39.6 1.2-43.2-1.4-43.2Z"/>
+    <path d="M1.4-40.4C4.2-36.4 5-30 4.2-23.6L3-23.8C3.4-30 2.8-35 .4-38.4Z"/>
+  </g>
+  <g id="rod-s"><!-- Roderick, risen from the sofa; seat at 0,0 -->
+    <path d="M-3.4-21C-5.8-14-6.8-6-6.6 0H6C5.6-7 4.4-14 2.6-21Z"/>
+    <path d="M2-4.8C11-5.4 20-5.2 28-3.6L29.8-1.8C30.6-.4 29.6.4 28.4 0H2Z"/>
+    <path d="M1.6-18C6-15.6 10-14.8 13.8-16.4L14.2-15C10.2-12.6 5.6-12.6.6-14.6Z"/>
+    <path d="M-2.4-21.6C-3.6-23-4-25.6-3.2-27.6C-2.2-30 .6-30.6 2.4-29.4C3.4-28.6 3.6-27.4 3.4-26.6L4.9-25.1 3.6-24.6C3.6-23 3-22 1.6-21.6Z"/>
+    <g id="rod-s-hair"></g>
+  </g>
+
+  <!-- ===== the house: shell (always), rooms (cutaway), façade (closed) ===== -->
+  <g id="shell">
+    <rect class="m" x="300" y="172" width="360" height="196"/>
+    <rect class="m" x="280" y="166" width="22" height="202"/>
+    <rect class="m" x="658" y="166" width="22" height="202"/>
+    <rect class="m" x="273" y="158" width="54" height="9"/>
+    <rect class="m" x="633" y="158" width="54" height="9"/>
+    <path class="m" d="M275 160Q296 134 300 86Q304 134 325 160ZM635 160Q656 134 660 86Q664 134 685 160Z"/>
+    <path class="m" d="M299.1 62h1.8v26h-1.8zM659.1 62h1.8v26h-1.8zM479 88h2v34h-2z"/>
+    <circle class="m" cx="300" cy="76" r="2.8"/><circle class="m" cx="660" cy="76" r="2.8"/><circle class="m" cx="480" cy="100" r="2.6"/>
+    <path class="m" d="M310 177L480 118 650 177Z"/>
+    <circle class="ll" cx="480" cy="152" r="11.5"/>
+    <g id="rosewin"></g>
+    <!-- turret slits, eye-like -->
+    <path class="ll" d="M288.4 216V198Q291 190 293.6 198V216ZM288.4 262V244Q291 236 293.6 244V262ZM666.4 216V198Q669 190 671.6 198V216ZM666.4 262V244Q669 236 671.6 244V262ZM666.4 314V296Q669 288 671.6 296V314Z"/>
+    <g id="crockets"></g>
+    <g id="frieze"></g>
+    <path class="crk" d="M486 130L476 164 482 178"/>
+  </g>
+
+  <g id="rooms">
+    <rect class="lg" x="306" y="180" width="348" height="36"/>
+    <g id="eaves"></g>
+    <rect class="lb" x="306" y="221" width="130" height="57"/>
+    <rect class="lh" x="306" y="283" width="130" height="55"/>
+    <path class="lh" d="M280 338V318Q280 304 293 299Q306 304 306 318V338Z"/>
+    <rect class="ls" x="441" y="221" width="78" height="117"/>
+    <rect class="lst" x="524" y="221" width="130" height="117"/>
+    <rect class="flick" x="524" y="221" width="130" height="117"/>
+    <rect class="lv" x="330" y="347" width="80" height="16"/>
+    <!-- vault: coffin on trestles -->
+    <path class="m" d="M346 357l4-4h38l4 4-4 3h-38zM352 360h2v3h-2zM384 360h2v3h-2z"/>
+    <!-- gallery: portraits in pairs, one face painted out -->
+    <g id="portraits"></g>
+    <g id="chandelier"></g>
+    <!-- bedroom: four-poster over the vault -->
+    <g id="bed">
+      <path class="m" d="M325 238h3v40h-3zM397 238h3v40h-3zM321 234h83v4.5h-83zM328 252h4v14h-4z"/>
+      <circle class="m" cx="326.5" cy="232.5" r="2"/><circle class="m" cx="398.5" cy="232.5" r="2"/>
+      <path class="m" d="M328 238C333 248 326 258 331 268L335 268C331.5 258 338 249 333 238ZM397 238C392 248 399 258 394 268L390 268C393.5 258 387 249 392 238Z"/>
+      <path class="m" d="M330 262h68v7h-68zM333 262c2-6 12-6 13 0z"/>
+      <path class="m" d="M418 278v-18h1.6v18zM414 278h10v-1.6h-10zM416 260h6v-1.4h-6zM418.3 258.6v-4.2h1v4.2z"/>
+    </g>
+    <!-- hall: lantern, valet on tiptoe -->
+    <path class="m" d="M356.6 283h.8v8h-.8zM353 291h8l-1 9h-6zM352 300h10v1.4h-10zM355 289.4h4v1.6h-4z"/>
+    <use href="#valet" x="398" y="338" style="fill:currentColor"/>
+    <!-- stair: two flights -->
+    <g id="stairs"></g>
+    <use href="#madeline" class="gauze" transform="translate(479 311) scale(.93)"/>
+    <!-- studio -->
+    <path class="ll" d="M542 264V238Q542 229 548 226Q554 229 554 238V264ZM583 264V238Q583 229 589 226Q595 229 595 238V264ZM624 264V238Q624 229 630 226Q636 229 636 238V264Z"/>
+    <path class="lat" d="M542 264V238Q542 229 548 226Q554 229 554 238V264ZM583 264V238Q583 229 589 226Q595 229 595 238V264ZM624 264V238Q624 229 630 226Q636 229 636 238V264Z"/>
+    <path class="m" d="M547.4 230h1.2v34h-1.2zM588.4 230h1.2v34h-1.2zM629.4 230h1.2v34h-1.2zM541 246h14v1.2h-14zM582 246h14v1.2h-14zM623 246h14v1.2h-14z"/>
+    <g id="drapes"></g>
+    <g id="sofa" transform="translate(531 338)"></g>
+    <use href="#rod-s" x="541" y="325" style="fill:currentColor"/>
+    <use href="#guest" x="621" y="338" style="fill:currentColor"/>
+    <path class="m" d="M598 338v-3h12v3zM599 335v-2.6h10v2.6zM600.5 332.4v-2.4h8v2.4z"/>
+  </g>
+
+  <g id="windows"><!-- the closed façade: vacant eye-like windows -->
+    <g id="eyes"></g>
+    <path class="m" d="M300 336h360v6h-360z"/>
+    <path style="fill:#3a2a4c" d="M466 342V316Q466 300 480 294Q494 300 494 316V342Z"/>
+    <path class="m" d="M470 342V317Q470 304 480 299Q490 304 490 317V342Z"/>
+  </g>
+
+  <g id="bank">
+    <path class="m" d="M0 368V336C24 330 52 332 78 338C100 343 120 346 140 352C152 356 160 362 168 368Z"/>
+    <g id="trees"></g>
+    <g id="causeway"></g>
+    <g id="sedgeL"></g>
+  </g>
+  <g id="shore">
+    <path class="m" d="M672 368C700 362 740 358 800 357C860 356 910 358 960 356V368Z"/>
+    <g id="sedgeR"></g>
+  </g>
+
+  <g id="scene"><use href="#bank"/><use href="#shore"/><use href="#shell"/><use href="#rooms"/></g>
+  <g id="sceneTitle">
+    <use href="#bank"/><use href="#shore"/>
+    <path class="m" d="M278 336L326 333V338L278 341ZM300 338h3V368h-3z"/>
+    <g transform="translate(480 368) scale(.8) translate(-480 -368)"><use href="#shell"/><use href="#windows"/></g>
+  </g>
+</defs>
+</svg>
+
+<main class="board">
+  <header class="hd">
+    <div>
+      <div class="kicker">A Sojourn of Some Weeks · style board</div>
+      <h1>Shadow Theatre</h1>
+      <p class="dek">After Lotte Reiniger's <i>Prince Achmed</i> (1926): the whole House of Usher cut from black paper and held up against lamplight.</p>
+    </div>
+    <div class="num">Direction 2 of 3<br>Map · two games · title<br>Palette · type · three lines</div>
+  </header>
+
+  <section class="row1">
+    <figure>
+      <div class="stage">
+        <svg id="hero" viewBox="0 0 960 640" role="img" aria-label="The map: the house of Usher in black cut-paper silhouette against a dusk sky, rooms lit from behind; the guest stands before Roderick in the studio; Madeline faint on the stair; below, the tarn returns the house as light, with Madeline bright and the fissure in red.">
+          <rect width="960" height="368" fill="url(#skyHero)"/>
+          <rect width="960" height="368" fill="url(#halo)"/>
+          <g id="heroClouds"></g>
+          <path d="M0 368V316C60 300 120 318 190 306C250 296 300 312 360 304C430 296 520 300 600 296C680 292 760 310 830 300C880 294 930 304 960 300V368Z" style="fill:#6c4662;opacity:.55"/>
+          <path d="M0 368V340C70 330 140 344 220 336C320 328 420 340 520 334C640 328 760 344 860 334C900 330 940 334 960 332V368Z" style="fill:#3a2842;opacity:.75"/>
+          <use href="#scene" class="above"/>
+          <!-- the tarn -->
+          <rect y="368" width="960" height="272" fill="url(#glass)"/>
+          <g class="below" mask="url(#depth)">
+            <g transform="matrix(1 0 0 -.85 0 680.8)" filter="url(#ripple)"><use href="#scene"/></g>
+          </g>
+          <path d="M14 368.6H946" style="stroke:#f7d894;stroke-width:.8;opacity:.45"/>
+          <path d="M590 369H668L430 640H352ZM700 369H716L478 640H462Z" style="fill:#e9e0ff;opacity:.035"/>
+          <!-- truths don't ripple -->
+          <g transform="matrix(1 0 0 -.85 0 680.8)">
+            <path class="truth" d="M486 130l-10 34 14 30-12 40 12 46-10 50 8 38"/>
+            <use href="#madeline" transform="translate(479 311) scale(.93)" filter="url(#shine)" style="fill:#fff6e0"/>
+          </g>
+          <!-- dialogue strip -->
+          <g id="dlg"></g>
+          <ellipse cx="104" cy="597" rx="14" ry="17.5" style="fill:url(#gLamp)"/>
+          <clipPath id="cameoClip"><ellipse cx="104" cy="597" rx="14" ry="17.5"/></clipPath>
+          <g clip-path="url(#cameoClip)"><use href="#rod-s" transform="translate(106 624) scale(1.05)" style="fill:#0b0809;color:#0b0809"/></g>
+          <ellipse cx="104" cy="597" rx="14" ry="17.5" style="fill:none;stroke:#0b0809;stroke-width:2.4"/>
+          <text class="t caps" x="132" y="590" style="font-size:12px;fill:#d79a6a;letter-spacing:.2em">Roderick</text>
+          <text class="t" x="132" y="612" style="font-size:22px;fill:#ede2cb">“You came! Is that wool? It’s terribly loud.”</text>
+          <text class="t caps" x="926" y="44" text-anchor="end" style="font-size:12px;fill:#f7d894;opacity:.85">III · The Cheerfulness of My Society</text>
+          <g class="frame" style="color:#0b0809"></g>
+        </svg>
+      </div>
+      <figcaption><b>The map</b><i>Chapter III. Every solid thing is cut paper; colour lives only in the light behind it. The tarn is dark glass: the house comes back as light, Madeline brightest, the fissure whole and red.</i></figcaption>
+    </figure>
+
+    <aside class="lines">
+      <h2>Three lines</h2>
+      <ol>
+        <li><em>The idea</em>Usher as a Reiniger shadow play: house, trees and people cut from black paper with lace edges, held against graded lamplight from dusk amber to ink, and returned by the tarn's dark glass as light.</li>
+        <li><em>Why it fits Usher</em>Poe's narrator only ever sees the surface: walls, “vacant eye-like windows”, an inverted image in the tarn. A silhouette is a figure with no face, so the reflection, light where there was black, is the house's negative and its truth.</li>
+        <li class="risk"><em>The risk</em>Silhouettes hide faces and furniture, so telling who is who, which room is which and what can be touched rests on profile and backlight alone; lace is slow to cut, gets lost on a phone, and turns to doilies or a cartoon if the edges are drawn instead of cut.</li>
+      </ol>
+      <p class="notes">Rules: black is only ever paper; colour only ever light; nothing has an outline. <span>Red</span> is the one colour that sits on the glass rather than behind it.</p>
+    </aside>
+  </section>
+
+  <section class="row2">
+    <figure>
+      <div class="stage">
+        <svg id="studio" viewBox="0 0 960 640" role="img" aria-label="Studio mini-game: Roderick on a chaise under three lancets, a sunbeam across his face, a rose on a stand, the brass band as TAN-TARA, a small red tap in the floorboards.">
+          <defs>
+            <linearGradient id="stBg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="500">
+              <stop offset="0" stop-color="#1f1630"/><stop offset=".35" stop-color="#4a3150"/><stop offset=".66" stop-color="#8e5560"/><stop offset=".9" stop-color="#cf8752"/><stop offset="1" stop-color="#e2a35a"/>
+            </linearGradient>
+            <linearGradient id="beam" gradientUnits="userSpaceOnUse" x1="560" y1="300" x2="210" y2="405">
+              <stop offset="0" stop-color="#fff0c2" stop-opacity=".62"/><stop offset="1" stop-color="#fff0c2" stop-opacity=".2"/>
+            </linearGradient>
+          </defs>
+          <rect width="960" height="500" fill="url(#stBg)"/>
+          <ellipse cx="480" cy="220" rx="380" ry="260" style="fill:#f8d993;opacity:.22" filter="url(#soft)"/>
+          <g id="lancets"></g>
+          <path d="M538 300H582L234 418 194 392Z" fill="url(#beam)" style="mix-blend-mode:screen"/>
+          <g transform="translate(150 266) rotate(-6)" style="color:#0b0809"><text class="t" x="0" y="0" style="font-size:52px;fill:#0b0809;letter-spacing:.02em">TAN-TARA</text><g id="bandCurls"></g></g>
+          <g id="stDrapes" style="color:#0b0809"></g>
+          <g id="stSofa" style="color:#0b0809"></g>
+          <g id="stRose" style="color:#0b0809"></g>
+          <!-- floor and the vault below it -->
+          <rect y="500" width="960" height="40" style="fill:#0b0809"/>
+          <path d="M120 500v40M240 500v40M360 500v40M480 500v40M600 500v40M720 500v40M840 500v40" style="stroke:#b8794e;stroke-width:1;opacity:.6"/>
+          <path d="M14 500.5H946" style="stroke:#e2a35a;stroke-width:1;opacity:.5"/>
+          <g transform="translate(300 521)" style="fill:none;stroke:#b8794e;stroke-width:.8;opacity:.55"><ellipse rx="10" ry="7"/><ellipse rx="7" ry="4.8"/><ellipse rx="4.2" ry="2.8"/><ellipse rx="1.6" ry="1"/></g>
+          <rect y="540" width="960" height="100" fill="url(#glassBand)"/>
+          <g filter="url(#rippleStill)" style="opacity:.55"><path d="M262 578h196l8 6-8 6H262l-8-6z" style="fill:#f3dba2"/><path d="M276 590h3v8h-3zM441 590h3v8h-3z" style="fill:#f3dba2"/></g>
+          <text class="t" x="0" y="0" transform="translate(782 528) rotate(-3)" style="font-size:24px;font-style:italic;fill:#e0392b">tap.</text>
+          <text class="t" x="44" y="40" style="font-size:26px;font-style:italic;fill:#ede2cb">Spare him everything.</text>
+          <text class="t caps" x="920" y="606" text-anchor="end" style="font-size:17px;fill:#f7d894">Taps hushed 3 · ×2 · 340</text>
+          <g class="frame" style="color:#0b0809"></g>
+        </svg>
+      </div>
+      <figcaption><b>Studio</b><i>Warm room, ember light. The draperies are the black mass; the band is type cut from the same paper. The only red is the tap in the floor.</i></figcaption>
+    </figure>
+
+    <figure>
+      <div class="stage">
+        <svg id="trist" viewBox="0 0 960 640" role="img" aria-label="Trist mini-game: in the rain, Ethelred sways with his mace raised; a dotted arc runs to the hermit's plank door, already gouged with light; upside down in the dark margin, a small red 'crack'.">
+          <defs>
+            <linearGradient id="trBg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="470">
+              <stop offset="0" stop-color="#0f0d1e"/><stop offset=".4" stop-color="#2c2650"/><stop offset=".78" stop-color="#6a5a8e"/><stop offset="1" stop-color="#a796bf"/>
+            </linearGradient>
+            <clipPath id="trBandClip"><rect y="540" width="960" height="100"/></clipPath>
+          </defs>
+          <rect width="960" height="470" fill="url(#trBg)"/>
+          <ellipse cx="660" cy="400" rx="330" ry="200" style="fill:#d8cce6;opacity:.28" filter="url(#soft)"/>
+          <g id="rain" style="stroke:#e9e0ff;stroke-width:.9;opacity:.32;stroke-linecap:round"></g>
+          <g id="tristScene" style="color:#0b0809"></g>
+          <text class="t" x="44" y="62" style="font-size:26px;font-style:italic;fill:#ede2cb">Draw the blow.</text>
+          <text class="t caps" x="916" y="54" text-anchor="end" style="font-size:12px;fill:#d8cce6;opacity:.85">The Mad Trist · Sir Launcelot Canning</text>
+          <rect y="540" width="960" height="100" fill="url(#glassBand)"/>
+          <g clip-path="url(#trBandClip)"><g transform="matrix(1 0 0 -.6 0 822)" filter="url(#rippleStill)" style="opacity:.45"><use href="#tristScene" style="color:#e9ddb6"/></g></g>
+          <text class="t" x="0" y="0" transform="translate(150 574) rotate(180)" style="font-size:26px;font-style:italic;fill:#e0392b">crack.</text>
+          <text class="t caps" x="920" y="606" text-anchor="end" style="font-size:17px;fill:#f7d894">Blows 4</text>
+          <g class="frame" style="color:#0b0809"></g>
+        </svg>
+      </div>
+      <figcaption><b>Trist</b><i>Cold night, rain, moonless lilac. Your strokes are cut into the planks and let the light through; the margin hears the crack before you strike.</i></figcaption>
+    </figure>
+
+    <figure>
+      <div class="stage">
+        <svg id="title" viewBox="0 0 960 640" role="img" aria-label="Title card: A Sojourn of Some Weeks on a lit cartouche over the closed house at dusk; reflected in the tarn, upside down, A Burial of Some Weeks, with Burial in red.">
+          <rect width="960" height="368" fill="url(#skyTitle)"/>
+          <rect width="960" height="368" fill="url(#halo)" style="opacity:.8"/>
+          <g id="titleClouds"></g>
+          <path d="M0 368V320C80 306 150 322 230 312C320 302 420 316 520 308C640 300 760 318 860 306C910 300 940 306 960 304V368Z" style="fill:#5e3d5c;opacity:.6"/>
+          <use href="#sceneTitle" class="above"/>
+          <g id="cartouche"></g>
+          <rect y="368" width="960" height="272" fill="url(#glass)"/>
+          <g class="below" mask="url(#depth)">
+            <g transform="matrix(1 0 0 -.85 0 680.8)" filter="url(#rippleStill)"><use href="#sceneTitle"/></g>
+          </g>
+          <path d="M14 368.6H946" style="stroke:#f7d894;stroke-width:.8;opacity:.45"/>
+          <g transform="matrix(1 0 0 -.85 0 680.8)"><path class="truth" style="stroke-width:1.6;opacity:.8" d="M486 130l-10 34 14 30-12 40 12 46-10 50 8 38" transform="translate(480 368) scale(.8) translate(-480 -368)"/></g>
+          <g transform="translate(480 572) scale(1 -1)">
+            <text class="t" x="0" y="0" text-anchor="middle" filter="url(#rippleStill)" style="font-size:52px;fill:#f3dba2;opacity:.85">A <tspan style="fill:transparent">Burial</tspan> of Some Weeks</text>
+            <text class="t" x="0" y="0" text-anchor="middle" style="font-size:52px;fill:transparent">A <tspan style="fill:#e0392b">Burial</tspan> of Some Weeks</text>
+          </g>
+          <g class="frame" style="color:#0b0809"></g>
+        </svg>
+      </div>
+      <figcaption><b>Title</b><i>The house at dusk, façade closed, windows vacant. The title floats in the glass upside down, one word changed and not rippling. It teaches the game: look down.</i></figcaption>
+    </figure>
+  </section>
+
+  <section class="row3">
+    <div class="sec">
+      <h2>Palette · black is paper, colour is light</h2>
+      <div class="sw">
+        <div class="rampwrap"><div class="ramp"><span style="left:0">ink · zenith</span><span style="left:38%">violet · rose</span><span style="right:0">amber · lamp</span></div></div>
+        <div class="chip"><div class="c" style="background:#0b0809"></div><div class="t"><b>Silhouette</b><code>#0B0809</code><small>Every figure, house, tree, frame. Never tinted.</small></div></div>
+        <div class="chip"><div class="c" style="background:#f7d894"></div><div class="t"><b>Lamp</b><code>#F7D894</code><small>Hottest backlight; what the tarn returns.</small></div></div>
+        <div class="chip"><div class="c" style="background:#e6a256"></div><div class="t"><b>Dusk amber</b><code>#E6A256</code><small>Horizon and lit rooms.</small></div></div>
+        <div class="chip"><div class="c" style="background:#a2646e"></div><div class="t"><b>Rose ash</b><code>#A2646E</code><small>Mid sky, the studio's ember edge, speakers.</small></div></div>
+        <div class="chip"><div class="c" style="background:#5b4170"></div><div class="t"><b>Dusk violet</b><code>#5B4170</code><small>Upper sky, far layers, the stair.</small></div></div>
+        <div class="chip"><div class="c" style="background:#241a34"></div><div class="t"><b>Zenith</b><code>#241A34</code><small>Top of sky; the chapters darken toward it.</small></div></div>
+        <div class="chip"><div class="c" style="background:linear-gradient(180deg,#30243f,#13122a 45%,#07060d)"></div><div class="t"><b>Tarn glass</b><code>#13122A</code><small>The water: dark coloured glass, dialogue ground.</small></div></div>
+        <div class="chip"><div class="c" style="background:#e0392b"></div><div class="t"><b>Truth red</b><code>#E0392B</code><small>What really happened. Sharp, unrippled, never UI.</small></div></div>
+        <div class="chip"><div class="c" style="background:#ede2cb;box-shadow:inset 0 0 0 1px rgba(11,8,9,.25)"></div><div class="t"><b>Paper</b><code>#EDE2CB</code><small>Type on glass; Madeline, the gauze above.</small></div></div>
+      </div>
+    </div>
+    <div class="sec">
+      <h2>Type · IM Fell English, regular and italic</h2>
+      <div class="spec">
+        <div class="tr"><div class="r">Title<small>Regular 64, ink on lit card</small></div><div class="s-title">A Sojourn of Some Weeks</div></div>
+        <div class="tr"><div class="r">Intertitle<small>Regular 44, lamp on silhouette</small></div><div class="s-inter">A Harmless Precaution</div></div>
+        <div class="tr"><div class="r">Chapter<small>Caps 14, tracked .16em</small></div><div class="s-chap">Chapter the Sixth · One of Your Favorite Romances</div></div>
+        <div class="tr"><div class="r">Dialogue<small>Regular 22 on glass; speaker caps 13, rose</small></div><div class="glassbar"><span class="s-spk">The Physician</span><span class="s-line">“If the sister dies, send for me. Before anyone does anything.”</span></div></div>
+        <div class="tr"><div class="r">Teaching line<small>Italic 24, top left, once</small></div><div class="s-teach">Draw the blow.</div></div>
+        <div class="tr"><div class="r">Sound-word<small>Italic, lowercase with a stop; red in the truth</small></div><div class="s-sound">plink. &nbsp; bonk. &nbsp; <span class="red">tap.</span></div></div>
+        <div class="tr" style="border-bottom:0"><div class="r">Label · score<small>Caps 13, tracked</small></div><div class="s-label">Taps hushed 41 &nbsp;·&nbsp; Stones set 8 &nbsp;·&nbsp; ×5</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg', $=id=>document.getElementById(id), r1=n=>Math.round(n*10)/10, PI=Math.PI;
+function el(p,tag,a){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e}
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+// a cut-paper stroke: walk a heading whose curvature tightens toward the tip, then taper it
+function walk(x,y,a,len,k0,k1,n){const p=[[x,y]],s=len/n;for(let i=1;i<=n;i++){const t=i/n;a+=(k0+(k1-k0)*t*t*t)*s;x+=Math.cos(a)*s;y+=Math.sin(a)*s;p.push([x,y])}return p}
+function taper(p,w0,w1){const L=[],R=[],n=p.length;for(let i=0;i<n;i++){const a=p[Math.max(0,i-1)],b=p[Math.min(n-1,i+1)];let dx=b[0]-a[0],dy=b[1]-a[1];const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;const w=(w0+(w1-w0)*i/(n-1))/2;L.push(r1(p[i][0]-dy*w)+' '+r1(p[i][1]+dx*w));R.push(r1(p[i][0]+dy*w)+' '+r1(p[i][1]-dx*w))}return'M'+L.join('L')+'L'+R.reverse().join('L')+'Z'}
+function curl(g,x,y,a,len,k0,k1,w0,w1,cls,n){return el(g,'path',{d:taper(walk(x,y,a,len,k0,k1,n||30),w0,w1),class:cls||'m'})}
+function circ(x,y,r){return`M${r1(x-r)} ${r1(y)}a${r} ${r} 0 1 0 ${2*r} 0a${r} ${r} 0 1 0 ${-2*r} 0`}
+function scal(g,x0,x1,y,r,step,cls){let d='';for(let x=x0;x<=x1+.01;x+=step)d+=circ(x,y,r);return el(g,'path',{d,class:cls||'m'})}
+function scalV(g,x,y0,y1,r,step,cls){let d='';for(let y=y0;y<=y1+.01;y+=step)d+=circ(x,y,r);return el(g,'path',{d,class:cls||'m'})}
+function tree(g,x,y,a,len,w,d,R){
+  const dir=R()<.5?-1:1, tip=d===0?(.28+R()*.3):(.07+R()*.06);
+  const pts=walk(x,y,a,len,(R()-.5)*.012,dir*tip,28);
+  el(g,'path',{d:taper(pts,w,.5),class:'m'});
+  if(d>0){const m=2+(R()<.5?1:0);
+    for(let i=0;i<m;i++){const idx=Math.max(2,Math.floor((pts.length-1)*(.3+R()*.45)));const p=pts[idx],q=pts[idx-1];
+      const pa=Math.atan2(p[1]-q[1],p[0]-q[0]),side=i%2?1:-1;
+      tree(g,p[0],p[1],pa+side*(.45+R()*.5),len*(.48+R()*.22),w*(.5+R()*.12),d-1,R)}}
+}
+function sedges(g,x0,x1,base,count,h0,h1,R,lean){
+  for(let i=0;i<count;i++){const x=x0+(x1-x0)*R(),h=h0+(h1-h0)*R(),dir=R()<.5?-1:1;
+    curl(g,x,base+2,-PI/2+(lean||0)+(R()-.5)*.8,h,dir*.004,dir*(.3+R()*.5),2+R()*1.3,.35,'m',26)}
+}
+function clouds(g,yL,yR,xEnd,fill,op,R,rmin,rmax){
+  let x=xEnd,d=`M-10 -10H${xEnd}V${yR}`;
+  while(x>-20){const r=rmin+(rmax-rmin)*R(),nx=x-r*1.6,t=Math.max(0,nx)/xEnd,ny=yL+(yR-yL)*t+(R()-.5)*10;
+    d+=`A${r1(r)} ${r1(r*.8)} 0 0 1 ${r1(nx)} ${r1(ny)}`;x=nx}
+  d+='Z';return el(g,'path',{d,style:`fill:${fill};opacity:${op}`})
+}
+function frame(svg){
+  const g=svg.querySelector('.frame'),W=960,H=640,i=14;
+  el(g,'path',{d:`M0 0H${W}V${H}H0ZM${i} ${i}V${H-i}H${W-i}V${i}Z`,'fill-rule':'evenodd',class:'m'});
+  scal(g,i+8,W-i-8,i,3.1,10.6);scal(g,i+8,W-i-8,H-i,3.1,10.6);scalV(g,i,i+8,H-i-8,3.1,10.6);scalV(g,W-i,i+8,H-i-8,3.1,10.6);
+  [[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]].forEach(([x,y,sx,sy])=>{
+    const c=el(g,'g',{transform:`translate(${x} ${y}) scale(${sx} ${sy})`});
+    curl(c,i,i,.22,50,0,.42,5,.5);curl(c,i,i,PI/2-.22,50,0,-.42,5,.5);curl(c,i,i,PI/4,26,0,.6,3.4,.4);
+    el(c,'circle',{cx:i+19,cy:i+19,r:2.2,class:'m'});
+  });
+  el(g,'rect',{x:5.5,y:5.5,width:W-11,height:H-11,style:'fill:none;stroke:#f7d894;stroke-width:.7;opacity:.4'});
+}
+
+/* ---------- the house ---------- */
+let R=rng(11);
+const cr=$('crockets');
+for(let t=.12;t<.96;t+=.105){ // gable slopes: curls leaning up and out
+  const xl=310+170*t,yl=177-59*t; curl(cr,xl,yl-1,-PI/2-.85,8,0,-.9,2.2,.4,'m',14);
+  const xr=650-170*t; curl(cr,xr,yl-1,-PI/2+.85,8,0,.9,2.2,.4,'m',14);
+}
+[[300,-1],[660,1]].forEach(([cx])=>{for(let t=.2;t<.9;t+=.22){const y=160-74*t,w=25*(1-t)+1;curl(cr,cx-w,y,-PI+.5,6,0,-1,1.6,.3,'m',12);curl(cr,cx+w,y,-.5,6,0,1,1.6,.3,'m',12)}});
+curl(cr,300,70,-.1,12,0,.9,1.8,.3,'m',16);curl(cr,660,70,PI+.1,12,0,-.9,1.8,.3,'m',16); // vane curls
+curl(cr,480,96,-PI/2-.9,9,0,-1.1,2,.3,'m',14);curl(cr,480,96,-PI/2+.9,9,0,1.1,2,.3,'m',14);
+const rw=$('rosewin'); // rose window tracery
+el(rw,'circle',{cx:480,cy:152,r:2.6,class:'m'});
+for(let k=0;k<8;k++){const a=k*PI/4;el(rw,'path',{class:'m',d:`M${r1(480+Math.cos(a)*2)} ${r1(152+Math.sin(a)*2)}L${r1(480+Math.cos(a)*11.5)} ${r1(152+Math.sin(a)*11.5)}`,style:'stroke:currentColor;stroke-width:1.1'});el(rw,'path',{class:'m',d:circ(480+Math.cos(a+PI/8)*8.2,152+Math.sin(a+PI/8)*8.2,1.1)})}
+el(rw,'circle',{cx:480,cy:152,r:11.5,style:'fill:none;stroke:currentColor;stroke-width:1.6'});
+const ev=$('eaves'); // the fungi web-work, hanging from the eaves as lace
+for(let x=309;x<=651;x+=4.3){const l=3+R()*6.5;curl(ev,x,179,PI/2+(R()-.5)*.25,l,0,(R()<.5?-1:1)*(.4+R()*.8),1.5,.3,'m',10);if(R()<.35)el(ev,'circle',{cx:r1(x+(R()-.5)*2),cy:r1(181+l),r:.75,class:'m'})}
+const fr=$('frieze');for(let x=424;x<=652;x+=9){el(fr,'path',{class:'lv',d:circ(x,354,1.7)+circ(x+4.5,358,1)})}
+// gallery portraits
+const po=$('portraits');
+[[332,348],[546,562],[606,622]].forEach(([a,b])=>{
+  [a,b].forEach((x,j)=>{el(po,'ellipse',{cx:x,cy:198,rx:5.4,ry:7,style:'fill:none;stroke:currentColor;stroke-width:1.7'});curl(po,x,190.5,-PI/2,3,0,j?1.4:-1.4,1.2,.3,'m',8);
+    if(j===0)el(po,'path',{class:'m',d:`M${x-3.4} 204.4c0-3 1.6-4.2 3.4-4.4c-1.6-.8-2.2-2.2-1.8-3.6c.2-1.6 1.4-2.6 2.4-2.6c1.4 0 2.4 1 2.4 2.4l1 1.2-.9.4c0 1.2-.6 1.8-1.4 2.2c1.6.4 2.6 1.8 2.6 4.4z`})});
+});
+const ch=$('chandelier');el(ch,'path',{class:'m',d:'M404.6 180h.8v10h-.8zM396 194q9 5 18 0v1.4q-9 5-18 0zM397 190h1.2v4.4h-1.2zM404.4 190h1.2v5.6h-1.2zM411.8 190h1.2v4.4h-1.2z'});
+curl(ch,396,194.5,PI/2+.2,5,0,1.2,1.3,.3,'m',10);curl(ch,414,194.5,PI/2-.2,5,0,-1.2,1.3,.3,'m',10);
+// stairs: two flights, zigzag, with balusters
+const st=$('stairs');
+function flight(x0,y0,x1,y1,n,t){const dx=(x1-x0)/n,dy=(y1-y0)/n;let d=`M${x0} ${y0}`;let x=x0,y=y0;for(let i=0;i<n;i++){y+=dy;d+=`V${r1(y)}`;x+=dx;d+=`H${r1(x)}`}
+  d+=`L${r1(x1+(dx>0?0:0))} ${r1(y1+t)}L${r1(x0+dx*1.2)} ${r1(y0+t*.2)}Z`;el(st,'path',{class:'m',d});
+  for(let i=1;i<n;i++){const bx=x0+dx*i+dx*.5,by=y0+dy*(i+1);el(st,'path',{class:'hl',d:`M${r1(bx)} ${r1(by)}v-11`,style:'stroke-width:.7'})}
+  el(st,'path',{class:'hl',d:`M${r1(x0+dx*.5)} ${r1(y0+dy-11)}L${r1(x1-dx*.5)} ${r1(y1-11)}`,style:'stroke-width:1.4'})}
+flight(441,338,505,286,8,6);el(st,'path',{class:'m',d:'M503 284h16v5h-16z'});flight(519,284,449,224,8,6);el(st,'path',{class:'m',d:'M441 221h12v5h-12z'});
+// studio drapes and valance
+const dr=$('drapes');el(dr,'path',{class:'m',d:'M524 221h130v5h-130z'});scal(dr,527,651,226,2.2,5.2);
+el(dr,'path',{class:'m',d:'M524 224h13c-2 10 2 20-2 30c-1 6 2 12-3 16c4 10 1 20 1 30h-9zM654 224h-12c2 10-2 20 2 30c1 6-2 12 3 16c-4 10-1 20-1 30h8z'});
+curl(dr,535,270,PI/2-.1,10,0,.9,1.6,.3,'m',12);curl(dr,643,270,PI/2+.1,10,0,-.9,1.6,.3,'m',12);
+const so=$('sofa');el(so,'path',{class:'m',d:'M3-13H55Q59-13 59-10V-8H3Z'});scal(so,5,57,-8,1.25,3.2);
+curl(so,5,-9,-PI/2-.05,20,0,-.75,5.5,.8,'m',26);curl(so,57,-10,-PI/2+.15,8,0,.9,3,.5,'m',16);
+curl(so,7,-8,PI/2+.3,8,0,.9,2.2,.5,'m',12);curl(so,54,-8,PI/2-.3,8,0,-.9,2.2,.5,'m',12);
+// Roderick's hair: floating lace
+const hs=$('rod-s-hair');R=rng(5);
+for(let k=0;k<13;k++){const a=PI*.55+k*(PI*1.05/12),cx=-.6,cy=-26.2;const x=cx+Math.cos(a)*3,y=cy+Math.sin(a)*3;const dir=k%2?1:-1;curl(hs,x,y,a+(R()-.5)*.3,6+R()*4.5,0,dir*(1.1+R()*.6),1.2,.25,'',14)}
+[[-7,-28],[-6,-32.5],[-2.6,-34.4],[-8.2,-24.4],[1.6,-34]].forEach(([x,y])=>el(hs,'circle',{cx:x,cy:y,r:.9,style:'fill:none;stroke:currentColor;stroke-width:.55'}));
+curl($('guest-scarf'),2.2,-27.8,.3,16,0,.5,2.6,.5,'',20);
+// façade eyes
+const ey=$('eyes');
+[330,372,414,546,588,630].forEach(x=>{[[214,15],[268,15]].forEach(([y,h])=>{el(ey,'path',{class:'ll',style:'opacity:.75',d:`M${x} ${y-h}Q${x+8} ${y} ${x} ${y+h}Q${x-8} ${y} ${x} ${y-h}Z`});el(ey,'path',{class:'m',d:`M${x-5} ${y-.6}h10v1.2h-10z`})})});
+for(let x=318;x<=642;x+=18)if(Math.abs(x-480)>14)el(ey,'path',{class:'ll',style:'opacity:.6',d:`M${x-2.4} 208V194Q${x} 188 ${x+2.4} 194V208Z`});
+// bank: three white trunks, bare curling crowns, sedges, the causeway
+R=rng(23);const tr=$('trees');
+[[34,354,196,-.05,4.4],[66,352,226,.08,3.8],[98,350,184,-.12,4]].forEach(([x,yb,yt,lean,w],j)=>{
+  const xt=x+lean*120;
+  tree(tr,xt,yt+10,-PI/2+lean*1.4,62+j*8,5.4,4,R);
+  el(tr,'path',{class:'lt',d:`M${x-w} ${yb}C${x-w*.6} ${(yb+yt)/2} ${xt-w*.5} ${yt+20} ${xt-1.4} ${yt}H${xt+1.4}C${xt+w*.5} ${yt+20} ${x+w*.6} ${(yb+yt)/2} ${x+w} ${yb}Z`,style:'stroke:currentColor;stroke-width:2.2'});
+  el(tr,'path',{class:'hl',d:`M${x-1} ${yb-20}c1-6-1-10 0-16M${x+1} ${yb-60}c-1-5 1-9 0-14`,style:'stroke-width:.8'});
+});
+sedges($('sedgeL'),10,170,364,46,8,22,R,.1);
+const cw=$('causeway');
+el(cw,'path',{class:'m',d:'M150 350L282 336V341L150 355Z'});
+[172,206,240,272].forEach((x,k)=>{const y=350-(x-150)*14/132;el(cw,'path',{class:'m',d:`M${x-2} ${r1(y+3)}h4V368h-4z`})});
+for(let k=0;k<3;k++){const xa=[174,208,242][k],xb=[204,238,270][k];const ya=350-(xa-150)*14/132+4;el(cw,'path',{class:'hl',d:`M${xa} 368Q${xa} ${r1(ya+2)} ${(xa+xb)/2} ${r1(ya+1)}Q${xb} ${r1(ya)} ${xb} 368`,style:'stroke-width:2.2'})}
+for(let x=154;x<=278;x+=8){const y=350-(x-150)*14/132;el(cw,'path',{class:'hl',d:`M${x} ${r1(y)}v-7`,style:'stroke-width:.9'});el(cw,'circle',{cx:x,cy:r1(y-7.6),r:.9,class:'m'})}
+el(cw,'path',{class:'hl',d:'M152 343.4L280 329.5',style:'stroke-width:1.2'});
+sedges($('sedgeR'),676,946,362,56,7,18,R,-.05);
+sedges($('sedgeR'),262,298,366,10,8,15,R,0);sedges($('sedgeR'),662,700,366,10,8,15,R,0);
+
+/* ---------- skies ---------- */
+R=rng(41);clouds($('heroClouds'),76,26,980,'#160f22',.86,R,18,40);R=rng(42);clouds($('heroClouds'),128,64,700,'#3c2a4c',.5,R,14,30);
+R=rng(43);clouds($('titleClouds'),120,60,980,'#120c1d',.88,R,16,36);R=rng(44);clouds($('titleClouds'),170,96,760,'#36263f',.5,R,14,28);
+
+/* ---------- dialogue strip: a black cut-paper banner on the glass ---------- */
+const dl=$('dlg');el(dl,'path',{class:'m',d:'M70 576H890V620H70Z',style:'fill:#0b0809'});
+const dlc=el(dl,'g',{style:'color:#0b0809'});
+scal(dlc,76,884,576,2.2,7.4);scal(dlc,76,884,620,2.2,7.4);
+curl(dlc,72,598,PI+.1,30,0,-.55,9,.6);curl(dlc,72,592,-PI/2-.3,22,0,-.8,4,.4);curl(dlc,72,606,PI/2+.3,22,0,.8,4,.4);
+curl(dlc,888,598,-.1,30,0,.55,9,.6);curl(dlc,888,592,-PI/2+.3,22,0,.8,4,.4);curl(dlc,888,606,PI/2-.3,22,0,-.8,4,.4);
+el(dl,'path',{d:'M80 581.5H880M80 614.5H880',style:'stroke:#f7d894;stroke-width:.6;opacity:.35'});
+
+/* ---------- studio ---------- */
+const ln=$('lancets');
+[400,480,560].forEach(cx=>{const d=`M${cx-23} 300V132Q${cx-23} 88 ${cx} 66Q${cx+23} 88 ${cx+23} 132V300Z`;
+  el(ln,'path',{d,fill:'url(#gLamp)'});el(ln,'path',{d,fill:'url(#latticeL)'});
+  el(ln,'path',{d:`M${cx-1.6} 92h3.2v208h-3.2zM${cx-23} 196h46v3h-46z`,style:'fill:#0b0809'});
+  el(ln,'path',{d,style:'fill:none;stroke:#0b0809;stroke-width:5'});
+});
+const sd=$('stDrapes');
+el(sd,'path',{class:'m',d:'M0 0H960V58H0Z'});scal(sd,10,950,58,7,17.5);
+for(let x=46;x<940;x+=88){el(sd,'path',{class:'hl',d:`M${x} 64v16`,style:'stroke-width:1.2'});el(sd,'path',{class:'m',d:`M${x-4} 80h8l-1.4 3c4 4 3 12 0 16h-5.2c-3-4-4-12 0-16z`})}
+const lD=el(sd,'g',{});const rD=el(sd,'g',{transform:'translate(960 0) scale(-1 1)'});
+[lD,rD].forEach(g=>{el(g,'path',{class:'m',d:'M0 50H162C156 120 136 196 98 250C126 300 146 380 136 470H0Z'});
+  scal(g,6,132,470,4.6,9.4);
+  el(g,'path',{d:'M40 70C46 140 40 200 62 246M78 70C84 130 70 190 84 248M70 262C80 320 74 400 84 466M36 270C44 330 38 400 46 466',style:'fill:none;stroke:#e8a868;stroke-width:1;opacity:.42'});
+  el(g,'path',{class:'m',d:'M84 238q20 6 30 18q-6 4-14 2q-10-8-20-12z'});
+  el(g,'path',{class:'hl',d:'M110 256q8 18 4 38',style:'stroke-width:1.6'});
+  el(g,'path',{class:'m',d:'M108 292h12l-2 4c5 6 5 18 0 26h-8c-5-8-5-20 0-26z'});
+  curl(g,114,326,PI/2,10,0,.8,2,.3);curl(g,110,326,PI/2+.3,10,0,-.8,2,.3);
+});
+const ss=$('stSofa');
+el(ss,'path',{class:'m',d:'M180 452H426Q436 452 436 460V470H180Z'});el(ss,'path',{class:'m',d:'M184 470h248v7h-248z'});scal(ss,190,428,477,3.4,8.6);
+curl(ss,190,472,-PI/2-.05,92,0,-.2,22,2.5,'m',60);curl(ss,428,462,-PI/2+.1,34,0,.42,9,1.2,'m',40);
+curl(ss,196,477,PI/2+.35,24,0,.4,7,1,'m',26);curl(ss,420,477,PI/2-.35,24,0,-.4,7,1,'m',26);
+// Roderick at full length, an arm across his eyes against the beam
+el(ss,'path',{class:'m',d:'M206 420C224 414 244 420 268 428C304 436 352 440 402 440C414 440 422 446 416 452H202C192 444 194 428 206 420Z'});
+el(ss,'path',{class:'m',d:'M246 452C252 466 268 474 296 472C326 474 354 466 374 452Z'});scal(ss,256,368,470,2.6,7);
+el(ss,'path',{class:'m',d:'M402 438c6-6 14-8 22-6c2 2 0 4-2 4c-6 0-12 3-16 6z'});
+el(ss,'path',{class:'m',d:'M196 418C190 410 190 398 198 392C204 388 212 388 216 392L222 386L222 393C226 398 226 406 222 412C218 418 206 422 196 418Z'});
+el(ss,'path',{class:'m',d:'M222 424C232 414 236 402 230 392C226 386 218 384 210 386L208 392C214 392 220 394 222 400C224 408 220 414 214 420Z'});
+R=rng(9);for(let k=0;k<26;k++){const a=PI*.38+k*(PI*1.2/25);const x=205+Math.cos(a)*10,y=404+Math.sin(a)*10;const dir=k%2?1:-1;curl(ss,x,y,a+(R()-.5)*.3,26+R()*24,0,dir*(.3+R()*.25),3.6,.45,'m',26)}
+for(let k=0;k<14;k++){const a=PI*.45+k*(PI*1.1/13);el(ss,'circle',{cx:r1(205+Math.cos(a)*(40+R()*14)),cy:r1(404+Math.sin(a)*(38+R()*12)),r:r1(1.8+R()*1.4),style:'fill:none;stroke:currentColor;stroke-width:1.2'})}
+// the rose, shouting
+const ro=$('stRose');
+el(ro,'path',{class:'m',d:'M736 500l-10-4h28l-10 4zM737 496V430h6v66zM724 430h32q-2 -12 -10 -16h-12q-8 4-10 16zM728 414h24v-4h-24z'});
+curl(ro,738,498,PI-.4,14,0,-.9,3,.5);curl(ro,742,498,.4,14,0,.9,3,.5);
+const stem=walk(740,410,-PI/2-.15,120,-.002,-.012,40);el(ro,'path',{class:'m',d:taper(stem,4,2.6)});
+for(let i=6;i<36;i+=6){const p=stem[i];el(ro,'path',{class:'m',d:`M${r1(p[0]+1.5)} ${r1(p[1])}l5 -3 -4 5z`})}
+[[14,1,.5],[24,-1,.8]].forEach(([i,s,a])=>{const p=stem[i];  el(ro,'path',{class:'m',d:`M${r1(p[0])} ${r1(p[1])}q${s*12} -14 ${s*30} -8q${-s*8} 12 ${-s*30} 8z`});
+  el(ro,'path',{d:`M${r1(p[0]+s*4)} ${r1(p[1]-2)}q${s*10} -6 ${s*22} -5`,style:'fill:none;stroke:#e8a868;stroke-width:.8;opacity:.6'})});
+const top=stem[stem.length-1];el(ro,'circle',{cx:r1(top[0]),cy:r1(top[1]-10),r:20,class:'m'});
+el(ro,'path',{class:'m',d:`M${r1(top[0]-22)} ${r1(top[1]-2)}q22 16 44 0q-6 12-22 14q-16-2-22-14z`});
+const sp=[];for(let t=0;t<5.2*PI;t+=.2){const rr=1.2+t*1.05;sp.push(r1(top[0]+Math.cos(t)*rr)+' '+r1(top[1]-10+Math.sin(t)*rr*.85))}
+el(ro,'path',{d:'M'+sp.join('L'),style:'fill:none;stroke:#e8a868;stroke-width:1;opacity:.75'});
+// little marching curls for the band
+const bc=$('bandCurls');curl(bc,-6,-16,PI*.85,24,0,-.5,3.2,.4);curl(bc,-4,-6,PI*.95,16,0,.6,2.2,.4);
+curl(bc,292,-24,-.1,20,0,.55,3,.4);curl(bc,290,-10,.15,14,0,-.7,2.2,.4);
+
+/* ---------- trist ---------- */
+const rn=$('rain');R=rng(77);let rd='';for(let i=0;i<150;i++){const x=R()*1000-20,y=R()*480,l=14+R()*20;rd+=`M${r1(x)} ${r1(y)}l${r1(-l*.2)} ${r1(l)}`}el(rn,'path',{d:rd});
+const ts=$('tristScene');
+el(ts,'path',{class:'m',d:'M0 470C120 462 240 468 380 466C520 464 700 470 960 466V540H0Z'});
+R=rng(31);sedges(ts,14,946,470,90,10,26,R,0);
+tree(ts,96,470,-PI/2+.12,130,13,4,rng(3));
+// hut, thatch, chimney, firelit window, door with light round it
+el(ts,'path',{class:'m',d:'M528 470V336H808V470Z'});
+el(ts,'path',{class:'m',d:'M486 346Q560 252 664 226Q770 252 842 346Z'});scal(ts,494,834,348,6.5,13);
+R=rng(8);for(let x=500;x<830;x+=6){const l=5+R()*12;curl(ts,x,350,PI/2+(R()-.5)*.3,l,0,(R()<.5?-1:1)*(.3+R()*.5),2,.3,'m',12)}
+el(ts,'path',{class:'m',d:'M742 262l20-4 4 52-22 2z'});curl(ts,752,258,-PI/2-.4,30,0,-.25,6,1);curl(ts,758,250,-PI/2+.1,40,0,.2,4,.6);
+el(ts,'circle',{cx:762,cy:396,r:14,style:'fill:#f2b866'});el(ts,'path',{class:'m',d:'M760.5 382h3v28h-3zM748 394.5h28v3h-28z'});
+el(ts,'path',{d:'M594 470V338H696V470Z',style:'fill:#f2b866'});
+el(ts,'path',{class:'m',d:'M598 470V342H692V470Z'});
+el(ts,'path',{d:'M613.7 344V470M629.3 344V470M645 344V470M660.7 344V470M676.3 344V470',style:'stroke:#c98a52;stroke-width:1.1;opacity:.7'});
+// the player's strokes, cut through the planks
+el(ts,'path',{d:'M606 384l18 4 6-3 14 6 12 1 10 5 14 2-14 1-12-3-12-1-14-5-6 2-18-6z',style:'fill:#fbe3a6'});
+el(ts,'path',{d:'M612 432l14-4 10 2 14-6 12 1 14-6 6 0-8 4-12 4-12 0-14 6-10-2-14 4z',style:'fill:#fbe3a6'});
+[[688,394],[692,398],[684,402],[620,436]].forEach(([x,y])=>el(ts,'circle',{cx:x,cy:y,r:1.2,style:'fill:#fbe3a6'}));
+el(ts,'path',{class:'m',d:'M684 404h8v6h-8z'});
+el(ts,'text',{class:'t',x:732,y:452,style:'font-size:22px;font-style:italic;fill:#f7d894'}).textContent='“Nobody’s home!”';
+// Ethelred, swaying, mace up
+const et=el(ts,'g',{transform:'rotate(5 330 470)'});
+el(et,'path',{class:'m',d:'M318 470l-8-2 4-60h12l2 60zM338 470l10-2-4-60h-12l-2 60z'});
+el(et,'path',{class:'m',d:'M300 412C298 380 304 350 312 330H352C360 350 364 380 362 412Z'});scal(et,302,360,412,3.6,7.2);
+el(et,'path',{class:'m',d:'M312 330C306 320 308 306 318 300H346C356 306 358 320 352 330Z'});
+el(et,'path',{class:'m',d:'M316 300C312 290 314 270 322 262C332 254 344 258 348 268C352 278 350 292 346 300Z'});
+el(et,'path',{d:'M322 279h26v2.6h-26z',style:'fill:#a796bf;opacity:.85'});
+R=rng(4);for(let k=0;k<9;k++){curl(et,328+k*2,260,-PI/2-1.3+k*.13,34+R()*16,0,(k%2?1:-1)*(.2+R()*.16),4.6,.5,'m',26)}
+el(et,'path',{class:'m',d:'M346 316C362 300 372 278 368 256L376 254C382 280 370 306 352 324Z'});
+el(et,'path',{class:'m',d:'M364 258L330 196l5-3 34 62z'});
+el(et,'circle',{cx:328,cy:192,r:11,class:'m'});
+for(let k=0;k<8;k++){const a=k*PI/4;el(et,'path',{class:'m',d:`M${r1(328+Math.cos(a-.25)*10)} ${r1(192+Math.sin(a-.25)*10)}L${r1(328+Math.cos(a)*18)} ${r1(192+Math.sin(a)*18)}L${r1(328+Math.cos(a+.25)*10)} ${r1(192+Math.sin(a+.25)*10)}Z`})}
+el(et,'path',{class:'m',d:'M304 340C292 360 286 380 288 400L282 402C280 380 286 356 298 336Z'});
+// the flagon at his feet
+el(ts,'path',{class:'m',d:'M240 470c-4-10-4-20 2-26v-6h10v6c6 6 6 16 2 26zM254 448c8 0 8 12 0 12'});
+// the arc you will draw
+const arc=[];for(let t=.08;t<=.98;t+=.045){const x=(1-t)*(1-t)*346+2*(1-t)*t*500+t*t*640,y=(1-t)*(1-t)*182+2*(1-t)*t*150+t*t*392;arc.push(circ(x,y,2.6))}
+el($('trist'),'path',{d:arc.join(''),style:'fill:#ede2cb;opacity:.9'});
+$('trist').insertBefore($('trist').lastElementChild,$('trist').querySelector(':scope > text'));
+
+/* ---------- title cartouche ---------- */
+const ca=$('cartouche');el(ca,'path',{d:'M206 30H754V128H206Z',style:'fill:#0b0809'});
+el(ca,'path',{d:'M220 42H740V116H220Z',fill:'url(#gLamp)'});
+const cc=el(ca,'g',{style:'color:#0b0809'});scal(cc,226,734,42,2.4,7.5);scal(cc,226,734,116,2.4,7.5);
+[[206,1],[754,-1]].forEach(([x,s])=>{curl(cc,x,79,s>0?PI:0,40,0,s*-.42,12,.7,'m',40);curl(cc,x,50,s>0?PI-.5:.5,26,0,s*-.6,5,.4);curl(cc,x,108,s>0?PI+.5:-.5,26,0,s*.6,5,.4)});
+curl(cc,480,30,-PI/2-.2,20,0,-.7,4,.4);curl(cc,480,30,-PI/2+.2,20,0,.7,4,.4);el(cc,'circle',{cx:480,cy:22,r:2.6,class:'m'});
+el(ca,'text',{class:'t',x:480,y:93,'text-anchor':'middle',style:'font-size:43px;fill:#0b0809'}).textContent='A Sojourn of Some Weeks';
+el(ca,'text',{class:'t caps',x:480,y:152,'text-anchor':'middle',style:'font-size:13px;fill:#f7d894;opacity:.85'}).textContent='after Poe · The Fall of the House of Usher';
+
+['hero','studio','trist','title'].forEach(id=>frame($(id)));
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)document.querySelectorAll('svg').forEach(s=>s.pauseAnimations&&s.pauseAnimations());
+})();
+</script>
+</body>
+</html>
