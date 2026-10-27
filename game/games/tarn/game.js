@@ -61,9 +61,10 @@ const CSS = `
 .g-tarn .slot .r{fill:var(--g-tarn-ring);opacity:.22}
 .g-tarn .slot .f{fill:var(--g-tarn-ring);transform:scale(0);transform-box:fill-box;transform-origin:center;transition:transform .35s ease-out}
 .g-tarn .slot.full .f{transform:scale(1)}
-.g-tarn .slot.smear .f{transition-duration:1.2s}
+.g-tarn .slot.smear .f{transition:none}
+.g-tarn .slot.smear .r{opacity:.1}
 .g-tarn .slot .sm{fill:var(--g-tarn-smear);opacity:0;transition:opacity .3s}
-.g-tarn .slot.smear .sm{opacity:.95;transition:opacity 1.2s ease-in}
+.g-tarn .slot.smear .sm{opacity:.9;transition:opacity 1.2s ease-in}
 .g-tarn .slot .dr{opacity:0;transition:opacity .3s}
 .g-tarn .slot.drip .dr{opacity:1;transition:none}
 .g-tarn .slot .dr path{fill:var(--g-tarn-smear);transform:scaleY(0);transform-box:fill-box;transform-origin:50% 0;transition:transform 1.6s ease-in}
@@ -72,6 +73,7 @@ const CSS = `
 .g-tarn .slot.drip .dr circle{opacity:1}
 .g-tarn.rm .slot .f{transform:none;opacity:0;transition:opacity .3s}
 .g-tarn.rm .slot.full .f{opacity:1}
+.g-tarn.rm .slot.smear .f{transition:none}
 .g-tarn.rm .slot .dr path,.g-tarn.rm .slot .dr circle{transition:none}
 .g-tarn .six{opacity:0;transition:opacity .4s}
 .g-tarn .six.on{opacity:1}
@@ -94,8 +96,8 @@ const CSS = `
 // (at 'sky': behind the whole cut; 'face': behind the detail, over the wall).
 // house/water: the false (above) and true (below) states.
 const DIFFS = [
-  { id: 'crack', hits: [{ x: 430, y: 200, r: 90 }, { x: 434, y: 300, r: 55 }, { x: 505, y: 148, r: 70 }, { x: 504, y: 214, r: 50 }],
-    loop: { cx: 504, cy: 220, rx: 32, ry: 124, at: 'face' } },
+  { id: 'crack', hits: [{ x: 430, y: 200, r: 90 }, { x: 434, y: 300, r: 55 }, { x: 505, y: 148, r: 70 }, { x: 504, y: 196, r: 44 }],
+    loop: { cx: 504, cy: 168, rx: 30, ry: 66, at: 'face' } },   // helper and halo stop short of the door
   { id: 'smoke', hits: [{ x: 640, y: 70, r: 70 }], loop: { cx: 632, cy: 70, rx: 40, ry: 46, at: 'sky' },
     house: 'on', water: 'off', drip: { x: 645, y: 98 } },
   { id: 'tree', hits: [{ x: 150, y: 230, r: 90 }, { x: 98, y: 300, r: 50 }, { x: 62, y: 262, r: 58 }, { x: 214, y: 200, r: 80 }],
@@ -230,7 +232,7 @@ export default {
     root.className = 'g-tarn' + (rm ? ' rm sh-still' : '');
     const slotsSvg = [0, 1, 2, 3, 4].map(i => `<g class="slot" transform="translate(${14 + i * 28} 14)">
         <circle class="f" r="10"/><circle class="r" r="10"/>
-        <path class="sm" d="M-10 2.5C-8-3-2-6.5 4-6C9-5.5 11-1.5 8.5 1.5C6 4.5 1 3.5-3 6.5C-6 9-10.5 7-10 2.5Z"/>
+        <path class="sm" d="M-9.5 5.2C-5 10.6 5 11.4 12.6 6.4C13.6 5.8 13.4 7.4 12.4 8.2C5.4 13.6-5.6 13-10.4 6.6C-10.8 5.9-10 4.6-9.5 5.2ZM9.6 2.6C11.6 1.6 13.6 2.6 13.2 4.4C12.2 4.2 10.8 4 9.6 2.6Z"/>
         <g class="dr"><path d="M-1 6h4l-1.1 22h-1.8z"/><circle cx="1" cy="30.5" r="2.6"/></g></g>`).join('');
     root.innerHTML = `<style>${CSS}</style>
 <svg class="tarn-svg" viewBox="0 0 960 640" preserveAspectRatio="xMidYMid meet" role="img"
@@ -317,7 +319,9 @@ export default {
       slotState[i] = s;
       slotEls[i].classList.remove('empty', 'full', 'smear', 'drip');
       slotEls[i].classList.add(s);
-      live.textContent = `${slotState.filter(x => x === 'full').length} of five`;
+      // the count is said when the dots show it: at once when one empties, as a filling one lands
+      const say = () => { live.textContent = `${slotState.filter(x => x === 'full').length} of five`; };
+      if (s === 'full') later(say, 360); else say();
     };
     const setVariant = (id, val, ms, fresh) => {
       above.querySelectorAll(`[data-d="${id}"]`).forEach(g => {
