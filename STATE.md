@@ -1,19 +1,13 @@
 # State — 2026-10-26
 
-**Phase 1: Story.** What the player lives through, and why this tale makes a game.
+**Phase 1: Story → concept.** Back to the drawing board (Lukas, 18:50): recognizable genre, visually pleasing, a simple graphic interface that carries the story; the twist / mirror / upside-down house.
 
-**Now:** story round done. Blind drafts, critiques and v2s are in work/story/; the distilled options are in work/story/OPTIONS.md (Perfect Keeping, Nevertheless, The Coincidence Alone). Coordinator's pick: Perfect Keeping.
+**Now:** concept sprint. Four specialists (puzzle-box, mind-game, deduction, tiny-hit), one 350-word concept each → work/concept/. Briefs: briefs/concept-*.md. Round-one story work (work/story/) is raw material; prototypes in work/proto/ were stopped unfinished.
 
-| Specialist | Seat | Brief | Output |
-|---|---|---|---|
-| Narrative designer | the narrator | briefs/story-01-narrator.md | work/story/01-narrator.md |
-| Poe/gothic scholar | Madeline | briefs/story-02-madeline.md | work/story/02-madeline.md |
-| Systems designer | the house + Roderick | briefs/story-03-house.md | work/story/03-house.md |
-| Reading-interface designer | the reader | briefs/story-04-reader.md | work/story/04-reader.md |
 
-**Next:** coordinator distils 2–3 directions with one pick → Lukas picks → Mechanics + Design as one quick phase, while a build instance starts the reading surface.
+**Next:** coordinator distils 2–3 concepts with one pick → Lukas picks → build handoff (about 60 min of build).
 
-**Open with Lukas:** pick a story direction.
+**Open with Lukas:** nothing until the concepts land.
 
 **Time box:** competition entry, ~2.5h total window from about 17:45. Most of it goes on the idea; then a playable slice.
 

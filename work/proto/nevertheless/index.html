@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nevertheless</title>
+<style>
+@font-face{font-family:"Fell";src:url("../fonts/im-fell-normal.woff2") format("woff2");font-style:normal;font-display:swap}
+@font-face{font-family:"Fell";src:url("../fonts/im-fell-italic.woff2") format("woff2");font-style:italic;font-display:swap}
+:root{--paper:#f2eee5;--ink:#29272a;--muted:#625d5a;--rule:#cbc3b8;--red:#7a3939}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink)}
+body{font-family:"Fell",Georgia,"Times New Roman",serif;font-size:19px;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.wrap{max-width:34rem;margin:0 auto;padding:18px 16px 56px}
+button{font:inherit;color:inherit}
+
+/* running head */
+.run{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--rule);padding-bottom:.45rem;min-height:1.7rem}
+.run:empty{border-color:transparent}
+.run .lb{background:none;border:0;padding:0 .2rem;cursor:pointer;font-style:italic;text-transform:none;letter-spacing:.02em;font-size:.82rem;color:var(--muted);text-decoration:underline dotted var(--rule);text-underline-offset:.25em}
+.run .lb:hover{color:var(--ink)}
+.where{white-space:nowrap;font-variant-numeric:oldstyle-nums}
+
+/* the page and its crack */
+.stage{position:relative}
+.crack{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.12;transition:opacity 2.8s ease}
+.crack.seen{opacity:.5}
+.crack polyline,.beneath polyline{fill:none;stroke:var(--muted);stroke-width:1;vector-effect:non-scaling-stroke;stroke-linejoin:miter}
+.page{position:relative;padding:1.4rem 0 .4rem;transition:opacity .16s ease,transform .16s ease;outline:none}
+.page.out{opacity:0;transform:translateX(-10px)}
+.page.shake{animation:shake .2s}
+.page.jolt{animation:jolt .5s}
+@keyframes shake{25%{transform:translate(2px,1px)}50%{transform:translate(-2px,-1px)}75%{transform:translate(1px,-1px)}}
+@keyframes jolt{20%{transform:translateY(-3px)}45%{transform:translateY(1px)}}
+
+.num{text-align:center;font-size:2.7rem;line-height:1;margin:.1rem 0 1.1rem;font-variant-numeric:oldstyle-nums}
+.num::before,.num::after{content:"";display:inline-block;width:2.2rem;height:1px;background:var(--rule);vertical-align:middle;margin:0 .75rem}
+.num.flip{transform:scaleY(-1);color:var(--muted)}
+.body p{margin:0 0 .85em;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+.body p.solo{text-align:left;font-size:1.32rem;line-height:1.4;margin:1.6rem 0 1.2rem;hyphens:manual;-webkit-hyphens:manual}
+.margin{font-style:italic;color:var(--muted);font-size:.86rem;text-align:right;margin:.3rem 0 .9rem}
+.reflect{transform:scaleY(-1);opacity:.3;filter:blur(.4px);user-select:none;-webkit-mask-image:linear-gradient(to top,#000 0%,transparent 90%);mask-image:linear-gradient(to top,#000 0%,transparent 90%)}
+.reflect p{margin:0 0 .5em;text-align:justify}
+.madeline{transition:none}
+.madeline.go{animation:pass 10s cubic-bezier(.55,0,.85,.35) forwards}
+.madeline .without{transition:opacity 2.2s ease,letter-spacing 2.2s ease}
+.madeline .without.gone{opacity:0;letter-spacing:-.6em}
+@keyframes pass{to{transform:translateX(115%);opacity:0}}
+
+/* choices */
+.choices{margin-top:1.3rem;border-top:1px solid var(--rule);padding-top:.4rem}
+.choice{display:block;width:100%;text-align:left;background:none;border:0;padding:.62rem 0;font:italic 1.03rem/1.4 "Fell",Georgia,serif;color:var(--ink);cursor:pointer;min-height:44px}
+.choice .to{font-style:normal;white-space:nowrap}
+.choice .to b{font-weight:normal;color:var(--red)}
+.choice:hover .lab,.choice:focus-visible .lab{text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:.22em}
+.choice:focus-visible{outline:1px dotted var(--muted);outline-offset:4px}
+.choice.nope{animation:nope .4s}
+@keyframes nope{20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
+.choice.strike{font-size:1.2rem;text-align:center;border:1px solid var(--ink);margin:.7rem auto .2rem;max-width:16rem;padding:.6rem 1rem}
+.choice.strike:active{transform:translateY(1px)}
+.deny{font-style:italic;color:var(--red);font-size:.88rem;margin:.1rem 0 .4rem;min-height:1.2em}
+
+/* adventure sheet */
+.sheet{margin-top:1.2rem;border-top:1px solid var(--rule);padding-top:.5rem;font-size:.74rem;letter-spacing:.05em;color:var(--muted);display:flex;flex-wrap:wrap;gap:.15rem 1.1rem}
+.sheet:empty{border-color:transparent}
+.sheet .who{width:100%;font-style:italic;letter-spacing:.02em}
+.sheet b{font-weight:normal;color:var(--ink);transition:color 2.4s ease}
+.sheet b.flash{color:var(--red);transition:none}
+.sheet b.odd{color:var(--paper);background:var(--muted);transition:none;padding:0 .2em}
+
+/* title page */
+.title{text-align:center;padding-top:1.4rem}
+.title .small{font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.title h1{font-weight:normal;font-size:2.05rem;line-height:1.15;letter-spacing:.05em;margin:.9rem 0 .3rem}
+.title .or{font-style:italic;color:var(--muted);margin:.2rem 0}
+.title h2{font-weight:normal;font-size:1.55rem;letter-spacing:.28em;text-transform:uppercase;margin:.2rem 0 1rem;color:var(--red)}
+.title .sub{font-style:italic}
+.rules{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:.9rem .2rem;margin:1.5rem 0 .4rem;font-size:.95rem;text-align:left}
+.title .choices{border:0;text-align:center}
+.title .choice{display:inline-block;width:auto;border:1px solid var(--ink);padding:.6rem 1.6rem;font-size:1.15rem;text-align:center}
+.fn{font-size:.8rem;color:var(--muted);text-align:left;margin-top:2.6rem;padding-top:.3rem;border-top:1px solid var(--rule);width:7rem}
+
+/* the second book */
+body.trist .page{border:3px double var(--muted);padding:1.1rem 1rem .6rem;margin-top:1rem}
+body.trist .num{color:var(--red);font-size:1.9rem;letter-spacing:.12em}
+body.trist .num::before,body.trist .num::after{width:1.2rem}
+.init{float:left;font-size:3.2em;line-height:.82;color:var(--red);margin:.07em .08em 0 0}
+.tristhead{text-align:center;margin:0 0 1rem}
+.tristhead .t{font-size:1.35rem;letter-spacing:.24em;text-transform:uppercase}
+.tristhead .s{font-style:italic;color:var(--muted);font-size:.88rem}
+.apparatus{font-style:italic;color:var(--red);font-size:.9rem;text-align:center;margin:.2rem 0 .6rem}
+.blow{animation:struck .5s ease-out}
+@keyframes struck{from{opacity:0;letter-spacing:.5em}to{opacity:1;letter-spacing:normal}}
+.foot{font-size:.8rem;line-height:1.45;color:var(--muted);margin-top:1rem;padding-top:.5rem;border-top:1px solid var(--rule);text-align:left;opacity:0;transition:opacity 2s ease}
+.foot.show{opacity:1}
+
+/* beneath the page */
+.beneath{position:relative;height:0;overflow:hidden;transition:height 1.4s ease}
+.beneath.open{height:7.5rem}
+.beneath svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.62}
+.echo{position:absolute;left:0;right:0;bottom:.4rem;text-align:center;line-height:2}
+.echo span{display:inline-block;margin:0 .45rem;font-style:italic;letter-spacing:.3em;color:var(--muted);opacity:0;filter:blur(6px);transform:translateY(26px);transition:opacity 2.4s ease,filter 2.4s ease,transform 2.4s ease}
+
+.stub{text-align:center;font-style:italic;color:var(--muted);margin:3.2rem 0 2.4rem;font-size:1.15rem;letter-spacing:.04em}
+.again{display:block;margin:0 auto 1rem;background:none;border:0;border-bottom:1px solid var(--rule);font-style:italic;color:var(--muted);cursor:pointer;padding:.4rem 0}
+
+@media (max-width:480px){
+  body{font-size:17.5px}
+  .num{font-size:2.3rem}
+  .body p{text-align:left}
+  .title h1{font-size:1.75rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body class="title">
+<div class="wrap">
+  <header class="run" id="run"></header>
+  <div class="stage">
+    <svg class="crack" id="crack" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline id="crackline" points=""/></svg>
+    <main class="page" id="page" tabindex="-1"></main>
+  </div>
+  <div class="beneath" id="beneath" aria-live="polite">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline id="crack2" points=""/></svg>
+    <div class="echo" id="echo"></div>
+  </div>
+  <footer class="sheet" id="sheet"></footer>
+</div>
+<noscript><p style="text-align:center">This book requires its reader to have scripts enabled. Nevertheless.</p></noscript>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const page = $("#page");
+
+const st = {
+  cur: null, view: null, hist: [], visits: {},
+  made: 0, altered: 0, might: 1, looks: 0, blows: 0,
+  crack: [[82, 0]], dir: 1, seen: false, book: "title"
+};
+let busy = false, epoch = 0;
+
+/* ---------------------------------------------------------------
+   THE BOOK. Poe is quoted verbatim (block ids in the notes).
+   Choices, joins, apparatus and the Trist's padding are ours.
+---------------------------------------------------------------- */
+const S = {
+  title: {
+    book: "title", num: "",
+    body: () => `<div class="title">
+      <div class="small">Being an Entertainment in Numbered Sections</div>
+      <h1>The Fall of the<br>House of Usher</h1>
+      <div class="or">— or, —</div>
+      <h2>Nevertheless</h2>
+      <div class="sub">in which YOU are the Visitor</div>
+      <div class="rules">Read each section. At its foot you will find choices. Choose one, and turn to the section it names. Your choices are your own.*</div>
+    </div>`,
+    after: () => {
+      page.insertAdjacentHTML("beforeend", `<div class="fn">* See 2.</div>`);
+    },
+    choices: [{ lab: "Begin at 1", to: "1", free: true, bare: true }]
+  },
+
+  "1": {
+    num: "1",
+    body: () => `<p>DURING the whole of a dull, dark, and soundless day in the autumn of the year, when the clouds hung oppressively low in the heavens, I had been passing alone, on horseback, through a singularly dreary tract of country; and at length found myself, as the shades of the evening drew on, within view of the melancholy House of Usher. I know not how it was — but, with the first glimpse of the building, a sense of insufferable gloom pervaded my spirit.</p>`,
+    choices: [
+      { lab: "To ride on to the House,", to: "3" },
+      { lab: "To turn your horse for home,", to: "2" }
+    ]
+  },
+
+  "2": {
+    num: "2",
+    body: () => {
+      const v = st.visits["2"];
+      if (v === 1) return `<p class="solo">Nevertheless, in this mansion of gloom I now proposed to myself a sojourn of some weeks.</p>`;
+      if (v === 2) return `<p class="solo">… which allowed me no room for hesitation; and I accordingly obeyed forthwith what I still considered a very singular summons.</p>`;
+      if (v === 3) return `<p class="solo" style="font-size:2rem;text-align:center">Nevertheless.</p>`;
+      return `<p class="solo">“Thus, thus, and not otherwise …”</p><p class="margin">The book has run out of ways to say it.</p>`;
+    },
+    choices: [{ lab: "", to: "3" }]
+  },
+
+  "3": {
+    num: "3",
+    body: () => {
+      const direct = st.hist[st.hist.length - 2] === "1" && !st.visits["2"];
+      return (direct ? `<p class="margin">You did not even try to leave. The book had a page ready for that. It will keep it.</p>` : "") +
+      `<p>… I reined my horse to the precipitous brink of a black and lurid tarn that lay in unruffled lustre by the dwelling, and gazed down — but with a shudder even more thrilling than before — upon the re-modelled and inverted images of the gray sedge, and the ghastly tree-stems, and the vacant and eye-like windows.</p>
+      <div class="reflect" aria-hidden="true"><p>upon the re-modelled and inverted images of the gray sedge, and the ghastly tree-stems, and the vacant and eye-like windows.</p></div>`;
+    },
+    choices: () => {
+      const v = st.visits["2"] || 0;
+      const home = v === 0 ? "To turn for home after all," : v === 1 ? "To turn for home again," : "To turn for home (you know how this goes),";
+      return [
+        { lab: "To scan the house more narrowly,", to: "6" },
+        { lab: home, to: "2" }
+      ];
+    }
+  },
+
+  "6": {
+    num: "6",
+    body: () => `<p>Shaking off from my spirit what <em>must</em> have been a dream, I scanned more narrowly the real aspect of the building. Its principal feature seemed to be that of an excessive antiquity. The discoloration of ages had been great. … Perhaps the eye of a scrutinizing observer might have discovered a barely perceptible fissure, which, extending from the roof of the building in front, made its way down the wall in a zigzag direction, until it became lost in the sullen waters of the tarn.</p>`,
+    after: () => { st.seen = true; drawCrack(); },
+    choices: [
+      { lab: "To ride over the causeway to the house,", to: "7" },
+      { lab: "To remark upon the fissure,", to: "8" }
+    ]
+  },
+
+  "8": {
+    num: "8",
+    body: () => `<p class="solo">Such opinions need no comment, and I will make none.</p>`,
+    choices: [{ lab: "", to: "7" }]
+  },
+
+  "7": {
+    num: "7",
+    body: () => `<p>Noticing these things, I rode over a short causeway to the house. A servant in waiting took my horse, and I entered the Gothic archway of the hall. A valet, of stealthy step, thence conducted me, in silence, through many dark and intricate passages in my progress to the <em>studio</em> of his master. … On one of the staircases, I met the physician of the family. His countenance, I thought, wore a mingled expression of low cunning and perplexity.</p>`,
+    choices: [
+      { lab: "To question the physician,", to: "9" },
+      { lab: "To follow the valet to his master,", to: "10" }
+    ]
+  },
+
+  "9": {
+    num: "9",
+    body: () => `<p class="solo">He accosted me with trepidation and passed on.</p>`,
+    choices: [{ lab: "", to: "10" }]
+  },
+
+  "10": {
+    num: "10",
+    body: () => `<p>The valet now threw open a door and ushered me into the presence of his master. … Upon my entrance, Usher arose from a sofa on which he had been lying at full length, and greeted me with a vivacious warmth which had much in it, I at first thought, of an overdone cordiality —</p>
+      <p class="madeline" id="mad">While he spoke, the lady Madeline (for so was she called) passed slowly through a remote portion of the apartment, and, <span class="without">without </span>having noticed my presence, disappeared.</p>`,
+    after: () => {
+      const e = epoch;
+      wait(3800).then(() => { if (e === epoch) $("#mad .without").classList.add("gone"); })
+        .then(() => wait(2600)).then(() => { if (e === epoch) $("#mad").classList.add("go"); });
+    },
+    choices: [
+      { lab: "To follow her,", to: "11" },
+      { lab: "To ask your friend who she is,", to: "12" }
+    ]
+  },
+
+  "11": {
+    num: "11",
+    body: () => `<p class="solo">… the lady, at least while living, would be seen by me no more.</p>`,
+    choices: [{ lab: "", to: "bridge" }]
+  },
+
+  "12": {
+    num: "12",
+    body: () => `<p class="solo">For several days ensuing, her name was unmentioned by either Usher or myself:</p>`,
+    choices: [{ lab: "", to: "bridge" }]
+  },
+
+  bridge: {
+    num: "…",
+    body: () => `<p class="stub">— the slice continues —</p>`,
+    choices: [{ lab: "Some nights later, a storm:", to: "33" }]
+  },
+
+  "33": {
+    num: "33",
+    body: () => `<p>I had taken but few turns in this manner, when a light step on an adjoining staircase arrested my attention. I presently recognised it as that of Usher. In an instant afterward he rapped, with a gentle touch, at my door, and entered, bearing a lamp. …</p>
+      <p>“Here is one of your favorite romances. I will read, and you shall listen; — and so we will pass away this terrible night together.”</p>`,
+    choices: [
+      { lab: "To read him the “Mad Trist” of Sir Launcelot Canning,", to: "37" },
+      { lab: "To find a better book,", to: "36" }
+    ]
+  },
+
+  "36": {
+    num: "36",
+    body: () => `<p class="solo">It was, however, the only book immediately at hand;</p>`,
+    choices: [{ lab: "", to: "37" }]
+  },
+
+  "37": {
+    num: "37",
+    body: () => `<p>The antique volume which I had taken up was the “Mad Trist” of Sir Launcelot Canning; but I had called it a favorite of Usher’s more in sad jest than in earnest; for, in truth, there is little in its uncouth and unimaginative prolixity which could have had interest for the lofty and spiritual ideality of my friend.</p>`,
+    choices: [{ lab: "To open it,", to: "T1" }]
+  },
+
+  /* ---------------- THE MAD TRIST: the book that lets you ---------------- */
+  T1: {
+    book: "trist", num: "I",
+    body: () => `<div class="tristhead"><div class="t">The Mad Trist</div><div class="s">of Sir Launcelot Canning, Knt. · a Romance, wherein Thou art the Champion</div></div>
+      <p><span class="init">H</span>ERE beginneth the Trist. Thou art Ethelred, the hero of the Trist, and hast sought in vain for peaceable admission into the dwelling of the hermit; and the rain is upon thy shoulders, and the tempest riseth, and at thy belt there hangeth a flagon of wine, and in thy hand a mace, and the door of the hermit, being shut, abideth shut, as doors will.</p>
+      <p class="apparatus">Mark upon thy sheet that thy MIGHT is 1.</p>`,
+    choices: () => tristChoices(true)
+  },
+
+  T2: {
+    book: "trist", num: "II",
+    body: () => `<p class="solo">— waited no longer to hold parley with the hermit, who, in sooth, was of an obstinate and maliceful turn —</p>`,
+    choices: () => tristChoices(false)
+  },
+
+  T3: {
+    book: "trist", num: "III",
+    enter: () => { st.might += 3; st.altered += 1; },
+    body: () => st.visits.T3 === 1
+      ? `<p><span class="init">A</span>nd Ethelred, who was by nature of a doughty heart, and who was now mighty withal, on account of the powerfulness of the wine which he had drunken —</p><p class="apparatus">Add 3 to thy MIGHT.</p>`
+      : `<p><span class="init">A</span>nd Ethelred drank yet again, the flagon being, in sooth, of a prodigious and most bottomless capacity, whereby he waxed mightier withal, and doughtier, and was become exceeding loud —</p><p class="apparatus">Add 3 more to thy MIGHT. It is ${st.might}.</p>`,
+    after: () => { flash("mt", "flash"); flash("alt", "flash"); },
+    choices: [
+      { lab: "To drink yet more,", to: "T3" },
+      { lab: "To uplift thy mace,", to: "T4" }
+    ]
+  },
+
+  T4: {
+    book: "trist", num: "IV",
+    enter: () => { st.blows = 0; },
+    body: () => `<p><span class="init">B</span>ut, feeling the rain upon his shoulders, and fearing the rising of the tempest, uplifted his mace outright, and, with blows, made quickly room in the plankings of the door for his gauntleted hand; and now pulling therewith sturdily, he so<span id="blows"></span><span id="rest"></span></p>`,
+    choices: [{ lab: "Strike the door.", strike: true }]
+  },
+
+  "40": {
+    num: "40",
+    body: () => `<p>… amid the rattling of the sashes of the casements, and the ordinary commingled noises of the still increasing storm, the sound, in itself, had nothing, surely, which should have interested or disturbed me.</p><p class="solo">I continued the story:</p>`,
+    choices: [{ lab: "", to: "T5" }]
+  },
+
+  T5: {
+    book: "trist", num: "V",
+    body: () => `<p class="stub">— the slice continues —</p>`,
+    after: () => {
+      page.insertAdjacentHTML("beforeend", `<button class="again" id="again">Begin again at 1</button>`);
+      $("#again").addEventListener("click", () => location.reload());
+    },
+    choices: []
+  }
+};
+
+function tristChoices(withParley) {
+  const c = [];
+  if (withParley) c.push({ lab: "To hold parley with the hermit,", to: "T2" });
+  c.push({ lab: "To drink of thy wine,", to: "T3" });
+  c.push({
+    lab: "If thy MIGHT be three or more, to uplift thy mace,", to: "T4",
+    need: () => st.might >= 3,
+    deny: () => `Thy MIGHT is but ${st.might}. Hast thou not wine?`
+  });
+  return c;
+}
+
+/* ---------------- turning pages ---------------- */
+const numOf = id => S[id].num;
+
+async function riffle(a, b) {
+  const el = $("#where");
+  const A = parseInt(a, 10), B = parseInt(b, 10);
+  if (!el || isNaN(A) || isNaN(B) || A === B) { await wait(170); return; }
+  const n = Math.min(Math.abs(B - A), 12);
+  for (let i = 1; i <= n; i++) {
+    el.textContent = "§ " + Math.round(A + (B - A) * i / n);
+    await wait(Math.max(22, 170 / n));
+  }
+}
+
+async function go(id, opt = {}) {
+  if (busy) return;
+  busy = true;
+  const from = st.view && S[st.view] ? numOf(st.view) : null;
+  page.classList.add("out");
+  await riffle(from, numOf(id));
+  if (!opt.ret && st.cur && id !== "title") addCrack(1);
+  render(id, opt);
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => page.classList.remove("out"));
+  busy = false;
+}
+
+function render(id, opt = {}) {
+  epoch++;
+  const s = S[id];
+  if (!opt.ret) {
+    st.visits[id] = (st.visits[id] || 0) + 1;
+    st.hist.push(id);
+    if (s.enter) s.enter();
+  }
+  st.cur = id; st.view = id;
+  setBook(s.book || "usher");
+  closeBeneath();
+  header(numOf(id));
+  page.innerHTML = (s.num && s.book !== "title" ? `<div class="num">${s.num}</div>` : "") +
+    `<div class="body">${s.body()}</div><div class="choices" id="choices"></div>`;
+  const list = typeof s.choices === "function" ? s.choices() : s.choices;
+  showChoices(list);
+  sheet();
+  if (s.after) s.after();
+  page.focus({ preventScroll: true });
+}
+
+function setBook(b) {
+  st.book = b;
+  document.body.className = b;
+  $("#crack").style.display = b === "title" ? "none" : "";
+}
+
+function header(n) {
+  const run = $("#run");
+  if (st.book === "title") { run.innerHTML = ""; return; }
+  const name = st.book === "trist" ? "The Mad Trist" : "The House of Usher";
+  const canLook = st.book === "usher" && st.view !== "tarn" && st.hist.length > 1;
+  run.innerHTML = `<span>${name}${canLook ? ` · <button class="lb" id="lb">look back</button>` : ""}</span><span class="where" id="where">${n && n !== "…" ? (st.book === "trist" ? "¶ " : "§ ") + n : ""}</span>`;
+  if (canLook) $("#lb").addEventListener("click", lookBack);
+}
+
+function showChoices(list) {
+  const box = $("#choices");
+  box.innerHTML = "";
+  list.forEach(c => {
+    const b = document.createElement("button");
+    b.className = "choice" + (c.strike ? " strike" : "");
+    if (c.strike) {
+      b.innerHTML = `<span class="lab">${c.lab}</span>`;
+    } else if (c.bare) {
+      b.innerHTML = `<span class="lab">${c.lab}</span>`;
+    } else {
+      const n = numOf(c.to);
+      b.innerHTML = c.lab
+        ? `<span class="lab">${c.lab}</span> <span class="to">turn to <b>${n}</b>.</span>`
+        : `<span class="to">Turn to <b>${n}</b>.</span>`;
+    }
+    b.addEventListener("click", () => choose(c, b));
+    box.appendChild(b);
+  });
+  if (list.some(c => c.need)) box.insertAdjacentHTML("beforeend", `<div class="deny" id="deny"></div>`);
+}
+
+function choose(c, btn) {
+  if (busy) return;
+  if (c.strike) { strike(btn); return; }
+  if (c.need && !c.need()) {
+    btn.classList.remove("nope"); void btn.offsetWidth; btn.classList.add("nope");
+    $("#deny").textContent = c.deny();
+    return;
+  }
+  if (!c.free) st.made++;
+  go(c.to, { ret: c.ret });
+}
+
+/* ---------------- the adventure sheet ---------------- */
+function sheet() {
+  const el = $("#sheet");
+  if (st.book === "title" || st.made === 0) { el.innerHTML = ""; return; }
+  let h = "";
+  if (st.book === "trist") h += `<span class="who">Thou art Ethelred.</span><span>MIGHT <b id="mt">${st.might}</b></span><span>a flagon of wine</span><span>a mace</span>`;
+  h += `<span>Choices made <b>${st.made}</b></span><span>Choices that altered anything <b id="alt">${st.altered}</b></span>`;
+  el.innerHTML = h;
+}
+function flash(id, cls) {
+  const b = document.getElementById(id);
+  if (!b) return;
+  b.classList.add(cls);
+  setTimeout(() => b.classList.remove(cls), cls === "odd" ? 1600 : 500);
+}
+
+/* ---------------- the crack ---------------- */
+function drawCrack() {
+  $("#crackline").setAttribute("points", st.crack.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" "));
+  $("#crack").classList.toggle("seen", st.seen);
+}
+function addCrack(mag) {
+  const [, y] = st.crack[st.crack.length - 1];
+  if (y >= 97) return;
+  st.dir *= -1;
+  const x = Math.max(56, Math.min(96, 82 + st.dir * (1.5 + Math.random() * 4) * mag));
+  st.crack.push([x, Math.min(97, y + 3.2 + Math.random() * 2.2)]);
+  drawCrack();
+}
+
+/* ---------------- looking back: the tarn ---------------- */
+const TARN = [
+  "I have said that the sole effect of my somewhat childish experiment — that of looking down within the tarn — had been to deepen the first singular impression.",
+  "There can be no doubt that the consciousness of the rapid increase of my superstition — for why should I not so term it? — served mainly to accelerate the increase itself.",
+  "Such, I have long known, is the paradoxical law of all sentiments having terror as a basis."
+];
+async function lookBack() {
+  if (busy) return;
+  const prev = st.hist[st.hist.length - 2];
+  if (!prev) return;
+  busy = true;
+  st.looks++; st.made++;
+  page.classList.add("out");
+  await wait(220);
+  addCrack(1.8);
+  epoch++;
+  st.view = "tarn";
+  header(S[prev].num);
+  page.innerHTML = `<div class="num flip">${S[prev].num}</div>
+    <div class="reflect" aria-hidden="true">${S[prev].body()}</div>
+    <div class="body"><p class="solo">${TARN[Math.min(st.looks, TARN.length) - 1]}</p></div>
+    <div class="choices" id="choices"></div>`;
+  showChoices([{ lab: "", to: st.cur, ret: true, free: true }]);
+  sheet();
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => page.classList.remove("out"));
+  busy = false;
+}
+
+/* ---------------- the door, and what is under it ---------------- */
+const BLOWS = [" cracked,", " and ripped,", " and tore all asunder,"];
+const ECHO = [["cracking", 2.2, .38], ["ripping", 1.7, .48], ["tearing", 1.2, .58]];
+
+function strike(btn) {
+  if (st.blows >= 3) return;
+  const i = st.blows++;
+  const e = epoch;
+  const w = document.createElement("span");
+  w.className = "blow"; w.textContent = BLOWS[i];
+  $("#blows").appendChild(w);
+  bump("shake"); addCrack(1.6);
+  if (i === 0) { openBeneath(); riseAt = 0; }
+  /* each blow is answered from below, in order, never sooner than it could travel */
+  const now = Date.now();
+  riseAt = Math.max(now + (i === 0 ? 1500 : 950), riseAt + 900);
+  wait(riseAt - now).then(() => { if (e === epoch) rise(...ECHO[i]); });
+  if (st.blows === 3) { btn.remove(); finishDoor(e); }
+}
+let riseAt = 0;
+
+function bump(cls) {
+  page.classList.remove("shake", "jolt"); void page.offsetWidth; page.classList.add(cls);
+}
+
+function openBeneath() {
+  const x = st.crack[st.crack.length - 1][0];
+  const pts = [[x, 0]];
+  let d = 1;
+  for (let y = 12; y <= 60; y += 12) { d *= -1; pts.push([x + d * (2 + Math.random() * 3), y]); }
+  $("#crack2").setAttribute("points", pts.map(p => p.join(",")).join(" "));
+  $("#echo").innerHTML = "";
+  $("#beneath").classList.add("open");
+}
+function closeBeneath() {
+  $("#beneath").classList.remove("open");
+  $("#echo").innerHTML = "";
+}
+function rise(word, blur, op) {
+  const s = document.createElement("span");
+  s.textContent = word;
+  $("#echo").appendChild(s);
+  void s.offsetWidth;
+  s.style.opacity = op; s.style.filter = `blur(${blur}px)`; s.style.transform = "none";
+}
+
+async function finishDoor(e) {
+  const ok = () => e === epoch;
+  $("#rest").textContent = " that the noise of the dry and hollow-sounding wood alarummed and reverberated throughout the forest.";
+  st.altered += 1; sheet(); flash("alt", "flash");
+  await wait(riseAt - Date.now() + 3200); if (!ok()) return;
+  /* a fourth blow. Nobody struck it. */
+  rise("cracking", .3, .9);
+  bump("jolt");
+  st.altered += 1; sheet(); flash("alt", "odd");
+  await wait(2000); if (!ok()) return;
+  $("#rest").insertAdjacentHTML("beforeend", "*");
+  page.querySelector(".body").insertAdjacentHTML("beforeend",
+    `<p class="foot" id="foot">* At the termination of this sentence I started, and for a moment, paused; for it appeared to me (although I at once concluded that my excited fancy had deceived me) — it appeared to me that, from some very remote portion of the mansion, there came, indistinctly, to my ears, what might have been, in its exact similarity of character, the echo (but a stifled and dull one certainly) of the very cracking and ripping sound which Sir Launcelot had so particularly described. It was, beyond doubt, the coincidence alone which had arrested my attention …</p>`);
+  void $("#foot").offsetWidth; $("#foot").classList.add("show");
+  await wait(1600); if (!ok()) return;
+  showChoices([
+    { lab: "To enter within the door,", to: "T5" },
+    { lab: "To close the book,", to: "40" }
+  ]);
+}
+
+/* ---------------- keys ---------------- */
+document.addEventListener("keydown", ev => {
+  if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+  const k = parseInt(ev.key, 10);
+  if (k >= 1 && k <= 9) {
+    const btns = page.querySelectorAll(".choice");
+    if (btns[k - 1]) btns[k - 1].click();
+  }
+});
+
+render("title", { ret: true });
+</script>
+</body>
+</html>
