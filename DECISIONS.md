@@ -2,6 +2,12 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-26 — The look: Shadow Theatre
+
+"yes to shadow theater. with a great amount of care in the design and cuts, this is beautiful, spooky, and on-theme."
+
+*Replaced:* Ink & Tarn (the first LOOK.md) as the art direction. The board is work/look/shadow-theatre/; the old LOOK.md is kept as work/design/LOOK-ink-and-tarn.md for reference.
+
 ## 2026-10-26 — Build the spine; challenge every mini-game; see the look
 
 "you can build the spine. engage the storyteller, game designer, designer, and other appropriate agents and instances to craft a coherent vision. involve me where you need judgement. but for the mini games, i want you to challenge each game and improve it materially before going to production — they should fit the overall mood, not be too shallow and be fun and intriguing on their own accord and not feel tedious."
