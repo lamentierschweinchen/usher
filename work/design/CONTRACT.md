@@ -68,3 +68,10 @@ export default {
 | flight | `flight` | `{ madeline: 'out' \| 'under', looks: number, fell: boolean }` |
 
 "Spared" in the flight means `tapsSpared > 0 || knockSpared`.
+
+## Act two: record, ghost, rewrite (milestone 1; full spec in work/fullgame/MILESTONE-1.md §1)
+- `api.mode`: `'sojourn'` (act one) or `'burial'` (act two).
+- `api.record(type, data)` (act one only): the spine appends `{type, t, ...data}` to `save.records[chapter]`. Pass the game's own clock as `t`. Capped at 4,000 events.
+- `api.ghost` (act two only): `{ events, synthetic }`, the chapter's act-one record. If it's missing or thin, the game's fixture `games/<id>/ghost.json` is used (`synthetic: true`).
+- `api.rewrite(label, text)`: her red correction for the Account row with that score label.
+- The save: `localStorage['usher.save.v1'] = {act, chapter, flags, results, records, rewrites}`, every access in try/catch. A refresh resumes at a chapter boundary.
