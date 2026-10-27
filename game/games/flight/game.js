@@ -40,6 +40,8 @@ const MOON_X = 66, MOON_Y = 276, MOON_R = 44;  // setting behind the gable, show
 const FLIP = `matrix(1 0 0 -.85 0 ${+(WATER * 1.85).toFixed(1)})`;   // y' = WATER − .85(y − WATER)
 const LIT = '--lit:#b9492f;--lit-door:#c85a38;--lit-vault:#4a1a16';  // the moon through the house's holes
 const BACKLIT = '#cf8752';        // ember: the moonlight getting round cut type
+const DARK_WAIT = 0.6, DARK_ENTER = 0.9, DARK_OFF = 40;   // the opening shows the moon; then the dark enters from the left wing
+const PHONE_W = 600, PHONE_TYPE = 1.5;                     // under a 600 px stage, game type ×1.5 (all games)
 
 const r1 = n => Math.round(n * 10) / 10;
 const hx = x => r1(HOUSE_X + (x - 482) * HOUSE_S), hy = y => r1(WATER + (y - 368) * HOUSE_S);
@@ -53,7 +55,7 @@ const FIS_STYLE = 'fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-w
 
 const CSS = `
 .g-flight{
-  --g-flight-veil-alpha:.9; --g-flight-fs:1;
+  --g-flight-veil-alpha:1; --g-flight-fs:1;
   position:relative;width:100%;height:100%;overflow:hidden;
   background:var(--sh-cut,#0b0809);color:var(--sh-cut,#0b0809);
   font-family:var(--sh-serif,'IM Fell English',Georgia,serif);
@@ -69,6 +71,7 @@ const CSS = `
 .g-flight .sound{font-style:italic;fill:var(--sh-cut,#0b0809);transition:opacity .6s}
 .g-flight .teach{font-style:italic;fill:var(--sh-paper,#ede2cb);transition:opacity .5s}
 .g-flight .score{fill:var(--sh-lamp,#f7d894);letter-spacing:.16em;font-size:calc(17px * var(--g-flight-fs))}
+.g-flight .score .none{font-style:italic;letter-spacing:.04em}
 .g-flight .fl-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 `;
 
@@ -85,9 +88,12 @@ function stoneCut(x, screw) {
 // The dark behind you is black paper too: its leading edge is lace.
 function veilEdge() {
   const R = C.rng(17);
-  let s = C.scallopsV(0, 4, 636, 3.4, 11);
-  for (let y = 16; y < 630; y += 30 / Math.max(C.lace(), 0.55)) {
-    s += C.curl(0, r1(y + (R() - 0.5) * 8), (R() - 0.5) * 0.6, 9 + R() * 9, (R() < 0.5 ? -1 : 1) * (0.7 + R() * 0.6), 2.4, 0.4, 14);
+  let s = C.scallopsV(0, 2, 638, 6, 17) + C.scallopsV(5, 10.5, 638, 2.4, 17);
+  for (let y = 12; y < 632; y += 34 / Math.max(C.lace(), 0.55)) {
+    const yy = r1(y + (R() - 0.5) * 10), dir = R() < 0.5 ? -1 : 1;
+    s += C.curl(4, yy, (R() - 0.5) * 0.7, 16 + R() * 14, dir * (0.6 + R() * 0.5), 4.2, 0.5, 18);
+    if (R() < 0.6) s += C.curl(4, r1(yy + 9 * dir), dir * 0.5, 8 + R() * 6, -dir * (0.9 + R() * 0.5), 2.2, 0.35, 12);
+    if (R() < 0.35) s += `<circle cx="${r1(24 + R() * 10)}" cy="${r1(yy + (R() - 0.5) * 14)}" r="1.6"/>`;
   }
   return s;
 }
@@ -283,7 +289,7 @@ export default {
     function sound(word, x, y, size, opts = {}) {
       const t = el('text', {
         class: 'sound', x: 0, y: 0, 'text-anchor': 'middle', filter: 'url(#fl-backlit)',
-        'font-size': (size * Math.max(1, fs * 0.85)).toFixed(1),
+        'font-size': (size * fs).toFixed(1),
         transform: `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(opts.tilt ?? (Math.random() * 8 - 4)).toFixed(1)})`
       }, soundsG);
       t.textContent = word;
@@ -557,10 +563,10 @@ export default {
     window.addEventListener('keyup', onKeyUp);
     window.addEventListener('blur', onBlur);
 
-    // Type sizes grow on small screens so the words stay legible.
+    // Under a 600 px stage every line of game type is set ×1.5 (the critic's rule for all games).
     function sizeType() {
       const w = svg.getBoundingClientRect().width || 960;
-      fs = clamp((960 / w) * 0.62, 1, 1.6);
+      fs = w < PHONE_W ? PHONE_TYPE : 1;
       root.style.setProperty('--g-flight-fs', fs.toFixed(3));
       if (slipId) layoutSlip();
     }
@@ -632,10 +638,12 @@ export default {
     function render() {
       const view = (looking && canLook()) || forced;
       // the dark behind you, with its lace edge
-      const vw = Math.max(0, (fell ? 960 : gx) - VEIL_GAP);
-      veilRect.setAttribute('width', vw.toFixed(1));
+      const edge = Math.max(0, (fell ? 960 : gx) - VEIL_GAP);
+      const enter = clamp((clock - DARK_WAIT) / DARK_ENTER, 0, 1);
+      const vw = reduced ? edge : -DARK_OFF + (edge + DARK_OFF) * easeInOut(enter);
+      veilRect.setAttribute('width', Math.max(0, vw).toFixed(1));
       veilEdgeG.setAttribute('transform', `translate(${vw.toFixed(1)} 0)`);
-      veil.style.opacity = (veilAlpha * (1 - lb)).toFixed(3);
+      veil.style.opacity = (veilAlpha * (1 - lb) * (reduced ? enter : 1)).toFixed(3);
 
       // you: slide and bob while running; turn edge-on to look back
       if (!fell) {
@@ -675,8 +683,12 @@ export default {
       const fis = 2.4 + Math.min(7, lookTime * 0.9);
       if (Math.abs(fis - lastFis) > 0.05) { lastFis = fis; svg.style.setProperty('--fl-fis-w', fis.toFixed(2)); }
 
-      const sc = `TURNED TO SEE ${looks}   ·   CAUGHT UP ${clung.length}`;
-      if (sc !== lastScore) { lastScore = sc; scoreT.textContent = sc; }
+      const sc = `${looks}|${clung.length}`;
+      if (sc !== lastScore) {
+        lastScore = sc;
+        const n = v => (v ? String(v) : '<tspan class="none">none</tspan>');
+        scoreT.innerHTML = `TURNED TO SEE ${n(looks)}   ·   CAUGHT UP ${n(clung.length)}`;
+      }
     }
 
     function frame(now) {

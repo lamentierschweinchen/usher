@@ -20,14 +20,15 @@
 
 **Cut here in the same manner:**
 - **Causeway stones:** each is a slab with an arch of light under it, a railing post with a knob, and its length of rail thread, all `currentColor`.
-- **The dark behind you:** black paper at the same 0.9 alpha, with a scalloped, curled lace edge that travels with you.
+- **The dark behind you:** opaque black paper with a bold lace edge (scallops, curls, knots) that travels with you at the old edge, guest − 40. *Art critique fix:* it no longer sits translucent over the house from frame one. The opening holds 0.6 s on the full red moon behind the gable, then the dark enters from the left wing over 0.9 s (with reduced motion it fades in instead). It still lifts over 150 ms while you look.
 - **Screw:** a lit hole with a slot.
 
 **Light and red:** the blood moon is the chapter's light. The fissure is that moonlight through the house: red, glowing, and still widening while you gaze. The house's windows and door show the moon through them. In the tarn the house returns as light, the fissure is whole and red, and Madeline is bright, unrippled and glowing. Above water she is gauze at .42. She glides and never bobs. The truth words beside her stay red, set on a soft black ground so they read on the red sky.
 
 **Legibility fixes (look only):**
 - **Sound-words and followers:** black cut type on a dark sky disappears, so each is backlit with an ember glow (moonlight getting round the paper).
-- **Type sizes:** words are 24/21/22 (were 22/19/20), still scaled up on phones by the existing `fs` factor.
+- **Type sizes:** words are 24/21/22 (were 22/19/20). *Critique, all games:* under a 600 px stage every line of game type is ×1.5. That covers words, sound-words, the teaching line and the score, and replaces the old sliding factor.
+- **Zero scores** read *none* (italic) in the score line, not an old-style 0 that looks like a letter. `api.done` still gets numbers.
 - **Teaching line:** italic paper 26, top left, on the dark. Score is lamp caps 17, bottom right.
 - **Clung words:** spaced a little wider.
 
@@ -37,7 +38,7 @@
 - **The horse waits in the right wing.** At 96 units there is no room on the bank: it would merge with the guest standing at x 888. It faces the stage with head, neck and forelegs showing. When she takes it, it turns edge-on and leaves stage right.
 - **The servant is offstage.** On the bank he and the horse cut as one blob. His closing line still plays.
 
-**Verified** (served `game/` on 8116, headless Chromium with a scripted clock):
+**Verified** (served `game/` on 8116, headless Chromium with a scripted clock; re-run after the critique fixes):
 - All four outcomes (won/out, won/under, fell/out, fell/under) at 1280 and 390 wide, and with reduced motion. `done` fired exactly once each time, with no console errors.
 - The same four scripted plays against git HEAD gave identical `done` results and flags at both widths.
 - Phone tap gives a 0.4 s look, lace is 0.55 on phones, and `.sh-still` is set when reduced motion is on.
@@ -46,5 +47,4 @@
 
 **Known:**
 - **Frame rate:** the still ripple on the reflection (`sh-ripple-still`) reruns every frame because the cast moves. Headless software rendering drops from 120 fps (ink cut) to about 55, and the drop is all the ripple. Splitting the reflection into set and cast made it worse (40). Worth a check on a real phone in the spine. The lead artist could offer a cheaper still ripple if needed.
-- **The 0.9 dark** still lets the house show faintly through, as before.
 - **Phone word pile:** with many hushed taps, the clung pile is busy at phone width. The score carries the count.
