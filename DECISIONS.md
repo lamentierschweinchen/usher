@@ -2,6 +2,12 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-27 — Past the deadline: build it out
+
+"happy we have an initial result. i want your honest take on it and enlist a critic to rate the entire experience on a scale from 1-10 across different categories like story, gameplay, creativity, etc. then tell me what you'd improve before i go for a first playthrough. also tell me what the estimated time for the full game is (and what you think would be ideal) — we obviously missed submission time so now we have the liberty to build it out into a fully-fledged game full of intrigue, wit, and fun."
+
+*Replaced:* the ~2.5h competition time box and the "playable slice" scope. The goal is now a fully-fledged game.
+
 ## 2026-10-26 — The look: Shadow Theatre
 
 "yes to shadow theater. with a great amount of care in the design and cuts, this is beautiful, spooky, and on-theme."
