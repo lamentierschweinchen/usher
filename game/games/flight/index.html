@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flight harness</title>
+<style>
+  @font-face { font-family: 'IM Fell English'; src: url('../../fonts/im-fell-normal.woff2') format('woff2'); font-style: normal; font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'IM Fell English'; src: url('../../fonts/im-fell-italic.woff2') format('woff2'); font-style: italic; font-weight: 400; font-display: swap; }
+  :root { --paper:#f2eee5; --ink:#29272a; --muted:#625d5a; --rule:#cbc3b8; --red:#7a3939; --serif:'IM Fell English', Georgia, serif; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ink); color: var(--paper); font-family: var(--serif); }
+  main { padding: 12px 16px 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  header { width: 100%; max-width: 1100px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 15px; }
+  header h1 { font-size: 17px; font-weight: 400; font-style: italic; margin: 0 8px 0 0; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+  button { font: inherit; font-size: 14px; background: transparent; color: var(--paper); border: 1px solid var(--muted); padding: 6px 12px; cursor: pointer; min-height: 36px; }
+  button[aria-pressed="true"] { border-color: var(--paper); background: rgba(242,238,229,.12); }
+  label { font-size: 14px; display: inline-flex; gap: 6px; align-items: center; min-height: 36px; }
+  .stage { position: relative; width: min(100%, calc((100vh - 150px) * 1.5)); min-width: 280px; aspect-ratio: 3 / 2; background: var(--paper); overflow: hidden; }
+  .stage::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .08; mix-blend-mode: multiply;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23g)'/%3E%3C/svg%3E"); }
+  #out { width: 100%; max-width: 1100px; margin: 0; font: 13px/1.45 ui-monospace, Menlo, monospace; color: var(--rule); white-space: pre-wrap; overflow-wrap: anywhere; }
+  #out .done { color: var(--paper); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>VII. A Thousand Waters (harness)</h1>
+    <div class="presets" role="group" aria-label="Flag presets">
+      <button data-preset="none">none</button>
+      <button data-preset="spared">spared</button>
+      <button data-preset="screw">screw out</button>
+      <button data-preset="words">unexplained words</button>
+      <button data-preset="all">all three</button>
+    </div>
+    <label><input type="checkbox" id="rm"> reduced motion</label>
+    <button id="restart">restart</button>
+  </header>
+  <div class="stage" id="stage"></div>
+  <pre id="out"></pre>
+</main>
+<script type="module">
+  import game from './game.js';
+
+  const PRESETS = {
+    none:   {},
+    spared: { tapsHushed: 20, tapsSpared: 3, knockSpared: true },
+    screw:  { tapsHushed: 41, tapsSpared: 0, burialScrewOut: true },
+    words:  { tapsHushed: 41, nightsUnexplained: ['a low moan', 'scratch'] },
+    all:    { tapsHushed: 12, tapsSpared: 2, knockSpared: true, burialScrewOut: true, nightsUnexplained: ['a step on the stair'] }
+  };
+
+  const stage = document.getElementById('stage');
+  const out = document.getElementById('out');
+  const rm = document.getElementById('rm');
+  rm.checked = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let preset = new URLSearchParams(location.search).get('preset') || 'none';
+  if (!PRESETS[preset]) preset = 'none';
+  let cleanup = null;
+  window.__flight = { results: [], flags: {} };
+
+  function log(text, cls) {
+    const line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = text;
+    out.appendChild(line);
+  }
+
+  function start() {
+    if (cleanup) cleanup();
+    stage.innerHTML = '';
+    out.textContent = '';
+    document.querySelectorAll('[data-preset]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.preset === preset)));
+    const state = Object.freeze({ ...PRESETS[preset] });
+    window.__flight = { results: [], flags: {} };
+    log(`state ${JSON.stringify(state)}  reducedMotion ${rm.checked}`);
+    let doneCalls = 0;
+    const api = {
+      state,
+      reducedMotion: rm.checked,
+      setFlag(key, value) { window.__flight.flags[key] = value; log(`setFlag ${key} ${JSON.stringify(value)}`); },
+      done(result) {
+        doneCalls++;
+        window.__flight.results.push(result);
+        log(`done #${doneCalls} ${JSON.stringify(result, null, 1).replace(/\n\s*/g, ' ')}`, 'done');
+        if (doneCalls > 1) console.error('api.done called more than once');
+      }
+    };
+    cleanup = game.mount(stage, api);
+  }
+
+  document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => { preset = b.dataset.preset; b.blur(); start(); }));
+  document.getElementById('restart').addEventListener('click', e => { e.currentTarget.blur(); start(); });
+  rm.addEventListener('change', () => { rm.blur(); start(); });
+  start();
+</script>
+</body>
+</html>
