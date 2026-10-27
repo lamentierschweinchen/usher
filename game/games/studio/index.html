@@ -24,9 +24,12 @@ main{padding:12px 16px 24px;max-width:1200px;margin:0 auto}
     <div id="stage"></div>
   </div>
   <div class="bar">
+    <label>act <select id="mode"><option value="sojourn">one · Sojourn (records)</option><option value="burial">two · Burial (the mirror)</option></select></label>
     <button id="restart">Restart</button>
+    <label><input type="checkbox" id="fixture"> act two plays the fixture</label>
     <label><input type="checkbox" id="rm"> reduced motion</label>
     <label>speed <select id="speed"><option>1</option><option>2</option><option>4</option><option>8</option></select></label>
+    <button id="save" title="Download the last act-one record as ghost.json">Save ghost.json</button>
   </div>
   <pre id="out">Playing. api.done has not fired.</pre>
 </main>
@@ -34,6 +37,7 @@ main{padding:12px 16px 24px;max-width:1200px;margin:0 auto}
 import game from './game.js';
 
 const q = new URLSearchParams(location.search);
+const KEY = 'usher.studio.harness.record';      // the stub's save: act one's record, which act two plays against
 
 // ?drive=1 swaps in a manual clock for automated testing: window.__advance(seconds) steps the game at 60fps.
 if (q.has('drive')) {
@@ -49,24 +53,32 @@ if (q.has('drive')) {
     return now / 1000;
   };
 }
-const stage = document.getElementById('stage');
-const out = document.getElementById('out');
-const rmBox = document.getElementById('rm');
-const speedSel = document.getElementById('speed');
+const $ = id => document.getElementById(id);
+const stage = $('stage'), out = $('out'), rmBox = $('rm'), speedSel = $('speed'), modeSel = $('mode'), fixBox = $('fixture');
 rmBox.checked = q.has('rm') ? q.get('rm') !== '0' : matchMedia('(prefers-reduced-motion: reduce)').matches;
 speedSel.value = q.get('speed') || '1';
+modeSel.value = q.get('mode') === 'burial' ? 'burial' : 'sojourn';
+fixBox.checked = q.get('fixture') === '1';
+
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } };
+const store = v => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) { /* private mode: the record lives in memory */ } };
+window.__studioRecord = (load() || {}).events || [];
 
 let cleanup = null;
 function start() {
   if (cleanup) cleanup();
   stage.replaceChildren();
+  const mode = modeSel.value, saved = load() || {};
   const flags = {};
   let doneCount = 0;
   const show = (extra) => {
-    out.textContent = `${game.title} (${game.id})\nflags: ${JSON.stringify(flags)}\ndone fired: ${doneCount}×` + (extra ? `\n${extra}` : '');
+    out.textContent = `${game.title} (${game.id}) · act ${mode === 'burial' ? 'two' : 'one'}\nflags: ${JSON.stringify(flags)}\ndone fired: ${doneCount}×` +
+      (mode === 'sojourn' ? `\nrecorded: ${window.__studioRecord.length} events` : `\nghost: ${fixBox.checked || !saved.events ? 'the fixture (ghost.json)' : saved.events.length + ' recorded events'}`) +
+      (window.__studioRewrite ? `\nrewrite: ${JSON.stringify(window.__studioRewrite)}` : '') + (extra ? `\n${extra}` : '');
   };
   const api = {
-    state: {},
+    mode,
+    state: mode === 'burial' ? { ...(saved.flags || {}) } : {},
     reducedMotion: rmBox.checked,
     speed: Number(speedSel.value),
     setFlag(k, v) { flags[k] = v; show(window.__studioResult ? JSON.stringify(window.__studioResult, null, 2) : ''); },
@@ -75,16 +87,33 @@ function start() {
       window.__studioResult = result;
       window.__studioDone = doneCount;
       console.log('[studio] done', result);
+      if (mode === 'sojourn') store({ events: window.__studioRecord, flags });   // act two plays against this
       show(JSON.stringify(result, null, 2));
     },
   };
-  window.__studioResult = null; window.__studioDone = 0; window.__studioFlags = flags;
+  if (mode === 'sojourn') {
+    window.__studioRecord = [];
+    api.record = (type, data) => { if (window.__studioRecord.length < 4000) window.__studioRecord.push({ type, ...data }); };
+  } else {
+    api.ghost = fixBox.checked || !saved.events ? null : { events: saved.events, synthetic: false };
+    api.rewrite = (label, text) => { window.__studioRewrite = { label, text }; };
+  }
+  window.__studioResult = null; window.__studioDone = 0; window.__studioFlags = flags; window.__studioRewrite = null;
   show();
   cleanup = game.mount(stage, api);
 }
-document.getElementById('restart').onclick = start;
+$('save').onclick = () => {
+  const events = (load() || {}).events || window.__studioRecord;
+  const blob = new Blob([JSON.stringify({ note: 'A real act-one run of the studio, recorded through games/studio/index.html.', events })], { type: 'application/json' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'ghost.json' });
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+$('restart').onclick = start;
 rmBox.onchange = start;
 speedSel.onchange = start;
+modeSel.onchange = start;
+fixBox.onchange = start;
 start();
 </script>
 </body>
