@@ -44,3 +44,22 @@ export default {
 - No audio unless synthesized in code and optional; never load-bearing. No network requests.
 - Mouse and touch. No instructions screen: teach by doing, in a line of type at most.
 - Scope each style to the game's own root class (`.g-<id>`) so games can't break the spine.
+
+## Flags registry (canonical keys; set with `api.setFlag`, read from `api.state` with defaults)
+| Chapter | Key | Value |
+|---|---|---|
+| tarn | `tarnCaught` | `'unaided'` \| `'hinted'` |
+| tarn | `tarnGlancesDown` | number |
+| tarn | `tarnSawHer` | boolean |
+| door | *(set by its spec, prefixed `door…`)* | |
+| studio | `tapsHushed`, `tapsSpared` | numbers |
+| studio | `knockSpared` | boolean |
+| burial | `burialScrewOut` | boolean (a screw left out; the flight reads it) |
+| nights | `nightsUnexplained` | array of strings, the noises left unexplained in their original words (the nights spec calls this `nights`; use this key) |
+| nights | `nightsStair` | `'unexplained'` or the excuse id used on her step |
+| nights | `nightsAgreed` | number |
+| trist | `tristLastBlow` | `'struck'` \| `'gust'` |
+| trist | `tristBlows` | number |
+| flight | `flight` | `{ madeline: 'out' \| 'under', looks: number, fell: boolean }` |
+
+"Spared" in the flight means `tapsSpared > 0 || knockSpared`.
