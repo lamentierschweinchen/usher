@@ -4,31 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Studio · Hush (dev harness)</title>
+<link rel="stylesheet" href="../../shared/shadow.css">
 <style>
-@font-face{font-family:'IM Fell English';src:url('../../fonts/im-fell-normal.woff2') format('woff2');font-style:normal;font-display:swap}
-@font-face{font-family:'IM Fell English';src:url('../../fonts/im-fell-italic.woff2') format('woff2');font-style:italic;font-display:swap}
-:root{--paper:#f2eee5;--ink:#29272a;--muted:#625d5a;--rule:#cbc3b8;--red:#7a3939;--serif:'IM Fell English',Georgia,serif}
 *{box-sizing:border-box}
-html,body{margin:0;background:#e6e1d7;color:var(--ink);font-family:var(--serif)}
+html,body{margin:0;background:#e7dcc4;color:#0b0809;font-family:var(--sh-serif)}
 main{padding:12px 16px 24px;max-width:1200px;margin:0 auto}
-.wrap{position:relative;width:min(100%, calc((100vh - 120px) * 1.5));aspect-ratio:3/2;margin:0 auto}
-#stage{position:absolute;inset:0;background:var(--paper)}
-.frame{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.frame rect{fill:none;stroke:var(--ink)}
-.bar{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:center;margin:10px 0 6px;font-size:15px;color:var(--muted)}
-.bar button{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);padding:4px 12px;cursor:pointer}
+.wrap{position:relative;width:min(100%, calc((100vh - 120px) * 1.5));aspect-ratio:3/2;margin:0 auto;background:#0b0809;
+  box-shadow:0 1px 0 rgba(255,255,255,.4),0 18px 40px -22px rgba(30,15,20,.55)}
+#stage{position:absolute;inset:0}
+.bar{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:center;margin:12px 0 6px;font-size:15px;color:#4a3d38}
+.bar button{font:inherit;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#f7d894;background:#0b0809;border:0;padding:7px 14px;cursor:pointer}
 .bar label{display:flex;gap:6px;align-items:center}
-#out{max-width:960px;margin:6px auto 0;font:13px/1.45 ui-monospace,Menlo,monospace;white-space:pre-wrap;color:var(--ink);background:var(--paper);border:1px solid var(--rule);padding:8px 10px;min-height:3em}
+#out{max-width:960px;margin:6px auto 0;font:13px/1.45 ui-monospace,Menlo,monospace;white-space:pre-wrap;color:#0b0809;background:#efe6d2;border:1px solid rgba(11,8,9,.2);padding:8px 10px;min-height:3em}
 </style>
 </head>
 <body>
 <main>
   <div class="wrap">
     <div id="stage"></div>
-    <svg class="frame" viewBox="0 0 960 640" preserveAspectRatio="none" aria-hidden="true">
-      <rect x="8" y="8" width="944" height="624" style="stroke-width:1.5"/>
-      <rect x="14" y="14" width="932" height="612" style="stroke-width:.6"/>
-    </svg>
   </div>
   <div class="bar">
     <button id="restart">Restart</button>
