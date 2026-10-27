@@ -33,6 +33,9 @@ const ASKEW = [[1.5, -1, 1.6], [-1, 1.5, -2.1], [1, 1, 1.3], [-1.5, -1, -1.5], [
 const MIRROR = 'matrix(1 0 0 -1 0 640)';      // this game's tarn is an exact mirror about y=320 (dragging her depends on it)
 const DROP = 36;                               // the whole picture sits 36 units lower, so the house's roof fits under the proscenium
 const ROOF_S = .64;                            // the library's gable and turrets, at this scale
+const IDLE = 15000;                            // once the player has moved, the house steps in after 15 s without a move
+const HINT_FIRST = 2500, HINT_EVERY = 9000;    // before that it only leans (she tips toward the next step, the stone gives), never moves
+const HOLD = 3000;                             // the open door, her in it, held before done
 const HER_SCALE = 1.95;                        // Madeline in the water: 86 tall, the most her 90-unit cell holds below the waterline
 
 const col = i => i % 5, row = i => (i / 5) | 0;
@@ -134,6 +137,7 @@ const CSS = `
 .g-door .g-door-line{position:absolute;margin:0;left:calc(100cqw*32/960);top:calc(100cqw*58/960);white-space:nowrap;pointer-events:none;
  font-family:var(--sh-serif);font-style:italic;font-size:max(12px,calc(100cqw*23/960));line-height:1.22;color:var(--sh-paper);transition:opacity 2s}
 .g-door .g-door-line.gd-gone,.g-door .gd-ribbon.gd-gone{opacity:0}
+.g-door .g-door-end,.g-door .gd-ribbon-end{transition-duration:.8s}
 .g-door .gd-ribbon{display:none;pointer-events:none;transition:opacity 2s}
 .g-door .gd-ribbon text{font-family:var(--sh-serif);font-style:italic;font-size:38px;fill:var(--sh-paper)}
 @container gdoor (max-width:600px){                 /* a phone: game type x1.5, the line on a ribbon over the glass */
@@ -221,12 +225,15 @@ ${reflection}
 <rect class="gd-hit"/><rect class="gd-hit"/>
 </g>
 <g class="gd-ribbon">${C.banner({ x: 40, y: DROP + WL + 4, w: 880, h: 52, line: '' })}<text x="480" y="${DROP + WL + 40}" text-anchor="middle">A mere different arrangement of the particulars.</text></g>
+<g class="gd-ribbon gd-ribbon-end gd-gone">${C.banner({ x: 40, y: 568, w: 880, h: 52, line: '' })}<text class="gd-end-text" x="480" y="604" text-anchor="middle"></text></g>
 ${C.frame()}
 </svg>
-<p class="g-door-line"><i>A mere different <br>arrangement of <br>the particulars.</i></p>`;
+<p class="g-door-line"><i>A mere different <br>arrangement of <br>the particulars.</i></p>
+<p class="g-door-line g-door-end gd-gone" aria-live="polite"><i></i></p>`;
     stage.appendChild(root);
     const svg = root.querySelector('svg'), view = svg.querySelector('.gd-view');
     const line = root.querySelector('.g-door-line'), ribbon = svg.querySelector('.gd-ribbon');
+    const endLine = root.querySelector('.g-door-end'), endRibbon = svg.querySelector('.gd-ribbon-end');
     const layer = side => {
       const g = svg.querySelector('.gd-' + side), q = s => g.querySelector('.gd-' + s);
       return { voids: q('voids'), stones: q('stones'), doorway: q('doorway'), fissure: q('fissure'), words: q('words') };
@@ -238,7 +245,7 @@ ${C.frame()}
     // ---------- state ----------
     let hole = 2, lastFrom = null, grown = false, ended = false, doneSent = false;
     let playerMoves = 0, houseMoves = 0, wordN = 0;
-    let drag = null, nudged = null, leaning = null, idleT = null;
+    let drag = null, nudged = null, leaning = null, idleT = null, hintT = null;
     const grid = new Array(15).fill(null);
     const edges = new Map();
     const walkOrder = [];
@@ -449,7 +456,24 @@ ${C.frame()}
       c.sort((a, b) => (a === lastFrom) - (b === lastFrom) || MAIN.indexOf(b) - MAIN.indexOf(a));
       return c.length ? c[0] : null;
     }
-    function armIdle(ms = 7000) { cancel(idleT); idleT = ended ? null : later(ms, houseTurn); }
+    function armIdle(ms = IDLE) { cancel(idleT); idleT = ended || !playerMoves ? null : later(ms, houseTurn); }   // still until the player's first move
+    function hintLean() {                  // before the first move the house only leans: she tips toward the next step, the stone gives, both settle back
+      hintT = null;
+      if (ended || playerMoves) return;
+      hintT = later(HINT_EVERY, hintLean);
+      if (drag || leaning) return;
+      const next = houseNext();
+      if (next == null) return;
+      const vx = col(next) - col(hole), vy = row(next) - row(hole), s = grid[next];
+      if (reduced) { if (s) { restart(s.g, 'gd-smudge'); restart(s.gR, 'gd-smudge'); } restart(herW, 'gd-smudge'); return; }
+      kill(her.tw.lean); kill(her.tw.off);
+      const l0 = her.lean;
+      leaning = { next, l0, s, hint: true };
+      leaning.h = tween(520, e => {
+        her.lean = lerp(l0, vx * 7, e); her.ox = vx * 8 * e; her.oy = -vy * 7 * e; drawHer();
+        if (s) { s.nx = -vx * .06 * CW * e; s.ny = -vy * .06 * CH * e; drawStone(s); }
+      }, () => { leaning.t = later(420, () => { if (leaning?.hint) cancelLean(); }); });
+    }
     function houseTurn() {
       idleT = null;
       if (ended) return;
@@ -467,7 +491,7 @@ ${C.frame()}
       }, () => { leaning.t = later(140, commitHouse); });
     }
     function commitHouse() {
-      if (!leaning || ended) return;
+      if (!leaning || leaning.hint || ended) return;
       const next = leaning.next;
       leaning = null; houseMoves++;
       move(next, 'house');
@@ -483,7 +507,7 @@ ${C.frame()}
 
     // ---------- the end: the door opens the instant she reaches it ----------
     function finish(from) {
-      ended = true; drag = null; cancel(idleT); cancelLean();
+      ended = true; drag = null; cancel(idleT); cancel(hintT); cancelLean();
       root.classList.add('gd-ended'); root.classList.remove('gd-dragging');
       setHot(null);
       for (const el of [gap, herEl]) { el.classList.remove('is-held'); el.setAttribute('aria-disabled', 'true'); }
@@ -505,9 +529,13 @@ ${C.frame()}
         // the confession's red corrections ("say, rather:"), keyed by score label
         rather: { 'stones set in order': askew ? 'she was in a hurry' : 'the ninth was her', 'times the house lent a hand': 'she did.' },
       };
-      const t0 = reduced ? 0 : 170;
+      // the door is held open, her in it, for HOLD; a line says what happened
+      endLine.firstChild.innerHTML = askew ? 'It opened. <br>You hadn\u2019t <br>finished.' : 'It opened.';
+      endRibbon.querySelector('.gd-end-text').textContent = askew ? 'It opened. You hadn\u2019t finished.' : 'It opened.';
+      const t0 = reduced ? 0 : 170, inAt = reduced ? 0 : 1500;   // she is fully in the doorway 1.5 s after it starts to open
       later(t0, openDoor);
-      later(t0 + 900 + 1800, () => { if (!doneSent) { doneSent = true; api.done?.(result); } });
+      later(t0 + (reduced ? 0 : 900), () => { endLine.classList.remove('gd-gone'); endRibbon.classList.remove('gd-gone'); });
+      later(t0 + inAt + HOLD, () => { if (!doneSent) { doneSent = true; api.done?.(result); } });
     }
     function openDoor() {
       clearWords();
@@ -631,8 +659,8 @@ ${C.frame()}
     svg.addEventListener('pointerleave', onLeave);
     root.addEventListener('keydown', onKey);
 
-    // the house moves first
-    later(1500, () => { if (ended) return; if (!playerMoves && !drag) houseTurn(); else armIdle(); });
+    // the house waits for the player; it only leans
+    hintT = later(HINT_FIRST, hintLean);
 
     return () => {
       ended = true;

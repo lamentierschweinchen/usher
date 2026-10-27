@@ -1,6 +1,12 @@
 # Door: build report
 
-**Built:** `game/games/door/game.js` (scoped `.g-door`) and its `index.html` harness. Everything in door.md is built: you drag the hole, or drag her in the water (vertical inverted). The crack is red in the water only, with stubs and a shortcut that grows at 8. The house steps at 1.5 s and after 7 s idle. At the door, her route fades in red; `done` follows 1.8 s later.
+**Built:** `game/games/door/game.js` (scoped `.g-door`) and its `index.html` harness. Everything in door.md is built: you drag the hole, or drag her in the water (vertical inverted). The crack is in the water only, with stubs and a shortcut that grows at 8. At the door, her route fades in red on the façade.
+
+**Puzzle first (2026-10-27, from the experience critique; the coordinator's call, which departs from door.md's timings).** In the critic's playthrough the door opened on their third move, so the house no longer takes over early:
+- The house makes **no move until the player's first move**. Before that it only leans, about every 9 s from 2.5 s in: she tips toward the next crack step, the stone gives, and both settle back. Nothing moves. With reduced motion, the stone and she fade-pulse instead.
+- After the player's first move, the house steps in after **15 s** without a move (was 7 s).
+- At the door, the open door is **held for 3 s with her fully in it**. A line shows top left on the dark cloud (on a phone, on a ribbon at the foot of the glass): *It opened. You hadn't finished.* if any stone is still askew, or just *It opened.* if the house is whole. `done` comes about 4.7 s after she reaches the door (3 s with reduced motion).
+- Flags, scores, notes, `rather` and both routes are unchanged.
 
 **Recut in Shadow Theatre (2026-10-26).** Only the look changed. Mechanics, timings, hit areas, flags, score labels, `rather` and `done` are as before.
 - **Façade.** Every stone is black cut paper, cut 3 units short of its neighbours, so the joints are hairlines of light. A stone out of place sits askew and lets a wedge of light through. Windows are lamplight through cuts: lancets from `C.lancet`, the oculus as a rose cut like the house's own, the crest as a lit shield with mantling curls, small windows with cross bars. The cornice corners carry lit dentils, quoins and lace curls on their outer edge, so a misplaced cornice shows. The parapet has two pinnacles, and the lintel has lit dentils over the walled door, with lamplight leaking round its bricked arch.
@@ -25,6 +31,8 @@
 **Play:** run `python3 -m http.server 8111` in `game/`, then open `/games/door/`. Again and reduced motion (or `?reduced`) are on the page. In the spine: `/?chapter=door`, then click the door.
 
 **Emits:** `doorRoute` long|short, `stonesAskew` 0|4, `doorHouseMoves` n. Scores are "stones set in order" (8|4) and "times the house lent a hand" (n), plus the note. An extra `rather` field carries the red corrections.
+
+**Tested (puzzle first):** headless Chrome 156. Untouched for 13 s, the house stays at the start and only leans. After one player move it steps at about 15.9 s (15 s, then the lean). By keyboard to the door, `done` fired 4.74 s after (3.02 s with reduced motion), with the line showing. Both routes with the mouse at 1280, both routes by touch at 390, and the short route in reduced motion all reached `done` once with the same flags and scores and no console errors. Shot: `shots/door.png`, the short route's end with its line.
 
 **Tested (after the critique):** long and short routes with the mouse at 1280, the long route by touch at 390, the short route in reduced motion, and the game mounting in the spine: all reached `done` once, with no console errors.
 
