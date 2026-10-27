@@ -4,24 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Flight harness</title>
+<link rel="stylesheet" href="../../shared/shadow.css">
 <style>
-  @font-face { font-family: 'IM Fell English'; src: url('../../fonts/im-fell-normal.woff2') format('woff2'); font-style: normal; font-weight: 400; font-display: swap; }
-  @font-face { font-family: 'IM Fell English'; src: url('../../fonts/im-fell-italic.woff2') format('woff2'); font-style: italic; font-weight: 400; font-display: swap; }
-  :root { --paper:#f2eee5; --ink:#29272a; --muted:#625d5a; --rule:#cbc3b8; --red:#7a3939; --serif:'IM Fell English', Georgia, serif; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--ink); color: var(--paper); font-family: var(--serif); }
+  html, body { margin: 0; background: var(--sh-cut); color: var(--sh-paper); font-family: var(--sh-serif); }
   main { padding: 12px 16px 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
   header { width: 100%; max-width: 1100px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 15px; }
   header h1 { font-size: 17px; font-weight: 400; font-style: italic; margin: 0 8px 0 0; }
   .presets { display: flex; flex-wrap: wrap; gap: 6px; }
-  button { font: inherit; font-size: 14px; background: transparent; color: var(--paper); border: 1px solid var(--muted); padding: 6px 12px; cursor: pointer; min-height: 36px; }
-  button[aria-pressed="true"] { border-color: var(--paper); background: rgba(242,238,229,.12); }
+  button { font: inherit; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; background: transparent; color: var(--sh-lamp); border: 1px solid rgba(247,216,148,.35); padding: 6px 12px; cursor: pointer; min-height: 36px; }
+  button[aria-pressed="true"] { border-color: var(--sh-lamp); background: rgba(247,216,148,.12); }
   label { font-size: 14px; display: inline-flex; gap: 6px; align-items: center; min-height: 36px; }
-  .stage { position: relative; width: min(100%, calc((100vh - 150px) * 1.5)); min-width: 280px; aspect-ratio: 3 / 2; background: var(--paper); overflow: hidden; }
-  .stage::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .08; mix-blend-mode: multiply;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23g)'/%3E%3C/svg%3E"); }
-  #out { width: 100%; max-width: 1100px; margin: 0; font: 13px/1.45 ui-monospace, Menlo, monospace; color: var(--rule); white-space: pre-wrap; overflow-wrap: anywhere; }
-  #out .done { color: var(--paper); }
+  .stage { position: relative; width: min(100%, calc((100vh - 150px) * 1.5)); min-width: 280px; aspect-ratio: 3 / 2; background: var(--sh-cut); overflow: hidden; }
+  #out { width: 100%; max-width: 1100px; margin: 0; font: 13px/1.45 ui-monospace, Menlo, monospace; color: rgba(237,226,203,.6); white-space: pre-wrap; overflow-wrap: anywhere; }
+  #out .done { color: var(--sh-paper); }
 </style>
 </head>
 <body>
@@ -38,7 +34,7 @@
     <label><input type="checkbox" id="rm"> reduced motion</label>
     <button id="restart">restart</button>
   </header>
-  <div class="stage" id="stage"></div>
+  <div class="stage sh-grain" id="stage"></div>
   <pre id="out"></pre>
 </main>
 <script type="module">
