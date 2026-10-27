@@ -1,13 +1,15 @@
-# State — 2026-10-26, late evening
+# State — 2026-10-27
 
-**Game:** *A Sojourn of Some Weeks*: an adventure through the House of Usher, with seven chapter games, in **Shadow Theatre**. Play it: `cd game && python3 -m http.server 8300`, then open http://localhost:8300/ (`?chapter=<id>` jumps; `?debug` adds a skip).
+**Game:** *A Sojourn of Some Weeks*, playable at about 24 minutes (`cd game && python3 -m http.server 8300`). Critic: 6.5 general, 8 connoisseur (work/review/).
 
-**Done:** the spine plus all seven games (tarn, door, studio, burial, nights, trist, flight) are built, recut from the shared cut library (`game/shared/`), art-critiqued and fixed, and pushed. The coordinator played chapter I end to end inside the spine and checked the ending. No console errors.
+**Phase: full game** (75–90 min, one evening). Lukas: integrate the critic's fixes; no single source tells the truth ("the water is fluid and reflections can be tricky"); the mirror second act (*A Burial of Some Weeks*) is in.
 
-**In progress:** nothing. The three playtest notes (captions, the tarn's last beat, outro lines) are fixed and pushed.
+**Now:**
+- Critic's fixes in progress: the spine (an invitation to look down, outros that branch on flags, save on refresh, ledger fit), door (a puzzle first), tarn (counter matches the dots), burial (rule before the first catch), trist (threshold stroke, dragons-slain score, Roderick's line held).
+- Three full-game blueprints are being written: the house (investigation), the account (unreliable testimony), the mirror (two acts). Briefs: briefs/fullgame-*.md → work/fullgame/.
 
-**Next:** Lukas plays it → his notes → fixes → decide on sharing (deploy is his call).
+**Next:** blueprints cross-critique and refine → coordinator brings Lukas 2–3 full-game options with a pick → first milestone build.
 
-**Open with Lukas:** play-through verdict. Lore and story calls to confirm while playing: twin burials as a family custom (hinted only), the physician as the honest one, Madeline may take your horse in the flight.
+**Open with Lukas:** nothing until the options. Also pending: what red means now (the blueprints propose).
 
-**Rules:** builders don't commit; the coordinator checkpoints to public `main` at github.com/lamentierschweinchen/usher.
+**Rules:** builders don't commit; the coordinator checkpoints to public `main`, github.com/lamentierschweinchen/usher.
