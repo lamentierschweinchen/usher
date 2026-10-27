@@ -1,7 +1,12 @@
 // II. A Mere Different Arrangement: the door.
 // A sliding-stone puzzle played from the hole. You think you're mending the house;
 // you're walking her to the door. Spec: work/design/games/door.md
-// Every colour goes through CSS custom properties and classes (scoped to .g-door).
+// Look: Shadow Theatre (work/design/LOOK.md). The façade is black cut paper held up against
+// the chapter's violet light: windows are lamplight through cuts, the joints are hairlines of
+// light, the gap is the light behind the house. The tarn returns it all as a negative; the
+// crack and Madeline are its truths. Shapes from ../../shared/cuts.js; styles scoped to .g-door.
+
+import * as C from '../../shared/cuts.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const H = 640, CW = 120, CH = 90, GX = 180, GY = 50, WL = 320;
@@ -25,11 +30,13 @@ const JAGS = [
 // out of place, a stone sits a little askew: [dx, dy, degrees]
 const ASKEW = [[1.5, -1, 1.6], [-1, 1.5, -2.1], [1, 1, 1.3], [-1.5, -1, -1.5], [1, 1.5, 2.2], [-1, -1.5, -1.8], [1.5, 1, 1.4],
   [-1.5, 1, -2.3], [1, -1.5, 1.9], [-1, 1, -1.2], [1.5, -1.5, 2], [-1, -1, -1.7], [1, 1, 1.5], [-1.5, 1.5, -2]];
+const MIRROR = 'matrix(1 0 0 -1 0 640)';      // this game's tarn is an exact mirror about y=320 (dragging her depends on it)
+const HER_SCALE = 1.95;                        // Madeline in the water: 86 tall, the most her 90-unit cell holds below the waterline
 
 const col = i => i % 5, row = i => (i / 5) | 0;
 const cellX = i => GX + CW * col(i), cellY = i => GY + CH * row(i);
 const midX = i => cellX(i) + CW / 2, midY = i => cellY(i) + CH / 2;
-const feetY = i => H - cellY(i) - 7;            // her feet, in the hole's mirrored cell
+const feetY = i => H - cellY(i) - 3;            // her feet, in the hole's mirrored cell
 const key = (a, b) => (a < b ? a + '-' + b : b + '-' + a);
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -37,104 +44,100 @@ const easeOut = k => 1 - (1 - k) * (1 - k);
 const easeInOut = k => (k < .5 ? 2 * k * k : 1 - (2 - 2 * k) ** 2 / 2);
 const linear = k => k;
 const f1 = n => (Math.round(n * 10) / 10).toString();
+const f2 = n => { const v = Math.round(n * 100) / 100; return (v === 0 ? 0 : v).toString(); };
 function neighbour(i, d) {
   const [dx, dy] = DIRS[d], c = col(i) + dx, r = row(i) + dy;
   return c < 0 || c > 4 || r < 0 || r > 2 ? null : r * 5 + c;
 }
 
-// ---------- the stones (drawn in a 120×90 cell; classes only) ----------
-const FACE = '<rect class="gd-face" x="2" y="2" width="116" height="86"/><path class="gd-fine" d="M7 83H113V7"/>';
-const CORNICE = '<path class="gd-mass" d="M2 2H118V12H2Z"/><path class="gd-ln" d="M2 18H118"/>' +
-  '<path class="gd-fine" d="M2 22H118M2 27H26V47H2M18 47V67H2M18 67H26V88"/><path class="gd-mass" d="M2 12H14L2 24Z"/>';
-function hatch(c) {            // diagonal hatching, corners only
-  const [x, y, sx, sy] = { tl: [8, 8, 1, 1], tr: [112, 8, -1, 1], bl: [8, 82, 1, -1], br: [112, 82, -1, -1] }[c];
-  return `<path class="gd-fine" d="${[9, 16, 23].map(l => `M${x} ${y + sy * l}L${x + sx * l} ${y}`).join('')}"/>`;
+// ---------- the stones: black paper in a 120×90 cell, light through the cuts ----------
+// Every stone is cut 3 units short of its neighbours, so the joints are hairlines of light;
+// a stone out of place sits askew and lets a wedge of light through.
+const LIT = 'style="fill:var(--lit,url(#sh-lamp))"';            // lamplight through a cut; dark glass in the tarn
+const THREAD = 'style="fill:none;stroke:var(--lit,#f7d894);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;opacity:.85"';
+const BODY = '<path d="M1.5 1.5H118.5V88.5H1.5Z"/>';
+const circ = (x, y, r) => `M${f1(x - r)} ${f1(y)}a${r} ${r} 0 1 0 ${f1(2 * r)} 0a${r} ${r} 0 1 0 ${f1(-2 * r)} 0`;
+// the oculus: a rose, cut in the manner of the house's own rose window
+function rose(cx, cy, r) {
+  let s = `<circle cx="${cx}" cy="${cy}" r="${r}" ${LIT}/><circle cx="${cx}" cy="${cy}" r="${f1(r * .23)}"/>`;
+  for (let k = 0; k < 8; k++) {
+    const a = k * Math.PI / 4;
+    s += `<path d="M${f1(cx + Math.cos(a) * r * .17)} ${f1(cy + Math.sin(a) * r * .17)}L${f1(cx + Math.cos(a) * r)} ${f1(cy + Math.sin(a) * r)}" style="stroke:currentColor;stroke-width:${f1(r / 10)}"/>` +
+      `<path d="${circ(cx + Math.cos(a + Math.PI / 8) * r * .71, cy + Math.sin(a + Math.PI / 8) * r * .71, f1(r / 10))}"/>`;
+  }
+  return s + `<circle cx="${cx}" cy="${cy}" r="${r}" style="fill:none;stroke:currentColor;stroke-width:${f1(r / 7)}"/>`;
 }
+// the cornice corner: a projecting ledge, a frieze of lit dentils, quoins, lace curling off the outer corner
+function cornice() {
+  let dent = '';
+  for (let x = 8; x <= 112; x += 8) dent += `M${x} 15h3.2v5.4h-3.2z`;
+  return '<path d="M-7 -1.5H118.5V11H-7Z"/><path d="M-4 24H1.5V42H-4ZM-4 50H1.5V68H-4ZM-4 76H1.5V88.5H-4Z"/>' + BODY +
+    `<path d="${dent}" ${LIT}/><path d="M6 27H112" ${THREAD}/>` +
+    C.curl(-7, 1, Math.PI + .25, 15, -.9, 2.6, .4, 18) + C.curl(-7, 9, Math.PI / 2 + .55, 12, .95, 2.2, .35, 16) +
+    C.curl(-4, 40, Math.PI - .2, 7, .9, 1.6, .3, 12) + C.curl(-4, 66, Math.PI - .2, 7, .9, 1.6, .3, 12);
+}
+const CHINKS = ['M74 30l5 7-3 6 4 5', 'M40 56l-4 6 3 5', 'M66 62l6-3 3 5', 'M50 24l4 6-2 5'];
 const ART = {
-  plain: v => FACE + hatch(['tl', 'br', 'tr', 'bl'][v % 4]) +
-    `<path class="gd-fine" d="${['M74 30l5 7-3 6 4 5', 'M40 56l-4 6 3 5', 'M66 62l6-3 3 5', 'M50 24l4 6-2 5'][v % 4]}"/>`,
-  cL: () => FACE + CORNICE,
-  cR: () => FACE + `<g transform="matrix(-1 0 0 1 120 0)">${CORNICE}</g>`,
-  attic: v => FACE + '<path class="gd-fine" d="M38 24Q60 8 82 24"/><path class="gd-mass" d="M45 64V38Q60 20 75 38V64Z"/>' +
-    '<path class="gd-ln" d="M40 68H80"/>' + hatch(v ? 'br' : 'bl'),
-  oculus: () => FACE + '<circle class="gd-ln" cx="60" cy="45" r="29"/><circle class="gd-mass" cx="60" cy="45" r="20"/>' +
-    '<path class="gd-fine" d="M60 9V16M60 74V81M24 45H31M89 45H96"/>',
-  tall: () => FACE + '<path class="gd-fine" d="M42 40Q42 14 60 6Q78 14 78 40"/>' +
-    '<path class="gd-mass" d="M47 80V38Q47 18 60 11Q73 18 73 38V80Z"/><path class="gd-ln" d="M41 83H79"/>',
-  crest: () => FACE + '<path class="gd-ln" d="M44 18H76V42Q76 62 60 72Q44 62 44 42Z"/>' +
-    '<path class="gd-fine" d="M49 47L60 36L71 47M49 55L60 44L71 55M36 26Q28 48 44 70M84 26Q92 48 76 70"/>',
-  small: v => FACE + '<path class="gd-fine" d="M45 38H75"/><path class="gd-mass" d="M49 42H71V68H49Z"/>' +
-    '<path class="gd-ln" d="M44 72H76"/>' + hatch(v ? 'tr' : 'tl'),
+  plain: v => BODY + `<path d="${CHINKS[v % 4]}" ${THREAD}/>`,
+  cL: () => cornice(),
+  cR: () => `<g transform="matrix(-1 0 0 1 120 0)">${cornice()}</g>`,
+  attic: () => BODY + C.lancet(49, 18, 22, 52) + '<path d="M44 71H76V75H44Z"/>' + `<path d="${circ(32, 30, 2.6)}${circ(88, 30, 2.6)}" ${LIT}/>`,
+  oculus: () => BODY + rose(60, 45, 27),
+  tall: () => BODY + C.lancet(45, 7, 30, 77),
+  crest: () => BODY +
+    `<path d="M44 16H76V40Q76 60 60 71Q44 60 44 40Z" ${LIT}/>` +
+    '<path d="M44 46L60 32L76 46V55L60 41L44 55Z"/><path d="M52 62L60 55L68 62L64 66L60 62.5L56 66Z"/><path d="M44 16H76V21H44Z"/>' +
+    `<g ${LIT}>${C.curl(42, 22, Math.PI * .78, 24, -.75, 3.4, .5, 22)}${C.curl(78, 22, Math.PI * .22, 24, .75, 3.4, .5, 22)}` +
+    `${C.curl(43, 46, Math.PI * .62, 18, -.9, 2.6, .4, 18)}${C.curl(77, 46, Math.PI * .38, 18, .9, 2.6, .4, 18)}</g>`,
+  small: v => BODY + `<path d="M46 38H74V67H46Z" ${LIT}/><path d="M58.6 38h2.8v29h-2.8zM46 51.2h28v2.6H46z"/><path d="M42 67H78V71H42Z"/>` +
+    `<path d="${v ? 'M88 20l4 5-2 4' : 'M30 70l-3 5 3 4'}" ${THREAD}/>`,
 };
-// the walled-up doorway at cell 12: a black lintel (the screen's one flat mass) and jambs
-const FRAME = '<path class="gd-mass" d="M-10 -9H130V11H-10Z"/><path class="gd-ln" d="M11 11V89M109 11V89"/>';
-const DOORWAY = '<rect class="gd-face" x="2" y="11" width="116" height="77"/>' +
-  '<path class="gd-void" d="M24 89V46Q24 25 60 18Q96 25 96 46V89Z"/>';
-// hooded paper shroud, faceless, train trailing (faces left at scale 1); feet at 0,0
-const HER = '<path class="gd-her" d="M0 -74C-7 -74 -9.5 -66 -8 -58C-10 -44 -12 -22 -14 0C-4 1.5 9 1.5 24 3C17 -1 12 -6 9.5 -14' +
-  'C8 -30 9 -46 8 -58C9.5 -66 7 -74 0 -74Z"/><ellipse class="gd-her gd-face-blank" cx="-1.6" cy="-63" rx="4" ry="5.4"/>' +
-  '<path class="gd-her-ln" d="M-3 -50C-5 -32 -7 -15 -8.5 -1M3.5 -50C3.5 -33 4.5 -17 8.5 -4"/>';
-const BANK =
-  '<path class="gd-fine" d="M44 320l-4-15M50 320l1-21M57 320l-5-12M64 320l3-17M71 320l-2-10M118 320l-3-13M125 320l2-19M131 320l-4-9"/>' +
-  '<path class="gd-face" d="M834 320L837 214 842 196 846 214 848 320Z"/><path class="gd-fine" d="M840 238l-16-20M842 222l11-15M824 218l-6-4"/>' +
-  '<path class="gd-face" d="M874 320L876 246 880 232 884 248 885 320Z"/><path class="gd-fine" d="M879 262l12-14M880 250l-9-10"/>' +
-  '<path class="gd-face" d="M904 320L906 270 909 258 912 272 912 320Z"/>';
-let web = '';
-for (let x = 176; x < 780; x += 20) web += `M${x} 47q5 ${5 + ((x / 20) % 3) * 2} 10 0`;
-const ROOF = `<path class="gd-ln" d="M168 47H792"/><path class="gd-fine" d="${web}M232 47v9M412 47v12M604 47v8M716 47v11"/>`;
-const LAYER = `<g class="gd-bank">${BANK}</g><g class="gd-voids"></g><g class="gd-stones"></g><g class="gd-doorway"></g>` +
-  `<g class="gd-frame" transform="translate(420 230)">${FRAME}</g><g class="gd-fissure"></g><g class="gd-roof">${ROOF}</g><g class="gd-words"></g>`;
+// the walled-up doorway at cell 12: a lintel with lit dentils, and light leaking round the bricked arch
+const ARCH = 'M24 89V46Q24 25 60 18Q96 25 96 46V89';
+const FRAME = `<path d="M-10 -9H130V11H-10Z"/><path d="${[...Array(13)].map((_, k) => circ(-1 + k * 10.2, 1, 1.9)).join('')}" ${LIT}/>` +
+  C.curl(-10, -8, Math.PI + .3, 9, -.9, 2.2, .3, 14) + C.curl(130, -8, -.3, 9, .9, 2.2, .3, 14) +
+  `<path d="${ARCH}" style="fill:none;stroke:var(--lit,#f7d894);stroke-width:1.6;stroke-linejoin:round;opacity:.8"/>`;
+const DOORFACE = '<path d="M1.5 11H118.5V88.5H1.5Z"/>';
 
 const CSS = `
-.g-door{position:relative;width:100%;height:100%;overflow:hidden;container:gdoor/inline-size;font-family:var(--serif);color:var(--ink);
- -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;outline:none;
- --g-door-stone:var(--paper);--g-door-void:var(--ink);--g-door-tarn:var(--ink);--g-door-tarn-alpha:.35;
- --g-door-reflect-line:var(--paper);--g-door-reflect-alpha:.6;--g-door-crack:var(--red);
- --g-door-her:var(--paper);--g-door-her-edge:var(--ink);--g-door-shadow:var(--ink);--g-door-shadow-alpha:.2;
- --g-door-word:var(--ink);--g-door-halo:var(--paper);--g-door-line:var(--ink);--g-door-bank:var(--ink)}
-.g-door:focus-visible{outline:1px dashed var(--rule);outline-offset:-4px}
+.g-door{position:relative;width:100%;height:100%;overflow:hidden;container:gdoor/inline-size;font-family:var(--sh-serif);color:var(--sh-cut);
+ background:var(--sh-cut);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;outline:none}
+.g-door:focus-visible{outline:1px dashed rgba(247,216,148,.5);outline-offset:-6px}
+.g-door:focus-visible .gd-gap{filter:url(#sh-rim)}
 .g-door svg{display:block;width:100%;height:100%;touch-action:none}
-.g-door .gd-above{color:var(--ink);--g-door-ground:var(--g-door-stone)}
-.g-door .gd-below{color:var(--g-door-reflect-line);--g-door-ground:transparent;opacity:var(--g-door-reflect-alpha)}
-.g-door .gd-face{fill:var(--g-door-ground);stroke:currentColor;stroke-width:2;stroke-linejoin:round}
-.g-door .gd-mass{fill:currentColor}
-.g-door .gd-ln{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.g-door .gd-fine{fill:none;stroke:currentColor;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round}
-.g-door .gd-void{fill:var(--g-door-void)}
-.g-door .gd-tarn{fill:var(--g-door-tarn);opacity:var(--g-door-tarn-alpha)}
-.g-door .gd-waterline{fill:none;stroke:var(--g-door-bank);stroke-width:1.1}
-.g-door .gd-above .gd-stone{filter:url(#gdoor-cutout)}
-.g-door .gd-flood{flood-color:var(--g-door-shadow);flood-opacity:var(--g-door-shadow-alpha)}
-.g-door .gd-edge{fill:none;stroke:var(--g-door-crack);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .4s}
-.g-door .gd-edge.gd-stub{stroke-width:1.8}
-.g-door .gd-edge.gd-walked{stroke-width:4.6}
-.g-door .gd-glow path{fill:none;stroke:var(--g-door-crack);stroke-width:12;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.g-door .gd-gap rect,.g-door .gd-light,.g-door .gd-voids>rect{fill:url(#gdoor-panel)}
+.g-door .gd-gap.is-hot rect,.g-door .gd-gap.is-held rect{fill:url(#gdoor-panel-hot)}
+.g-door .gd-voids-b rect{fill:none}
+.g-door .gd-edge{fill:none;stroke:var(--sh-red);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .4s}
+.g-door .gd-edge.gd-stub{stroke-width:1.6}
+.g-door .gd-edge.gd-walked{stroke-width:4.4}
+.g-door .gd-glow path{fill:none;stroke:var(--sh-red);stroke-width:12;stroke-linecap:round;stroke-linejoin:round;opacity:0}
 .g-door .gd-flare .gd-glow path{animation:gdoor-flare .6s ease-out}
 @keyframes gdoor-flare{0%{opacity:0}18%{opacity:.5}100%{opacity:0}}
-.g-door .gd-her{fill:var(--g-door-her);stroke:var(--g-door-her-edge);stroke-width:1.1;stroke-linejoin:round}
-.g-door .gd-her-ln{fill:none;stroke:var(--g-door-her-edge);stroke-width:.7;stroke-linecap:round;opacity:.6}
-.g-door .gd-word{font-family:var(--serif);font-style:italic;font-size:22px;fill:var(--g-door-word);paint-order:stroke;
- stroke:var(--g-door-halo);stroke-width:5px;stroke-linejoin:round;pointer-events:none;animation:gdoor-word 1.5s linear forwards}
+.g-door .gd-herw{--gauze:#fff6e0}
+.g-door .gd-word{font-family:var(--sh-serif);font-style:italic;font-size:30px;fill:var(--sh-cut);pointer-events:none;animation:gdoor-word 1.5s linear forwards}
 @keyframes gdoor-word{0%,60%{opacity:1}100%{opacity:0}}
 .g-door.g-door-reduced .gd-word{animation:none}
 .g-door .gd-smudge{animation:gdoor-smudge .3s ease-out}
 @keyframes gdoor-smudge{0%{opacity:.4}100%{opacity:1}}
-.g-door .gd-hit{fill:currentColor;fill-opacity:0;cursor:grab}
+.g-door .gd-hit{fill:#000;fill-opacity:0;cursor:grab}
 .g-door.gd-dragging,.g-door.gd-dragging *{cursor:grabbing}
 .g-door.gd-ended .gd-hit{display:none}
-.g-door .gd-fissure path{fill:none;stroke:var(--g-door-crack);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity 1.4s ease-in}
+.g-door .gd-fissure path{fill:none;stroke:var(--sh-red);stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity 1.4s ease-in}
 .g-door .gd-fissure.gd-shown path{opacity:1}
 .g-door .gd-in-door{opacity:0;transition:opacity 1s}
 .g-door .gd-in-door.gd-shown{opacity:1}
 .g-door .gd-doorway>g{opacity:0;transition:opacity .3s}
 .g-door .gd-doorway>g.gd-shown{opacity:1}
-.g-door .g-door-line{position:absolute;margin:0;left:calc(100cqw*36/960);top:calc(100cqw*42/960);white-space:nowrap;pointer-events:none;
- font-style:italic;font-size:max(12px,calc(100cqw*18/960));line-height:1.2;color:var(--g-door-line);transition:opacity 2s}
+.g-door .g-door-line{position:absolute;margin:0;left:calc(100cqw*32/960);top:calc(100cqw*58/960);white-space:nowrap;pointer-events:none;
+ font-family:var(--sh-serif);font-style:italic;font-size:max(12px,calc(100cqw*23/960));line-height:1.22;color:var(--sh-paper);transition:opacity 2s}
 .g-door .g-door-line.gd-gone{opacity:0}
 @container gdoor (max-width:620px){
- .g-door .g-door-line{left:0;right:0;top:2px;text-align:center;font-size:11px}
+ .g-door .g-door-line{left:0;right:0;top:calc(100cqw*608/960 - 7px);text-align:center;font-size:12px;line-height:14px}
  .g-door .g-door-line br{display:none}
+ .g-door .gd-word{font-size:34px}
 }
+@media (prefers-reduced-motion:reduce){.g-door .gd-word,.g-door .gd-smudge{animation:none}}
 `;
 
 export default {
@@ -142,6 +145,7 @@ export default {
   title: 'The Door',
   mount(stage, api = {}) {
     const reduced = !!api.reducedMotion;
+    C.autoLace();                                  // phones: about half the lace (decided before any markup)
     const timers = new Set(), tweens = new Set();
     const later = (ms, fn) => { const t = setTimeout(() => { timers.delete(t); fn(); }, ms); timers.add(t); return t; };
     const cancel = t => { if (t != null) { clearTimeout(t); timers.delete(t); } };
@@ -169,20 +173,41 @@ export default {
     const restart = (el, cls) => { el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); };
 
     // ---------- the scene ----------
+    // the bank: a low mound and sedges at left (the teaching line has the sky above it), white trunks at right
+    const BANK = '<path d="M14 320V308C44 302 84 303 122 309C146 313 164 317 178 320Z"/>' + C.sedges(18, 176, 318, { count: 34, h: [7, 19], seed: 7 }) +
+      '<path d="M782 320C806 313 842 308 880 306C910 305 932 305 946 303V320Z"/>' +
+      C.tree(842, 314, { h: 148, seed: 23, crown: 46, w: 4.6, lean: .05 }) + C.tree(878, 311, { h: 116, seed: 24, crown: 40, w: 4.2, lean: -.04 }) +
+      C.tree(912, 309, { h: 168, seed: 25, crown: 52, w: 5, lean: -.08 }) + C.sedges(786, 944, 316, { count: 30, h: [6, 16], seed: 8, lean: -.05 });
+    // the parapet: a black band with lace standing up, a pinnacle at each end
+    const pin = x => `<path d="M${x - 5} 40V30Q${x} 18 ${x} 8Q${x} 18 ${x + 5} 30V40Z"/>` + C.curl(x - 3, 24, Math.PI + .5, 7, -.9, 1.6, .3, 12) + C.curl(x + 3, 24, -.5, 7, .9, 1.6, .3, 12);
+    const ROOF = '<path d="M168 39H792V48.5H168Z"/>' + C.fringe(186, 774, 39.5, { seed: 5, len: [3, 7], step: 7.5, dir: -1, w: 1.4, dots: false }) + pin(172) + pin(788);
+    const LAYER = `<g class="gd-bank" fill="currentColor">${BANK}</g><g class="gd-voids"></g><g class="gd-stones"></g><g class="gd-doorway"></g>` +
+      `<g class="gd-frame" fill="currentColor" transform="translate(420 230)">${FRAME}</g><g class="gd-fissure"></g><g class="gd-roof" fill="currentColor">${ROOF}</g><g class="gd-words"></g>`;
+    const MY_DEFS = `<defs>
+<radialGradient id="gdoor-panel" gradientUnits="userSpaceOnUse" cx="480" cy="236" r="340"><stop offset="0" stop-color="#f1dbe4"/><stop offset=".5" stop-color="#bf9fbe"/><stop offset="1" stop-color="#7a5f97"/></radialGradient>
+<radialGradient id="gdoor-panel-hot" gradientUnits="userSpaceOnUse" cx="480" cy="236" r="340"><stop offset="0" stop-color="#fdeec6"/><stop offset=".5" stop-color="#e6c79c"/><stop offset="1" stop-color="#b58d8e"/></radialGradient>
+<linearGradient id="gdoor-deep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".46"/><stop offset=".45" stop-color="#fff" stop-opacity=".24"/><stop offset=".85" stop-color="#fff" stop-opacity=".07"/></linearGradient>
+<mask id="gdoor-depth" maskUnits="userSpaceOnUse" x="0" y="${WL}" width="960" height="${H - WL}"><rect x="0" y="${WL}" width="960" height="${H - WL}" fill="url(#gdoor-deep)"/></mask>
+<clipPath id="gdoor-arch"><path d="${ARCH}Z"/></clipPath></defs>`;
+    // the tarn returns the house as light: the library's returned(), on this game's exact mirror and waterline
+    const reflection = C.returned(`<g class="gd-below">${LAYER.replace('"gd-voids"', '"gd-voids gd-voids-b"')}</g>`, { still: true, transform: MIRROR })
+      .replace('url(#sh-depth)', 'url(#gdoor-depth)');
+
     const root = document.createElement('div');
-    root.className = 'g-door' + (reduced ? ' g-door-reduced' : '');
+    root.className = 'g-door' + (reduced ? ' g-door-reduced sh-still' : '');
     root.tabIndex = 0;
     root.innerHTML = `<style>${CSS}</style>
-<svg viewBox="0 0 960 640" role="img" aria-label="The façade of the House of Usher, its stones out of order around a black gap. In the grey tarn below, the house hangs upside down, cracked in red, and a pale figure stands in the gap's reflection. Drag the gap, or her.">
-<defs><filter id="gdoor-cutout" x="-10%" y="-10%" width="125%" height="125%"><feOffset in="SourceAlpha" dx="2" dy="3" result="o"/>
-<feFlood class="gd-flood"/><feComposite in2="o" operator="in" result="s"/><feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-<rect class="gd-tarn" x="32" y="320" width="896" height="288"/>
-<g class="gd-below" transform="matrix(1 0 0 -1 0 640)">${LAYER}</g>
-<path class="gd-waterline" d="M32 320H928"/>
+<svg viewBox="0 0 960 640" role="img" aria-label="The façade of the House of Usher, cut in black paper against violet light, its stones out of order around a lit gap. In the dark tarn below, the house comes back as light, cracked in red, and a pale figure stands upright in the gap's reflection. Drag the gap, or her.">
+${C.defs({ animate: false })}${MY_DEFS}
+${C.backdrop('door', { h: WL })}
+<rect class="gd-light" x="${GX}" y="${GY}" width="${5 * CW}" height="${3 * CH}"/>
+${C.glass('door', { y: WL, h: H - WL })}
+${reflection}
 <g class="gd-crack"><g class="gd-glow"></g><g class="gd-lines"></g></g>
-<g class="gd-herw"></g>
-<g class="gd-above">${LAYER}</g>
+<g class="gd-herw" filter="url(#sh-glow)"></g>
+<g class="gd-above" style="color:var(--sh-cut)">${LAYER}</g>
 <rect class="gd-hit"/><rect class="gd-hit"/>
+${C.frame()}
 </svg>
 <p class="g-door-line"><i>A mere different <br>arrangement of <br>the particulars.</i></p>`;
     stage.appendChild(root);
@@ -203,7 +228,7 @@ export default {
     const grid = new Array(15).fill(null);
     const edges = new Map();
     const walkOrder = [];
-    const heldWords = [];
+    const words = [];
 
     // stones
     const seen = {};
@@ -213,8 +238,8 @@ export default {
       const v = seen[type] = (seen[type] ?? -1) + 1, html = ART[type](v);
       const [ax, ay, ar] = ASKEW[n++];
       const s = { type, x: cellX(i), y: cellY(i), nx: 0, ny: 0, k: type === HOME[i] ? 0 : 1, wob: 0, ax, ay, ar, tw: {} };
-      s.g = mk('g', { class: 'gd-stone' }, A.stones, html);
-      s.gR = mk('g', { class: 'gd-stone' }, B.stones, html);
+      s.g = mk('g', { class: 'gd-stone', fill: 'currentColor' }, A.stones, html);
+      s.gR = mk('g', { class: 'gd-stone', fill: 'currentColor' }, B.stones, html);
       grid[i] = s; drawStone(s);
     });
     function drawStone(s) {
@@ -223,23 +248,32 @@ export default {
     }
     const raise = s => { s.g.parentNode.appendChild(s.g); s.gR.parentNode.appendChild(s.gR); };
 
-    // the hole: black, in the house and in the water
-    const voidRect = parent => mk('rect', { class: 'gd-void', width: CW - 2, height: CH - 2 }, parent);
-    const voids = [voidRect(A.voids), voidRect(B.voids)];
-    function placeVoid(i) { for (const v of voids) { v.setAttribute('x', cellX(i) + 1); v.setAttribute('y', cellY(i) + 1); } }
+    // the hole: the light behind the house, where a stone is missing (dark glass in the tarn)
+    const gap = mk('g', { class: 'gd-gap touch' }, A.voids);
+    const voidRect = parent => mk('rect', { class: 'gd-void', width: CW, height: CH }, parent);
+    const voids = [voidRect(gap), voidRect(B.voids)];
+    function placeVoid(i) { for (const v of voids) { v.setAttribute('x', cellX(i)); v.setAttribute('y', cellY(i)); } }
     function tempVoid(i, ms) {
       const pair = [voidRect(A.voids), voidRect(B.voids)];
-      for (const v of pair) { v.setAttribute('x', cellX(i) + 1); v.setAttribute('y', cellY(i) + 1); }
+      for (const v of pair) { v.setAttribute('x', cellX(i)); v.setAttribute('y', cellY(i)); }
       later(ms, () => pair.forEach(v => v.remove()));
     }
     placeVoid(hole);
 
-    // her, upright in the hole's reflection
-    const herG = mk('g', { class: 'gd-her-w' }, svg.querySelector('.gd-herw'), HER);
-    const her = { x: midX(hole), y: feetY(hole), ox: 0, oy: 0, bob: 0, lean: 0, wob: 0, face: 1, tw: {} };
-    function drawHer() {
-      herG.setAttribute('transform',
-        `translate(${f1(her.x + her.ox)} ${f1(her.y + her.oy + her.bob)}) rotate(${f1(her.lean + her.wob)}) scale(${her.face} 1)`);
+    // her: Madeline, upright in the hole's reflection, bright (the tarn's truth)
+    const herW = svg.querySelector('.gd-herw');
+    herW.innerHTML = C.figure('madeline', { scale: HER_SCALE, faint: false, cls: 'touch gd-her' });
+    const herEl = herW.firstElementChild, herPose = herEl.querySelector('.sh-pose');
+    const her = { x: midX(hole), y: feetY(hole), ox: 0, oy: 0, bob: 0, lean: 0, wob: 0, face: 1, sx: -1, tw: {} };
+    function drawHer() {                       // the cut faces right; face 1 is left, so the pose mirrors it
+      C.place(herEl, her.x + her.ox, her.y + her.oy + her.bob);
+      herPose.setAttribute('transform', `rotate(${f1(her.lean + her.wob)}) scale(${f2(her.sx)} 1)`);
+    }
+    function setFace(f) {                      // turn by flipping edge-on, 160 ms
+      if (f === her.face) return;
+      her.face = f; kill(her.tw.turn);
+      const s0 = her.sx, s1 = -f;
+      her.tw.turn = tween(reduced ? 0 : 160, e => { her.sx = lerp(s0, s1, e); drawHer(); }, null, linear);
     }
     drawHer();
 
@@ -282,6 +316,16 @@ export default {
     }
     placeHits();
 
+    // touchable: a lit edge where the lamp gets round the paper on hover; lifted while held
+    let hot = null;
+    const touchEl = mode => (mode === 'hole' ? gap : mode === 'her' ? herEl : null);
+    function setHot(mode) {
+      if (hot === mode) return;
+      touchEl(hot)?.classList.remove('is-hot');
+      hot = mode;
+      touchEl(hot)?.classList.add('is-hot');
+    }
+
     // ---------- feel ----------
     function slideStone(s, to) {
       kill(s.tw.slide); kill(s.tw.nudge);
@@ -302,7 +346,7 @@ export default {
       s.tw.wob = tween(300, e => { s.wob = 2.4 * Math.sin(e * Math.PI * 5) * (1 - e); drawStone(s); }, null, linear);
     }
     function herWobble() {
-      if (reduced) { restart(herG, 'gd-smudge'); return; }
+      if (reduced) { restart(herW, 'gd-smudge'); return; }
       kill(her.tw.wob);
       her.tw.wob = tween(300, e => { her.wob = 3 * Math.sin(e * Math.PI * 5) * (1 - e); drawHer(); }, null, linear);
     }
@@ -316,23 +360,31 @@ export default {
         s.tw.nudge = tween(reduced ? 0 : 140, e => { s.nx = nx * (1 - e); s.ny = ny * (1 - e); drawStone(s); }, null, easeOut);
       }
     }
-    function herTo(i, from) {
+    function herTo(i, from) {              // she glides (Madeline never bobs); reduced motion: she fades to her place
       const dc = col(i) - col(from);
-      if (dc) her.face = dc > 0 ? -1 : 1;
+      if (dc) setFace(dc > 0 ? -1 : 1);
       kill(her.tw.go); kill(her.tw.lean); kill(her.tw.off);
       const x0 = her.x + her.ox, y0 = her.y + her.oy, l0 = her.lean, x1 = midX(i), y1 = feetY(i);
       her.ox = her.oy = 0;
+      if (reduced) restart(herW, 'gd-smudge');
       her.tw.go = tween(reduced ? 0 : 200, e => {
-        her.x = lerp(x0, x1, e); her.y = lerp(y0, y1, e); her.bob = -1.5 * Math.sin(Math.PI * e); her.lean = l0 * (1 - e); drawHer();
+        her.x = lerp(x0, x1, e); her.y = lerp(y0, y1, e); her.lean = l0 * (1 - e); drawHer();
       }, null, easeOut);
     }
-    function word(i) {                     // a stone grinds home: the sound is type
-      const x = cellX(i) + CW - 8, y = cellY(i) + 24, tilt = f1((((i * 7) % 9) - 4) * .9);
-      const t = mk('text', { class: 'gd-word', x, y, 'text-anchor': 'end', transform: `rotate(${tilt} ${x} ${y})` }, A.words);
-      t.textContent = WORDS[wordN++ % WORDS.length];
-      if (reduced) heldWords.push(t); else later(1550, () => t.remove());
+    function word(i, t) {                  // a stone grinds home: the sound is cut type, black on the light of the gap beside it
+      const dc = col(i) - col(t), dr = row(i) - row(t);
+      let x = midX(t), y = midY(t) + 11, anchor = 'middle';
+      if (dc > 0) { x = cellX(t) + CW - 10; anchor = 'end'; }
+      else if (dc < 0) { x = cellX(t) + 10; anchor = 'start'; }
+      else if (dr > 0) y = cellY(t) + CH - 14;
+      else if (dr < 0) y = cellY(t) + 34;
+      const tilt = f1((((i * 7) % 9) - 4) * .9);
+      const el = mk('text', { class: 'gd-word sh-sound', x, y, 'text-anchor': anchor, transform: `rotate(${tilt} ${x} ${y})` }, A.words);
+      el.textContent = WORDS[wordN++ % WORDS.length];
+      words.push(el);
+      if (!reduced) later(1550, () => { el.remove(); const k = words.indexOf(el); if (k >= 0) words.splice(k, 1); });
     }
-    const clearWords = () => { while (heldWords.length) heldWords.pop().remove(); };
+    const clearWords = () => { while (words.length) words.pop().remove(); };
 
     // ---------- the rules ----------
     function move(t, who) {
@@ -347,7 +399,7 @@ export default {
       raise(s); slideStone(s, from);
       herTo(t, from);
       placeHits();
-      if (s.type === HOME[from]) word(from);
+      if (s.type === HOME[from]) word(from, t);
       if (who === 'player' && ++playerMoves === 2) line.classList.add('gd-gone');
       if (t === 8 && !grown) grow();
       if (t === DOOR) { finish(from); return; }
@@ -366,7 +418,7 @@ export default {
       addEdge(13, 12, false, 5, reduced ? 0 : 650);
       later(reduced ? 0 : 260, () => {     // she turns toward it
         if (ended || hole !== 8) return;
-        her.face = 1; kill(her.tw.lean);
+        setFace(1); kill(her.tw.lean);
         const l0 = her.lean;
         her.tw.lean = tween(reduced ? 0 : 500, e => { her.lean = lerp(l0, -6, e); drawHer(); });
       });
@@ -418,6 +470,8 @@ export default {
     function finish(from) {
       ended = true; drag = null; cancel(idleT); cancelLean();
       root.classList.add('gd-ended'); root.classList.remove('gd-dragging');
+      setHot(null);
+      for (const el of [gap, herEl]) { el.classList.remove('is-held'); el.setAttribute('aria-disabled', 'true'); }
       line.classList.add('gd-gone');
       const short = from === 13;
       let askew = 0, inOrder = 0;
@@ -442,18 +496,17 @@ export default {
     }
     function openDoor() {
       clearWords();
-      const parts =[A, B].map((L, i) => {
-        const g = mk('g', { transform: 'translate(420 230)' }, L.doorway, DOORWAY);
-        const leaves = [mk('path', { class: 'gd-face' }, g), mk('path', { class: 'gd-face' }, g), mk('path', { class: 'gd-fine' }, g)];
+      // the ebony panels throw slowly back [u49] on the stair's violet light; she is in it, faint above, bright below
+      const parts = [A, B].map((L, i) => {
+        const g = mk('g', { transform: 'translate(420 230)', fill: 'currentColor' }, L.doorway, DOORFACE);
+        const leaves = mk('g', { 'clip-path': 'url(#gdoor-arch)' }, g);
         let inDoor = null;
-        if (i === 0) inDoor = mk('g', { class: 'gd-in-door', transform: 'translate(60 88) scale(.86)' }, g, HER);
+        if (i === 0) inDoor = mk('g', { class: 'gd-in-door' }, g, C.figure('madeline', { x: 64, y: 88, scale: 1.5 }));
         return { g, leaves, inDoor };
       });
-      const setLeaves = k => {                       // panels thrown back
-        const s = 4 * k, t = 46, b = 89, l = lerp(60, -2, k), r = lerp(60, 122, k), m = (t + b) / 2;
-        const d = [`M24 ${t}L${f1(l)} ${f1(t - s)}L${f1(l)} ${f1(b + s)}L24 ${b}Z`, `M96 ${t}L${f1(r)} ${f1(t - s)}L${f1(r)} ${f1(b + s)}L96 ${b}Z`,
-          `M24 ${m}L${f1(l)} ${m}M96 ${m}L${f1(r)} ${m}`];
-        for (const p of parts) p.leaves.forEach((el, j) => el.setAttribute('d', d[j]));
+      const setLeaves = k => {
+        const html = C.door('ebony', { x: 24, y: 18, w: 72, h: 71, open: k, light: '--lit-stair', fallback: 'url(#sh-room-stair)' });
+        for (const p of parts) p.leaves.innerHTML = html;
       };
       setLeaves(0);
       const show = el => { void el.getBoundingClientRect(); el.classList.add('gd-shown'); };
@@ -527,6 +580,7 @@ export default {
         drag = { id: e.pointerId, mode, ox: p.x, oy: p.y, refused: null };
         try { svg.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
         root.classList.add('gd-dragging');
+        setHot(null); touchEl(mode).classList.add('is-held');
         e.preventDefault();
         return;
       }
@@ -534,14 +588,19 @@ export default {
       if (c != null && grid[c]) { shudder(grid[c]); flare(); }   // stones aren't moved directly
       armIdle();
     }
-    function onMove(e) { if (drag && e.pointerId === drag.id) track(svgPt(e)); }
+    function onMove(e) {
+      if (drag) { if (e.pointerId === drag.id) track(svgPt(e)); return; }
+      if (!ended && e.pointerType === 'mouse') setHot(grabMode(svgPt(e)));
+    }
     function onUp(e) {
       if (!drag || e.pointerId !== drag.id) return;
+      touchEl(drag.mode).classList.remove('is-held');
       drag = null;
       root.classList.remove('gd-dragging');
       relax(nudged); nudged = null;
       if (!ended) armIdle();
     }
+    const onLeave = () => setHot(null);
     function onKey(e) {
       const d = { ArrowLeft: 'L', ArrowRight: 'R', ArrowUp: 'U', ArrowDown: 'D' }[e.key];
       if (!d || ended) return;
@@ -554,6 +613,7 @@ export default {
     svg.addEventListener('pointermove', onMove);
     svg.addEventListener('pointerup', onUp);
     svg.addEventListener('pointercancel', onUp);
+    svg.addEventListener('pointerleave', onLeave);
     root.addEventListener('keydown', onKey);
 
     // the house moves first
@@ -567,6 +627,7 @@ export default {
       svg.removeEventListener('pointermove', onMove);
       svg.removeEventListener('pointerup', onUp);
       svg.removeEventListener('pointercancel', onUp);
+      svg.removeEventListener('pointerleave', onLeave);
       root.removeEventListener('keydown', onKey);
       root.remove();
     };

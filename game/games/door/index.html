@@ -4,30 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Door · dev harness</title>
+<link rel="stylesheet" href="../../shared/shadow.css">
 <style>
-@font-face{font-family:'IM Fell English';src:url('../../fonts/im-fell-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:'IM Fell English';src:url('../../fonts/im-fell-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
-:root{--paper:#f2eee5;--ink:#29272a;--muted:#625d5a;--rule:#cbc3b8;--red:#7a3939;--serif:'IM Fell English', Georgia, serif}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif)}
+html,body{margin:0;background:#1a1420;color:var(--sh-paper);font-family:var(--sh-serif)}
 body{padding:16px}
-.box{position:relative;width:min(100%, calc((100svh - 170px) * 1.5));aspect-ratio:3/2;margin:0 auto}
-.stage{position:absolute;inset:0;background:var(--paper)}
-.frame{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.frame rect{fill:none;stroke:var(--ink)}
-.bar{max-width:960px;margin:12px auto 0;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:15px;color:var(--muted)}
-.bar button{font:inherit;color:var(--ink);background:none;border:1px solid var(--rule);padding:4px 14px;cursor:pointer}
+.box{position:relative;width:min(100%, calc((100svh - 170px) * 1.5));aspect-ratio:3/2;margin:0 auto;container-type:inline-size;
+ background:var(--sh-cut);box-shadow:0 18px 40px -22px rgba(0,0,0,.8)}
+.stage{position:absolute;inset:0;overflow:hidden}
+.bar{max-width:960px;margin:12px auto 0;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:15px;color:var(--sh-lilac)}
+.bar button{font:inherit;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--sh-lamp);background:var(--sh-cut);border:1px solid rgba(247,216,148,.35);padding:6px 14px;cursor:pointer}
 .bar label{display:flex;gap:6px;align-items:center;cursor:pointer}
-pre{max-width:960px;margin:10px auto;white-space:pre-wrap;font:13px/1.45 ui-monospace,Menlo,monospace;color:var(--ink)}
+pre{max-width:960px;margin:10px auto;white-space:pre-wrap;font:13px/1.45 ui-monospace,Menlo,monospace;color:var(--sh-paper)}
 </style>
 </head>
 <body>
 <div class="box">
   <div class="stage" id="stage"></div>
-  <svg class="frame" viewBox="0 0 960 640" aria-hidden="true">
-    <rect x="8" y="8" width="944" height="624" style="stroke-width:1.5"/>
-    <rect x="14" y="14" width="932" height="612" style="stroke-width:.6"/>
-  </svg>
 </div>
 <div class="bar">
   <button id="again" type="button">Again</button>
