@@ -33,6 +33,8 @@ const SITES = { W0: ['sun', 0], W1: ['sun', 1], W2: ['sun', 2], V0: ['rose', 0],
 const SEQ = ['W2', 'B1', 'V0', 'W0', 'B0', 'V1', 'W1'];
 const VALUE = { sun: 10, rose: 10, band: 20, tap: 50 };
 const BAND_WORDS = ['TAN-TARA.', 'TAN-TARA.', 'OOM-PAH-PAH.', 'TAN-TARA.', 'TA-RA-RA.', 'TAN-TAN-TARA.', 'PARP.'];
+const BAND_LIFT = 60;                    // the band's type is drawn this far above its path, clear of Roderick's profile;
+                                         // its touch box (the word's own box, padded) goes with it
 const SPARE = 'Spare him everything.';
 const NOTE_HUSHED = 'Everything is hushed. Roderick thanks you, and goes on listening to it.';
 const NOTE_SPARED = 'Roderick heard it. He did not thank you.';
@@ -153,15 +155,11 @@ function scene(u) {
     <linearGradient id="${u}-beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0c2" stop-opacity=".58"/><stop offset="1" stop-color="#fff0c2" stop-opacity=".16"/></linearGradient>
     <radialGradient id="${u}-pool"><stop offset="0" stop-color="#fff6dc" stop-opacity=".75"/><stop offset=".6" stop-color="#fff0c2" stop-opacity=".28"/><stop offset="1" stop-color="#fff0c2" stop-opacity="0"/></radialGradient>
     <radialGradient id="${u}-glow" gradientUnits="userSpaceOnUse" cx="480" cy="250" r="430"><stop offset="0" stop-color="#f8d993" stop-opacity=".3"/><stop offset="1" stop-color="#f8d993" stop-opacity="0"/></radialGradient>
-    <filter id="${u}-edge" x="-12%" y="-35%" width="124%" height="170%" color-interpolation-filters="sRGB">
-      <feMorphology in="SourceAlpha" operator="dilate" radius="1.5" result="d"/><feGaussianBlur in="d" stdDeviation="1.2" result="b"/>
-      <feFlood flood-color="#f7d894" flood-opacity=".78"/><feComposite in2="b" operator="in" result="rim"/>
-      <feMerge><feMergeNode in="rim"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     <filter id="${u}-edgeU" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="640" color-interpolation-filters="sRGB">
       <feMorphology in="SourceAlpha" operator="dilate" radius="1.5" result="d"/><feGaussianBlur in="d" stdDeviation="1.2" result="b"/>
       <feFlood flood-color="#f7d894" flood-opacity=".78"/><feComposite in2="b" operator="in" result="rim"/>
       <feMerge><feMergeNode in="rim"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    ${[['stencil', 5.5, 0.62], ['stencil-hot', 7, 1]].map(([n, r, a]) => `<filter id="${u}-${n}" x="-15%" y="-35%" width="130%" height="170%" color-interpolation-filters="sRGB">
+    ${[['stencil', 5.5, 0], ['stencil-soft', 5, 0.55], ['stencil-hot', 7, 1]].map(([n, r, a]) => `<filter id="${u}-${n}" x="-15%" y="-35%" width="130%" height="170%" color-interpolation-filters="sRGB">
       <feMorphology in="SourceAlpha" operator="dilate" radius="4" result="d"/><feFlood flood-color="#0b0809"/><feComposite in2="d" operator="in" result="plaque"/>
       <feMorphology in="SourceAlpha" operator="dilate" radius="${r}" result="d2"/><feGaussianBlur in="d2" stdDeviation="1.6" result="b"/>
       <feFlood flood-color="#f7d894" flood-opacity="${a}"/><feComposite in2="b" operator="in" result="rim"/>
@@ -229,14 +227,13 @@ const css = u => `
 .g-studio .gs-spiral{fill:none;stroke:#e8a868;stroke-width:.8px;opacity:.85}
 .g-studio .gs-teach{font-style:italic;font-size:26px;fill:var(--sh-paper,#ede2cb)}
 .g-studio .gs-score{font-size:17px;letter-spacing:.16em;fill:var(--sh-lamp,#f7d894)}
-.g-studio .gs-word{fill:var(--sh-cut,#0b0809);font-style:italic;font-size:22px;filter:url(#${u}-edge)}
+.g-studio .gs-word{fill:var(--sh-cut,#0b0809);font-style:italic;font-size:22px}
 .g-studio .gs-word .gs-pts{font-style:normal;font-size:16px;letter-spacing:.12em}
 .g-studio .gs-band{fill:currentColor;letter-spacing:.03em}
-.g-studio .gs-sound{filter:url(#${u}-edge)}
-.g-studio .gs-sound.touch.is-hot,.g-studio .gs-sound.touch.is-held{filter:url(#sh-rim)}
 .g-studio .gs-tap{fill:var(--sh-red,#e0392b);font-style:italic;font-size:22px}
 .g-studio .gs-knock{fill:var(--sh-red,#e0392b)}
 .g-studio .gs-knockw{filter:url(#${u}-stencil)}
+@media (hover:none){.g-studio .gs-knockw.touch{filter:url(#${u}-stencil-soft)}}
 .g-studio .gs-knockw.touch.is-hot{filter:url(#${u}-stencil-hot)}
 .g-studio .gs-tick{fill:none;stroke:var(--sh-red,#e0392b);stroke-width:2.2px;stroke-linecap:round}
 .g-studio .gs-whorl{fill:none;stroke:#c98a52;stroke-width:.8px;opacity:.75}
@@ -247,11 +244,11 @@ const css = u => `
 .g-studio .gs-smudge{fill:var(--sh-cut,#0b0809);opacity:.55}
 .g-studio .gs-trail{fill:none;stroke:var(--sh-cut,#0b0809);stroke-width:2px;stroke-dasharray:7 5;stroke-linecap:round;filter:url(#${u}-edgeU)}
 .g-studio .gs-mime{color:var(--sh-cut,#0b0809);fill:currentColor;filter:url(#${u}-edgeU)}
-.g-studio.gs-narrow .gs-teach{font-size:34px}
-.g-studio.gs-narrow .gs-score{font-size:28px;letter-spacing:.12em}
-.g-studio.gs-narrow .gs-tap{font-size:28px}
-.g-studio.gs-narrow .gs-word{font-size:30px}
-.g-studio.gs-narrow .gs-word .gs-pts{font-size:21px}
+.g-studio.gs-narrow .gs-teach{font-size:39px}
+.g-studio.gs-narrow .gs-score{font-size:25.5px;letter-spacing:.12em}
+.g-studio.gs-narrow .gs-tap{font-size:33px}
+.g-studio.gs-narrow .gs-word{font-size:33px}
+.g-studio.gs-narrow .gs-word .gs-pts{font-size:24px}
 `;
 
 export default {
@@ -287,7 +284,7 @@ export default {
     const crackSegs = [...L.crack.querySelectorAll('[data-fork]')].map(fork => ({ shown: 0, fork }));
     if (RM && svg.pauseAnimations) svg.pauseAnimations();
     // phones: type that must read at 390px gets larger (sizes the hit areas never use)
-    const setNarrow = () => root.classList.toggle('gs-narrow', root.clientWidth > 0 && root.clientWidth < 640);
+    const setNarrow = () => root.classList.toggle('gs-narrow', root.clientWidth > 0 && root.clientWidth < 600);   // type ×1.5
     const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(setNarrow) : null;
     if (ro) ro.observe(root);
     setNarrow();
@@ -520,11 +517,12 @@ export default {
       } else if (p.type === 'band') {
         const pos = bandPos(p), shrink = 1 - 0.72 * clamp(p.hold / 0.9, 0, 1);
         const fs = (30 + 40 * p.p) * shrink;
-        p.node.setAttribute('x', f(pos.x)); p.node.setAttribute('y', f(pos.y));
+        const ty = pos.y - BAND_LIFT;
+        p.node.setAttribute('x', f(pos.x)); p.node.setAttribute('y', f(ty));
         p.node.setAttribute('font-size', f(fs));
         if (!still && T - p.jitT > 0.09) { p.jitT = T; p.jit = (Math.sin(T * 91 + p.idx * 7) * 2.6); }
         if (still) p.jit = 0;
-        p.node.setAttribute('transform', `rotate(${f(p.jit)} ${f(pos.x)} ${f(pos.y)})`);
+        p.node.setAttribute('transform', `rotate(${f(p.jit)} ${f(pos.x)} ${f(ty)})`);
       } else if (p.type === 'tap') {
         const k = clamp((p.p - 0.7) / 0.3, 0, 1), fade = clamp((T - p.born) / 0.25, 0, 1);
         const shiver = RM ? 0 : Math.sin(T * 40) * (p.p < 0.7 ? 2 : 0);
@@ -559,7 +557,7 @@ export default {
         });
       } else if (p.type === 'band') {
         const pos = bandPos(p);
-        word(pos.x, pos.y - 6, 'plink.', pts);
+        word(pos.x, pos.y - BAND_LIFT - 6, 'plink.', pts);
         remove(p, 0.2, (s, k) => { p.node.style.opacity = 1 - k; });
       }
     }
@@ -762,7 +760,8 @@ export default {
       // freeze: still pests; under reduced motion the lamp dims
       wash.style.opacity = RM && T < frozenUntil && !halted ? 0.3 : 0;
       // score: lamp caps, bottom right, on the glass
-      const hud = `TAPS HUSHED ${tapsHushed} · ×${mult} · ${score.toLocaleString('en-US')}`;
+      const num = v => (v ? v.toLocaleString('en-US') : 'NONE');   // an old-style zero reads as a letter
+      const hud = `TAPS HUSHED ${num(tapsHushed)} · ×${mult} · ${num(score)}`;
       if (hud !== shownHud) { scoreText.textContent = hud; shownHud = hud; }
       renderMime();
     }
