@@ -57,6 +57,7 @@ export default {
 | studio | `tapsHushed`, `tapsSpared` | numbers |
 | studio | `knockSpared` | boolean |
 | burial | `burialScrewOut` | boolean (a screw left out; the flight reads it) |
+| burial | `burialGlimpses` | number (times the physician got a look) |
 | nights | `nightsUnexplained` | array of strings, the noises left unexplained in their original words (the nights spec calls this `nights`; use this key) |
 | nights | `nightsStair` | `'unexplained'` or the excuse id used on her step |
 | nights | `nightsAgreed` | number |
