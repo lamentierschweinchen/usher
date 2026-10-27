@@ -213,7 +213,6 @@ const DEFS = `<defs>
 <radialGradient id="gn-candle"><stop offset="0" stop-color="#f7d894" stop-opacity=".55"/><stop offset=".5" stop-color="#e6a256" stop-opacity=".16"/><stop offset="1" stop-color="#e6a256" stop-opacity="0"/></radialGradient>
 <linearGradient id="gn-win" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1430"/><stop offset=".6" stop-color="#1a2c5a"/><stop offset="1" stop-color="#2f4a80"/></linearGradient>
 <linearGradient id="gn-hole" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a3b68"/><stop offset="1" stop-color="#241a34"/></linearGradient>
-<linearGradient id="gn-moon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e0f1"/><stop offset="1" stop-color="#a3b6da"/></linearGradient>
 <clipPath id="gn-clip-win"><path d="${C.lancetD(582, 98, 56, 62)}"/></clipPath>
 <clipPath id="gn-clip-cardwin"><path d="${C.lancetD(152, 60, 38, 64)}"/></clipPath>
 </defs>`;
@@ -316,22 +315,30 @@ const CSS = `
 .g-nights .gn-show.on{opacity:1}
 .g-nights .gn-lamp{fill:var(--sh-cut);opacity:0;transition:opacity .9s;pointer-events:none}
 .g-nights .gn-lamp.on{opacity:.9}
-/* phones: the stage is ~.39 px a unit, so the type grows and the card emblems give it room */
+/* phones (a stage under 600 px, ~.39 px a unit): all type ×1.5; the card emblems step aside to give it room.
+   The stamp's ribbon is scaled as a whole in code, so its type is not scaled again here. */
 .g-nights.gn-phone .gn-emb{display:none}
-.g-nights.gn-phone .gn-t-line{font-size:30px}
-.g-nights.gn-phone .gn-t-label{font-size:20px;letter-spacing:.1em}
-.g-nights.gn-phone .gn-t-rule{font-size:22px}
-.g-nights.gn-phone .gn-t-remark{font-size:26px}
-.g-nights.gn-phone .gn-t-snd{font-size:28px}
-.g-nights.gn-phone .gn-t-title{font-size:29px}
-.g-nights.gn-phone .gn-t-limit{font-size:23px}
-.g-nights.gn-phone .gn-t-back{font-size:28px}
-.g-nights.gn-phone .gn-t-hint{font-size:22px}
-.g-nights.gn-phone .gn-t-borrowed,.g-nights.gn-phone .gn-t-orig{font-size:30px}
-.g-nights.gn-phone .gn-t-say{font-size:24px}
-.g-nights.gn-phone .gn-t-prompt{font-size:28px}
-.g-nights.gn-phone .gn-t-score{font-size:22px;letter-spacing:.1em}
-.g-nights.gn-phone .gn-t-interrule{font-size:28px}
+.g-nights.gn-phone .gn-L-top .gn-t-label{display:none}
+.g-nights.gn-phone .gn-t-line{font-size:39px}
+.g-nights.gn-phone .gn-t-label{font-size:21px;letter-spacing:.1em}
+.g-nights.gn-phone .gn-t-rule{font-size:27px}
+.g-nights.gn-phone .gn-t-kind{font-size:75px}
+.g-nights.gn-phone .gn-t-field{font-size:54px}
+.g-nights.gn-phone .gn-t-time{font-size:51px}
+.g-nights.gn-phone .gn-t-remark{font-size:33px}
+.g-nights.gn-phone .gn-t-snd{font-size:31.5px}
+.g-nights.gn-phone .gn-t-title{font-size:36px}
+.g-nights.gn-phone .gn-t-limit{font-size:25.5px}
+.g-nights.gn-phone .gn-t-back{font-size:34.5px}
+.g-nights.gn-phone .gn-t-hint{font-size:24px}
+.g-nights.gn-phone .gn-t-boom{font-size:63px}
+.g-nights.gn-phone .gn-t-inter{font-size:66px}
+.g-nights.gn-phone .gn-t-interrule{font-size:33px}
+.g-nights.gn-phone .gn-t-borrowed{font-size:39px}
+.g-nights.gn-phone .gn-t-say{font-size:30px}
+.g-nights.gn-phone .gn-t-orig{font-size:39px}
+.g-nights.gn-phone .gn-t-prompt{font-size:33px}
+.g-nights.gn-phone .gn-t-score{font-size:25.5px;letter-spacing:.1em}
 .g-nights.gn-rm *{transition:none!important;animation:none!important}
 `;
 
@@ -367,7 +374,7 @@ export default {
     root.appendChild(live);
     stage.appendChild(root);
     // phones: the stage is about .39 px a unit there, so type grows (see .gn-phone in CSS)
-    let PHONE = root.clientWidth > 0 && root.clientWidth < 620;
+    let PHONE = root.clientWidth > 0 && root.clientWidth < 600;
     root.classList.toggle('gn-phone', PHONE);
 
     h('g', { class: 'gn-defs' }, svg).innerHTML = C.defs({ animate: false }) + DEFS;
@@ -412,9 +419,15 @@ export default {
     const lineEl = h('text', { class: 'gn-t-line', x: 36, y: 52 }, L.top);
     const nightEl = h('text', { class: 'gn-t-label', x: 924, y: 40, 'text-anchor': 'end' }, L.top);
     const ruleEl = h('text', { class: 'gn-t-rule', x: 924, y: 62, 'text-anchor': 'end' }, L.top);
+    function placeTop() {   // visual only
+      ruleEl.setAttribute('x', PHONE ? 918 : 924);
+      ruleEl.setAttribute('y', PHONE ? 82 : 62);
+      fit(ruleEl, [560, 520]);
+    }
+    placeTop();
     function say(t) {
       lineEl.textContent = t;
-      fit(lineEl, 560);
+      fit(lineEl, [560, 884]);
       live.textContent = t;
     }
 
@@ -427,13 +440,12 @@ export default {
       'aria-label': 'Unaccounted for: set the slip aside', transform: 'translate(712 244) rotate(1.2)' }, L.back);
     const backTouch = h('g', { class: 'touch' }, back);
     const backBody = h('g', { class: 'gn-backbody' }, backTouch);
-    // a page lit by the moon, not the lamp; its corner folded back
-    h('g', {}, backBody).innerHTML = litCard(208, 214, 8, 'url(#gn-moon)') +
-      cutG(`<path d="M178 8H200V30Z"/>` + C.curl(178, 9, PI * .25, 9, 1.1, 2, .3, 12));
-    h('text', { class: 'gn-t-back', x: 16, y: 36 }, backBody, 'Unaccounted for');
+    // a lamp-lit slip card, cut like the slips and the excuses
+    h('g', {}, backBody).innerHTML = litCard(208, 214, 8);
+    fit(h('text', { class: 'gn-t-back', x: 16, y: 36 }, backBody, 'Unaccounted for'), [180, 182]);
     h('line', { class: 'gn-rulel', x1: 16, y1: 46, x2: 192, y2: 46 }, backBody);
     const entriesG = h('g', {}, backBody);
-    const backHint = h('text', { class: 'gn-t-hint', x: 104, y: 196, 'text-anchor': 'middle' }, backBody, 'set a noise aside here');
+    const backHint = fit(h('text', { class: 'gn-t-hint', x: 104, y: 196, 'text-anchor': 'middle' }, backBody, 'set a noise aside here'), [180, 182]);
 
     // --- state
     let ni = 0;            // night index
@@ -467,12 +479,29 @@ export default {
       // position (style transform) › lit edge (.touch) › lifted (.gn-lift) › the card itself
       const touch = h('g', { class: 'touch' }, g);
       const lift = h('g', { class: 'gn-lift' }, touch);
+      drawCard(id, lift);
+      return { g, lift };
+    }
+    // The card's face; redrawn when the stage crosses the phone width (visual only).
+    function drawCard(id, lift) {
+      const c = CARDS[id];
+      lift.innerHTML = '';
       h('g', {}, lift).innerHTML = litCard(204, 140, 6, 'url(#sh-lamp)', 9);
       h('g', { class: 'gn-emb' }, lift).innerHTML = emblem(id);
-      fit(h('text', { class: 'gn-t-title', x: 14, y: 33 }, lift, c.title), 178);
-      h('line', { class: 'gn-rulel', x1: 14, y1: 43, x2: 190, y2: 43 }, lift);
-      c.limits.forEach((t, i) => fit(h('text', { class: 'gn-t-limit', x: 14, y: 66 + i * 20 }, lift, t), [122, 180]));
-      return { g };
+      // on phones a long title with few limits takes two lines rather than a hard squeeze
+      const two = PHONE && c.limits.length <= 2 && c.title.includes(', ');
+      const tt = h('text', { class: 'gn-t-title', x: 14, y: 33 }, lift);
+      if (two) {
+        const [a, z] = c.title.split(', ');
+        h('tspan', { x: 14 }, tt, a + ',');
+        h('tspan', { x: 14, dy: 30 }, tt, z);
+      } else {
+        tt.textContent = c.title;
+        fit(tt, [178, 184]);
+      }
+      const ry = PHONE ? (two ? 71 : 41) : 43;
+      h('line', { class: 'gn-rulel', x1: 14, y1: ry, x2: 190, y2: ry }, lift);
+      c.limits.forEach((t, i) => fit(h('text', { class: 'gn-t-limit', x: 14, y: PHONE ? ry + 22 + i * 22 : 66 + i * 20 }, lift, t), [122, 180]));
     }
     function layoutCards(ids, animateIn) {
       const slots = cardSlots(ids);
@@ -508,7 +537,8 @@ export default {
       for (let i = 0; i < NIGHTS[ni].ink; i++) {
         h('circle', { class: 'gn-dot' + (i < ink ? '' : ' spent'), cx: (PHONE ? 128 : 112) + i * 30, cy: 387, r: 9 }, inkG);
       }
-      countEl.textContent = `EXPLAINED ${stamped.length}`;
+      countEl.textContent = `EXPLAINED ${say0(stamped.length)}`;
+      fit(countEl, [200, 206]);
     }
 
     // --- room weather and marks
@@ -547,18 +577,19 @@ export default {
       const g0 = h('g', { class: 'gn-slip cur', 'data-act': 'slip', role: 'button', tabindex: '0' });
       const g = h('g', { class: 'touch' }, g0);      // its lit edge shows once an excuse is lifted
       h('g', {}, g).innerHTML = litCard(420, 220, 9);
-      h('text', { class: 'gn-t-label', x: 26, y: 40 }, g, `NO. ${n}`);
+      h('text', { class: 'gn-t-label', x: 26, y: PHONE ? 34 : 40 }, g, `NO. ${n}`);
       const F = {
-        time: field(g, 394, 46, 'gn-t-time', 'end', 140),
-        kind: field(g, 26, 100, 'gn-t-kind', 'start', 368),
-        place: field(g, 26, 166, 'gn-t-field', 'start', 368),
-        loud: field(g, 26, 202, 'gn-t-field', 'start', 250),
+        time: field(g, 394, PHONE ? 52 : 46, 'gn-t-time', 'end', 140),
+        kind: field(g, 26, PHONE ? 108 : 100, 'gn-t-kind', 'start', 368),
+        place: field(g, 26, PHONE ? 162 : 166, 'gn-t-field', 'start', 368),
+        loud: field(g, 26, PHONE ? 204 : 202, 'gn-t-field', 'start', 250),
       };
-      if (s.remark) h('text', { class: 'gn-t-remark', x: 26, y: 130 }, g, s.remark);
+      // on phones the remark shares the loudness line, at the right, so the big type keeps its spacing
+      if (s.remark) fit(h('text', PHONE ? { class: 'gn-t-remark', x: 394, y: 204, 'text-anchor': 'end' } : { class: 'gn-t-remark', x: 26, y: 130 }, g, s.remark), PHONE ? 262 : 368);
       // a refused stamp: the lamp behind the slip gutters for a moment
       const smudge = h('rect', { class: 'gn-smudge', x: 9, y: 9, width: 402, height: 202 }, g);
       // the stamp: a black ribbon, its word cut out of it so the lamp shows through
-      const imp = h('g', { class: 'gn-imp', transform: 'translate(252 128) rotate(-8)' }, g);
+      const imp = h('g', { class: 'gn-imp', transform: PHONE ? 'translate(210 124) rotate(-8) scale(1.4)' : 'translate(252 128) rotate(-8)' }, g);
       imp.innerHTML = cutG(`<path d="M-140 -40H140V40H-140Z"/>` + C.scallops(-133, 133, -40, 2.4, 7.4) + C.scallops(-133, 133, 40, 2.4, 7.4) +
         C.curl(-139, 0, PI + .1, 20, -.6, 8, .6, 24) + C.curl(139, 0, -.1, 20, .6, 8, .6, 24)) +
         `<path d="M-126 -31H126M-126 33H126" style="fill:none;stroke:var(--sh-lamp);stroke-width:.8;opacity:.6"/>`;
@@ -602,6 +633,7 @@ export default {
       ink = n.ink;
       nightEl.textContent = n.name.toUpperCase();
       ruleEl.textContent = n.rule;
+      fit(ruleEl, [560, 520]);
       renderInk();
       if (!holdCards) layoutCards(n.cards, false);
     }
@@ -747,8 +779,8 @@ export default {
       entriesG.innerHTML = '';
       backHint.style.display = aside.length ? 'none' : '';
       const n = aside.length;
-      const lh = Math.min(25, 150 / Math.max(n, 1));
-      const fs = PHONE ? Math.min(22, lh * 0.9) : Math.min(18, lh * 0.78);
+      const lh = PHONE ? Math.min(32, 140 / Math.max(n, 1)) : Math.min(25, 150 / Math.max(n, 1));
+      const fs = PHONE ? Math.min(27, lh * 0.84) : Math.min(18, lh * 0.78);
       aside.forEach((a, i) => {
         const t = h('text', { class: 'gn-t-entry gn-entry' + (fresh && i === n - 1 ? '' : ' on'),
           x: 16, y: 70 + i * lh, style: `font-size:${fs}px` }, entriesG, '— ' + words(a.s));
@@ -777,7 +809,7 @@ export default {
       const g = h('g', { class: 'gn-nc' }, L.nc);
       // the iris: a black stage with a lace-edged hole closes on the room, the intertitle holds, it opens
       const ir = h('path', { class: 'sh-iris', 'fill-rule': 'evenodd', d: C.irisD(480, 320, RM ? 0 : 300), style: 'fill:var(--sh-cut)' }, g);
-      h('path', { class: 'gn-nc-rule gn-nc-t', d: 'M300 262H660M300 386H660' }, g);
+      h('path', { class: 'gn-nc-rule gn-nc-t', d: PHONE ? 'M170 250H790M170 394H790' : 'M300 262H660M300 386H660' }, g);
       h('text', { class: 'gn-t-inter gn-nc-t', x: 480, y: 312, 'text-anchor': 'middle' }, g, n.name + '.');
       h('text', { class: 'gn-t-interrule gn-nc-t', x: 480, y: 364, 'text-anchor': 'middle' }, g, n.rule);
       g.getBoundingClientRect();
@@ -827,21 +859,23 @@ export default {
       if (k) {
         for (const r of persuaded) {
           const b = h('g', { class: 'gn-rv-slip', transform: `translate(0 ${y})` }, wrap);
-          const H = 38 + r.swaps.length * 36;
+          const RS = PHONE ? 46 : 36, R0 = PHONE ? 70 : 60;
+          const H = (PHONE ? 50 : 38) + r.swaps.length * RS;
           h('g', {}, b).innerHTML = ribbon(640, H);
           h('text', { class: 'gn-t-label', x: 20, y: 25 }, b, `NO. ${r.no} · EXPLAINED · ${CARDS[r.card].title.toUpperCase()}`);
           const reds = [];
           const order = { kind: 0, place: 1, loud: 2 };
           [...r.swaps].sort((a, z) => order[a.field] - order[z.field]).forEach((sw, i) => {
-            const ty = 60 + i * 36;
-            const t1 = h('text', { class: 'gn-t-borrowed', x: 20, y: ty }, b, fieldLabel(sw.field, sw.to));
+            const ty = R0 + i * RS;
+            const t1 = fit(h('text', { class: 'gn-t-borrowed', x: 20, y: ty }, b, fieldLabel(sw.field, sw.to)), 260);
             let w = 0;
-            try { w = t1.getComputedTextLength(); } catch (e) { w = 140; }
+            try { w = Math.min(260, t1.getComputedTextLength()); } catch (e) { w = 140; }
             const red = h('g', { class: 'gn-rv-red' }, b);
-            h('line', { class: 'gn-strike', x1: 16, y1: ty - 9, x2: 24 + w, y2: ty - 9 }, red);
+            h('line', { class: 'gn-strike', x1: 16, y1: ty - (PHONE ? 13 : 9), x2: 24 + w, y2: ty - (PHONE ? 13 : 9) }, red);
             const t2 = h('text', { x: 42 + w, y: ty }, red);
             h('tspan', { class: 'gn-t-say' }, t2, 'say, rather: ');
             h('tspan', { class: 'gn-t-orig' }, t2, fieldLabel(sw.field, sw.from));
+            fit(t2, 616 - (42 + w));
             reds.push(red);
           });
           blocks.push({ b, reds });
@@ -861,14 +895,15 @@ export default {
         t += dur(420);
       }
       const score = h('text', { class: 'gn-t-score gn-show', x: 922, y: 604, 'text-anchor': 'end' }, L.reveal,
-        `NOISES EXPLAINED ${n} · UNACCOUNTED FOR ${m} · SAW REASON ${k}`);
-      fit(score, 600);
-      const prompt = h('text', { class: 'gn-t-prompt gn-show', x: 816, y: 500, 'text-anchor': 'middle' }, L.reveal, 'Tap to put out the lamp.');
+        `NOISES EXPLAINED ${say0(n)} · UNACCOUNTED FOR ${say0(m)} · SAW REASON ${say0(k)}`);
+      fit(score, [600, 870]);
+      const prompt = h('text', { class: 'gn-t-prompt gn-show', x: 816, y: 500, 'text-anchor': 'middle' }, L.reveal, PHONE ? null : 'Tap to put out the lamp.');
+      if (PHONE) { h('tspan', { x: 816 }, prompt, 'Tap to put out'); h('tspan', { x: 816, dy: 38 }, prompt, 'the lamp.'); }
       later(() => score.classList.add('on'), t + dur(300));
       later(() => {
         prompt.classList.add('on');
         phase = 'ready';
-        live.textContent = `${note} Noises explained ${n}, unaccounted for ${m}, saw reason ${k}. Tap to put out the lamp.`;
+        live.textContent = `${note} Noises explained ${say0(n)}, unaccounted for ${say0(m)}, saw reason ${say0(k)}. Tap to put out the lamp.`;
       }, t + dur(900) + 300);
     }
 
@@ -883,7 +918,7 @@ export default {
         note: persuaded ? 'The evidence agreed with me throughout.' : 'The evidence declined to agree with me.',
         // the confession's red "say, rather:" lines (optional in the contract)
         rather: {
-          'noises explained': `${stamped.length} of 13`,
+          'noises explained': `${say0(stamped.length)} of 13`,
           'unaccounted for': 'one route, to my door',
           'saw reason': persuaded ? `${persuaded}, persuaded by me` : 'none; they kept to their story',
         },
@@ -936,10 +971,12 @@ export default {
 
     // --- phones: re-fit the type when the stage crosses the phone width
     const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(() => {
-      const p = root.clientWidth > 0 && root.clientWidth < 620;
+      const p = root.clientWidth > 0 && root.clientWidth < 600;
       if (p === PHONE || !alive) return;
       PHONE = p;
       root.classList.toggle('gn-phone', p);
+      for (const id in cards) drawCard(id, cards[id].lift);
+      placeTop();
       renderInk();
       renderEntries(false);
       refit();
@@ -965,6 +1002,9 @@ export default {
     };
   },
 };
+
+// A zero score reads as "none" (IM Fell's old-style 0 looks like a letter o).
+function say0(n) { return n === 0 ? 'none' : String(n); }
 
 // A slip that has left the desk is no longer touchable: no lit edge.
 function untouch(el) { const t = el.querySelector('.touch'); if (t) t.classList.remove('touch'); }

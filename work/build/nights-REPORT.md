@@ -4,15 +4,16 @@
 
 **Recut in Shadow Theatre (2026-10-26):** only the look changed. The rules, timings, hit areas, flags, score labels, `rather` and `done` are untouched.
 - The room is cut from the shared library: `C.drape`, `C.lancet`, `C.fringe`, `C.curl` and `C.scallops`, plus the library's canopy bed cut again at this scale. It stands against the nights deep-blue light (`C.backdrop('nights')`), with a candle as its own lamp and violet on the passage and stair. The archway and stairwell under the floor are holes letting light through. Below the floor is the tarn's glass (`C.glass('nights')`), and `C.frame()` is drawn last.
-- The slips and excuse cards are lamp-lit cards in cut frames with black type. The back page is lit by the moon. The stamp is a black ribbon with EXPLAINED cut out in lamplight. The emblems are cut paper, and Roderick is the library figure. Noises are curl sprays with tilted sound-words: black on the lit rooms, light through holes on the black beam and band.
+- The slips, the excuse cards and the back page are all lamp-lit cards in cut frames with black type. (The art critic found that a moonlit back page read as a sticky note.) The stamp is a black ribbon with EXPLAINED cut out in lamplight. The emblems are cut paper, and Roderick is the library figure. Noises are curl sprays with tilted sound-words: black on the lit rooms, light through holes on the black beam and band.
 - Touchables use the shared `.touch` lit edge. The lifted card and the armed slip show it, the back page shows it when it beckons, and phones get the faint rim.
 - Night cards are an iris intertitle (`C.runIris`) on the same 320 ms / 1.2 s timing. The reveal sets paper type on black ribbons. Red is used only for the route, its words and *say, rather:*.
-- Phones: below 620 px the type grows (card limits 17 → 23 units, labels 14 → 20, sound-words 21 → 28) and the card emblems step aside to make room. Reduced motion adds `.sh-still` and keeps the instant swaps.
+- Phones: on a stage under 600 px every type size is ×1.5. To fit, the card emblems step aside and the slip's lines are re-spaced; the stair slip's remark moves to the right of the loudness line. *Roderick, roaming* takes two lines, and the night's rule moves onto the black beam so the teaching line can use the full strip. The night's name still appears on its intertitle. Reduced motion adds `.sh-still` and keeps the instant swaps.
+- A zero score is written as *none* (EXPLAINED none, the reveal's score line, and *none of 13* in `rather`). The numbers sent to `done` are unchanged.
 
 **Play:** serve `game/` and open `/games/nights/`. Tap a card, then the slip; tap the back page to set a slip aside. Keys: 1–4, Enter, `a`. `?night=3` starts at night three; `?rm=1` is reduced motion.
 
 **Emits:** `nightsUnexplained`, `nightsStair`, `nightsAgreed`. `done` scores `noises explained`, `unaccounted for` and `saw reason`, plus `note` and `rather`.
 
-**Verified:** headless Chromium played start to finish by mouse at 1280, by touch at 390×844, and with reduced motion. Each run was compared against the pre-recut build from git HEAD, and the teaching lines, `done` result and flags were identical every time. `done` fired once, and there were no console errors or warnings. Shot: `work/build/shots/nights.png` (the reveal, 1280 wide).
+**Verified:** headless Chromium played start to finish by mouse at 1280, by touch at 390×844, and with reduced motion. Each run was compared against the pre-recut build (commit f4f40e3), and the teaching lines, `done` result and flags were identical every time. `done` fired once, and there were no console errors or warnings. Shot: `work/build/shots/nights.png` (the reveal, 1280 wide).
 
-**Known issues:** at 390 px the smallest type is still about 8–9 px, which the 3:2 stage forces. Only tested in Chromium.
+**Known issues:** on phones some lines are squeezed to fit their width rather than wrapped (the longest bounce notes to about 80%, back-page entries to about 70%). Only tested in Chromium.
