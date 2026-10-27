@@ -16,7 +16,7 @@ The look changed; the game didn't. Mechanics, timings, flags, score labels, `don
 
 **Cut here, in the same manner:** the chimney and its smoke (black curls rising and fading; held still under reduced motion); the shuttered window over the eye at (608,186), with louvres as light through slits, shut above and folded open in the water; the arch door at 40×62 (the library's door, larger so it reads on a phone), plus its open state; the opened red eye.
 
-**Marks:** your circles are slits of lamplight with a black paper edge, so they read on the black house, the amber sky and the pale reflection. The house's cross is black paper with a lamp rim (`sh-rim`). Misses tick in paper; the HUD is paper italic on the dark sky, with lamp rings.
+**Marks (after the art critique):** nothing is stroked. A find is an unstroked lamp halo glowing behind its cut, in both halves. Tree and smoke glow in the sky behind the whole cut; door, shutters, crack and window glow behind the detail on the façade, so the crack's halo is a column of light up the shut front. In the water the halo sits inside the returned house and burns amber, because a pale halo vanishes on the pale reflection. The cheat shrinks the halo out; the catch brings back two, one wider; tapping her lights hers only halfway. The house's cross is two tapered black paper strips with a lamp rim (`sh-rim`). Misses are pinpricks of light that fade. The hint's drip is a tapered ribbon of lamplight. The shutter louvres are filled slits. The HUD rings are holes: dim when empty, lamp-bright when found, an ember smear when taken back, and a lilac sixth crossed with black paper.
 
 **Decisions and departures (all about look or legibility):**
 - **Red only for the truth:** the fissure and the red window. The spec's red circles and "red smear" are now lamp circles and an ember smear (LOOK §9: never UI).
@@ -25,8 +25,8 @@ The look changed; the game didn't. Mechanics, timings, flags, score labels, `don
 - **Depth:** the library's `#sh-depth` mask starts at y 368 and fades to .08. The game uses its own `#g-tarn-depth` (340, .92 → .44), swapped into `returned()`'s output, so the cold chimney at the bottom of the glass still reads.
 - `--lit-door` is darkened in the tarn (it isn't one of `returned()`'s variables), so the door is a true negative.
 - The cheated, re-cut detail gets `sh-rim-soft` (fresh paper catching the light) in place of thicker ink; the hint's drip is lamplight running from it.
-- **Phones (≤540 px stage):** the teaching line wraps to two lines at its 12 px floor, the rings shrink, and marks and the fissure thicken.
+- **Phones (stage under 600 px):** game type is ×1.5 (teaching line `max(18px, 3.9cqw)`), wrapped to two lines top left; the rings move to the top right, clear of the spire and the tree; the fissure thickens. The game writes no numbers on screen, so the *none*-for-zero rule has nothing to change here; `score` values stay numeric for the spine.
 
-**Checked:** served `game/` on 8110 and played start to finish in headless Chrome. At 1280 (mouse): unaided, sawHer true, 4 glances. At 390×844 (touch, DPR 2): hinted after the 10 s drip. At 1280 with reduced motion: left her, so sawHer false, 3 glances. Each run: one `done`, flags as above, no console errors.
+**Checked** (again after the critique pass, with identical results): served `game/` on 8110 and played start to finish in headless Chrome. At 1280 (mouse): unaided, sawHer true, 4 glances. At 390×844 (touch, DPR 2): hinted after the 10 s drip. At 1280 with reduced motion: left her, so sawHer false, 3 glances. Each run: one `done`, flags as above, no console errors.
 
 **For the art critic:** the bust in the eye is small on a phone (the eye is about 17×27 px). It reads as a pale someone in a red window, not as a face, and with no faces in this look that is the intent. The left bank's reflection is a broad pale block, the same as on the map.
