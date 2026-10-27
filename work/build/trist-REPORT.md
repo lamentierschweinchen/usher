@@ -10,6 +10,12 @@
 - **Phones:** under a 600 px stage every line of type is ×1.5 (teach, caption, speech, captions, sound-words, score), rewrapped into balanced lines. Under a `<use>` clone class rules don't paint, so everything inside the reflected scene is styled inline.
 - **Art critique (round 2):** the lamp hairline box around the vault and the inset is gone. The heartbeat is now carried by the vault's own light, which throbs with her heart, alongside the two red hearts. The book's echo in the room shows one word at a time, in the room's empty top-left corner, clear of the reader's hat. A zero score reads BLOWS STRUCK NONE.
 
+**Playthrough critique (round 3):**
+- **The threshold choice now shows when it's live.** For the first second after she arrives (the guard against climb strokes carrying over), the dotted way to the door draws itself in and the doorway stays unlit. Strokes drawn then still show, but don't count. Then the doorway takes a lit edge (`.touch` `.is-hot`) and she reels.
+- **A stroke begun in the guard counts if it ends once the choice is live**, so a stroke in or across the doorway registers.
+- **"dragons slain" counts the dragon fight** (1 once it's slain), whatever the last blow. The gust ending now reports 1, and `tristLastBlow` still says `'gust'`.
+- **Roderick's "I sent for you because you never hear anything" gets a held beat.** The climb pauses for 3.2 s, the vault below the room dims and the teaching line clears. The heart keeps beating, and strokes drawn during the pause show but don't count.
+
 **Changed to fit the look (worth knowing):**
 - The mace still points at your stroke's angle, so Ethelred's arm hinge turns past LOOK's 30°. That angle is part of the spec's aim mechanic.
 - The library dragon is a single cut. It slides, sinks behind the floor and nods up to 8° so that its head follows the old path. Timing windows and reach are untouched.
@@ -19,7 +25,7 @@
 
 **Play:** serve `game/` (`python3 -m http.server 8115`) and open `/games/trist/`. To get the gust ending, don't draw at the threshold for six seconds. `?rm=1` turns on reduced motion. In the spine it plays at `/?chapter=trist`, entered by tapping the bedroom.
 
-**Emits (unchanged):** `tristLastBlow` `'struck'|'gust'`, `tristBlows` n; score `"dragons slain"` 1|0, `"blows struck"` n (every stroke).
+**Emits:** `tristLastBlow` `'struck'|'gust'`, `tristBlows` n; score `"dragons slain"` 1 once the dragon is slain (either ending), `"blows struck"` n (every counted stroke).
 
 **Checked:** headless Chromium (Playwright), scripted play from start to finish:
 - At 1280: struck ending, gust ending with reduced motion.

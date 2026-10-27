@@ -266,6 +266,7 @@ ${C.defs({ animate: false })}
   </g>
   <g class="lidmarks"></g>
   <path class="heart lidheart" d="${HEART}" transform="translate(200 494) scale(1.8)"/>
+  <rect class="hush" x="14" y="186" width="932" height="440" style="fill:var(--sh-cut,#0b0809);opacity:0;pointer-events:none"/>
   <text class="teach vteach" x="48" y="62"></text>
   <g class="vcap"></g>
   <g class="recho"></g>
@@ -466,7 +467,7 @@ export default {
     }
 
     // ── the dragon ─────────────────────────────────────────────────────────
-    let dragonLive = false, dState = 'cycle', cycleStart = 0, dHits = 0, saidSensitive = false;
+    let dragonLive = false, dState = 'cycle', cycleStart = 0, dHits = 0, saidSensitive = false, slain = 0;
     let headX = 600, headY = 236;
     const MID = [600, 236], DIP = [520, 322], UP = [600, 200];
     // Its tongue sweeps the floor every 2.4 s; as it retracts the head dips for 0.8 s.
@@ -636,6 +637,7 @@ export default {
       cycleStart = performance.now() - 1800;   // rise from the cringe, then sweep again
     }
     function kill() {
+      slain = 1;                                // the dragon is slain here, whatever the last blow
       phase = 'freeze'; frozen = true; dragonLive = false; dState = 'shriek';
       romTeach.textContent = '';
       poseDragon(560, 246, -34, null, false);
@@ -682,7 +684,7 @@ export default {
     const chestHeart = mad.querySelector('path[style*="sh-red"]'), lidHeart = q('.lidheart');
     const MS = 2.3;
     const lid = q('.sh-coffin .sh-lid'), idoor = q('.idoor'), bars = q('.bars'), rod = q('.rod'), rodFig = q('.gt-rod'), rdoor = q('.rdoor');
-    const beatLight = q('.beat'), vcap = q('.vcap'), vteach = q('.vteach'), recho = q('.recho');
+    const beatLight = q('.beat'), hush = q('.hush'), vcap = q('.vcap'), vteach = q('.vteach'), recho = q('.recho');
     const vfx = q('.vfx'), scratches = q('.scratches'), vhint = q('.vhint');
     const marks = { lid: q('.lidmarks'), door: q('.idmarks'), arch: q('.armarks'), stair: q('.stmarks') };
     let station = 0, stationHits = 0, onBeats = 0, misses = 0, mercy = false;
@@ -805,25 +807,47 @@ export default {
       const nx = STATIONS[station];
       if (nx.pos && was.k !== 'lid') glide(nx.pos[0], nx.pos[1]);
       if (nx.cap !== was.cap) vcaption(nx.cap);
+      if (nx.cap === 'sent' && was.cap !== 'sent') hold();
+    }
+    // Roderick's confession gets a held beat: her climb waits while it's read.
+    function hold() {
+      phase = 'hold';
+      vteach.textContent = '';
+      tween(RM ? 0 : 300, k => { hush.style.opacity = f1(.62 * k); });
+      later(3200, () => {
+        tween(RM ? 0 : 300, k => { hush.style.opacity = f1(.62 * (1 - k)); });
+        if (phase === 'hold') { phase = 'vault'; vteach.textContent = 'Draw on the heartbeat.'; }
+      });
     }
 
     // ── the threshold: a choice ────────────────────────────────────────────
     function threshold() {
       // a breath before the choice, so a stroke drawn on the climb's rhythm can't pre-empt it
+      // shown: the dotted way to the door draws itself in over that second, the doorway unlit
       phase = 'arrive';
-      later(1000, () => { if (phase === 'arrive') phase = 'threshold'; });
+      later(1000, () => {
+        if (phase !== 'arrive') return;
+        phase = 'threshold';
+        reel = true;                          // his sway, reused: the choice is live
+        rdoor.removeAttribute('aria-disabled');
+        rdoor.classList.add('is-hot');        // a lit edge on the doorway
+      });
       vteach.textContent = '';
       vcaption('door2');
       madFacing = -1;                         // she turns to the doors
-      reel = true;                            // his sway, reused
       C.hinge(rodFig, '.sh-arm', -70);        // in the dragon's pose, a hand to his ear
+      rdoor.classList.add('touch');
+      rdoor.setAttribute('aria-disabled', 'true');
+      vhint.style.transition = RM ? 'opacity .25s' : 'opacity 1s linear';
       vhint.style.opacity = '1';
       thresholdTimer = later(6000, gust);
     }
+    const unlight = () => { rdoor.classList.remove('is-hot', 'touch'); rdoor.removeAttribute('aria-disabled'); };
     function thresholdBlow(pts) {
       cancel(thresholdTimer);
       phase = 'end';
       vhint.style.opacity = '0';
+      unlight();
       rdoor.style.display = 'none';
       reel = false;
       tween(RM ? 0 : 320, k => { madRot = -80 * k * k; }, () => {
@@ -842,6 +866,7 @@ export default {
       if (phase !== 'threshold') return;
       phase = 'end';
       vhint.style.opacity = '0';
+      unlight();
       const gG = q('.gust');
       for (let i = 0; i < 16; i++) {
         const y = rnd(190, 590), len = rnd(60, 180), x = rnd(300, 900);
@@ -873,7 +898,7 @@ export default {
         api.setFlag?.('tristBlows', blows);
         api.done?.({
           won: true,
-          score: { 'dragons slain': kind === 'struck' ? 1 : 0, 'blows struck': blows },
+          score: { 'dragons slain': slain, 'blows struck': blows },
           note: kind === 'struck' ? 'Who slayeth the dragon, the shield he shall win.' : 'It was the work of the rushing gust.',
         });
       } catch (err) { console.warn('trist: api.done threw', err); }
@@ -882,6 +907,7 @@ export default {
     // ── input: draw anywhere ───────────────────────────────────────────────
     let drawing = null;
     const accepting = () => ['door', 'dragon', 'vault', 'threshold'].includes(phase);
+    const drawable = () => accepting() || phase === 'arrive' || phase === 'hold';
     function toVB(e) {
       const m = svg.getScreenCTM();
       if (!m) return [0, 0];
@@ -889,11 +915,11 @@ export default {
       return [p.x, p.y];
     }
     function onDown(e) {
-      if (!accepting() || drawing) return;
+      if (!drawable() || drawing) return;
       e.preventDefault();
       try { svg.setPointerCapture(e.pointerId); } catch (_) { /* fine */ }
       const p = toVB(e);
-      const inVault = phase === 'vault' || phase === 'threshold';
+      const inVault = ['vault', 'threshold', 'arrive', 'hold'].includes(phase);
       drawing = { id: e.pointerId, pts: [p], path: el('path', { class: 'stroke ' + (inVault ? 'paper' : 'ink'), d: pathOf([p]) }, inkL) };
     }
     function onMove(e) {
@@ -955,6 +981,7 @@ export default {
     function frame(now) {
       if (!alive) return;
       raf = requestAnimationFrame(frame);
+      if (root.dataset.phase !== phase) root.dataset.phase = phase;
       const dt = Math.max(0, Math.min(100, now - lastNow));
       lastNow = now;
       const sway = RM ? 3 : 4 * Math.sin(now / 2600 * Math.PI * 2);   // the wine
@@ -985,7 +1012,7 @@ export default {
         }
         madFace = madFace < madFacing ? Math.min(madFacing, madFace + turnStep * dt) : Math.max(madFacing, madFace - turnStep * dt);
         rodFace = rodFace < rodFacing ? Math.min(rodFacing, rodFace + turnStep * dt) : Math.max(rodFacing, rodFace - turnStep * dt);
-        const r = reel ? sway : 0;
+        const r = reel ? sway * 1.8 : 0;   // she reels
         C.place(mad, madX, madY);
         madPose.setAttribute('transform', `rotate(${f1(madRot + madLean * madFacing + r)})`);
         madInner.setAttribute('transform', `scale(${f1(-MS * madFace * 100) / 100} ${MS})`);
