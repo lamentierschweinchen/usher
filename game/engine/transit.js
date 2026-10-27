@@ -43,14 +43,17 @@ export class Transit {
   }
 
   // an intertitle on the ink; resolves on tap or after its reading time
-  async title({ kicker = '', title = '', line = '', sealed = false }, hold) {
+  // html: a title already marked up (the red word of A Burial of Some Weeks);
+  // during: runs once the card covers the stage, to change what lies beneath it
+  async title({ kicker = '', title = '', html = '', line = '', sealed = false, during }, hold) {
     this.card.innerHTML = `<div class="it-box${sealed ? ' sealed' : ''}">
       ${kicker ? `<div class="t-chapter">${md(kicker)}</div>` : ''}
-      ${title ? `<div class="t-intertitle">${md(title)}</div>` : ''}
+      ${title || html ? `<div class="t-intertitle">${html || md(title)}</div>` : ''}
       ${line ? `<div class="t-card-line">${md(line)}</div>` : ''}
     </div>`;
     this.card.classList.add('on');
     await sleep(250);
+    during?.();
     await tapOrWait(this.card, hold ?? holdFor(`${title} ${line}`));
     this.card.classList.remove('on');
     await sleep(200);

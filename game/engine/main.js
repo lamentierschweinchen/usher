@@ -1,14 +1,16 @@
-// The spine: letter → approach → seven chapters → the account → the last card.
+// The spine: letter → approach → seven chapters → the account → the last card →
+// Nevertheless. turns the stage over into act two, A Burial of Some Weeks.
 // ?chapter=<id> starts at that chapter (earlier ones count as played with stub
-// scores); ?chapter=ending goes straight to the end.
+// scores); ?chapter=ending goes straight to the end; &through=<id> ends act one
+// after that chapter, with no stub scores (the milestone: ?chapter=studio&through=studio).
 
 import { CHAPTERS, LETTER, TITLE, REMARKS } from './story.js';
 import { MapView, SPOTS, ROOM_NODE } from './map.js';
 import { sharedDefs } from './drawing.js';
 import { Band } from './band.js';
 import { Transit } from './transit.js';
-import { loadGame, mount } from './mount.js';
-import { account, lastCard } from './ending.js';
+import { loadGame, loadGhost, mount } from './mount.js';
+import { account, herPass, lastCard } from './ending.js';
 import { md, svg, sleep, tapOrWait, reducedMotion } from './util.js';
 import { frame as laceFrame } from '../shared/cuts.js';
 
@@ -29,21 +31,40 @@ const gameLayer = document.getElementById('game');
 const gameStage = document.getElementById('game-stage');
 const running = document.getElementById('running-chapter');
 
-const S = { flags: { glances: 0 }, results: {}, truth: null, tarnLine: '', carried: [], mode: 'map', invite: '' };
+const S = {
+  act: 'sojourn', flags: { glances: 0 }, results: {}, records: {}, rewrites: {}, below: {},
+  truth: null, tarnLine: '', carried: [], mode: 'map', invite: '',
+};
 
-// ---- a refresh resumes at the current chapter's map scene; "Nevertheless." forgets
-const SAVE = 'usher.sojourn.v1';
-function save(index) {
-  try { sessionStorage.setItem(SAVE, JSON.stringify({ index, flags: S.flags, results: S.results, truth: S.truth, tarnLine: S.tarnLine, carried: S.carried })); }
-  catch { /* private mode or full: play on without it */ }
+// ---- the save: a refresh resumes at a chapter boundary; "Nevertheless." at the very end forgets.
+// localStorage['usher.save.v1'] = {act, chapter, flags, results, records, rewrites, …}. A save
+// remembers the URL it was started from, so a test entry (?chapter=…) resumes only itself.
+const SAVE = 'usher.save.v1', OLD = 'usher.sojourn.v1';
+function save(chapter) {
+  try {
+    localStorage.setItem(SAVE, JSON.stringify({
+      act: S.act, chapter, flags: S.flags, results: S.results, records: S.records, rewrites: S.rewrites,
+      below: S.below, truth: S.truth, tarnLine: S.tarnLine, carried: S.carried, entry: location.search,
+    }));
+  } catch { /* private mode or full: play on without it */ }
 }
 function restore() {
   try {
-    const v = JSON.parse(sessionStorage.getItem(SAVE) || 'null');
-    return v && Number.isInteger(v.index) && v.index > 0 && v.index <= CHAPTERS.length ? v : null;
+    let v = JSON.parse(localStorage.getItem(SAVE) || 'null');
+    const old = JSON.parse(sessionStorage.getItem(OLD) || 'null');
+    if (!v && old && Number.isInteger(old.index)) {
+      // the act-one save that lived in sessionStorage moves here
+      v = { act: 'sojourn', chapter: CHAPTERS[old.index]?.id || 'ending', flags: old.flags, results: old.results, records: {}, rewrites: {},
+        truth: old.truth, tarnLine: old.tarnLine, carried: old.carried, entry: '' };
+      localStorage.setItem(SAVE, JSON.stringify(v));
+    }
+    sessionStorage.removeItem(OLD);
+    if (!v || !['sojourn', 'burial'].includes(v.act) || (v.entry || '') !== location.search) return null;
+    if (v.act === 'sojourn' && v.chapter === CHAPTERS[0].id) return null;   // nothing to resume yet
+    return v;
   } catch { return null; }
 }
-function forget() { try { sessionStorage.removeItem(SAVE); } catch { /* nothing to forget */ } }
+function forget() { try { localStorage.removeItem(SAVE); sessionStorage.removeItem(OLD); } catch { /* nothing to forget */ } }
 const INSIDE = ['gallery', 'bedroom', 'hall', 'stair', 'studio', 'vault'];
 
 // ---- layout: a 3:2 stage; on a narrow portrait phone the map takes a taller crop
@@ -92,7 +113,7 @@ function explore(goals, ch) {
     let busy = false;
     // one target: the strip names it, and a click on the strip goes there
     const goal = goals.length === 1 ? goals[0] : null;
-    const words = goal && ((map.guestRoom() === goal && ch?.prompt) || REMARKS.prompt[goal]);
+    const words = goal && (ch?.below || (map.guestRoom() === goal && ch?.prompt) || REMARKS.prompt[goal]);
     // after an outro the strip also invites a look at the tarn, until the player takes one
     const prompt = () => {
       const line = [S.invite, words].filter(Boolean).join(' ');
@@ -105,6 +126,8 @@ function explore(goals, ch) {
       if (busy) return;
       busy = true;
       try {
+        // act two: only the open room goes anywhere; the dim ones are sealed
+        if (map.act === 'burial' && !goals.includes(room)) { await band.say(REMARKS.sealedBelow); prompt(); return; }
         if (room === 'tarn' && !goals.includes('tarn')) { await glance(ch); prompt(); return; }
         if (room === 'tarn') return done(room);
         if (!map.open && INSIDE.includes(room)) return;
@@ -112,7 +135,7 @@ function explore(goals, ch) {
         if (map.open && (room === 'causeway' || room === 'bank') && !goals.includes('causeway')) {
           await band.say(REMARKS.leave); prompt(); return;
         }
-        await map.walkTo('guest', node(room), ch?.finale && room === 'causeway' ? 200 : undefined);
+        await map.walkTo(map.walker, node(room), ch?.finale && room === 'causeway' ? 200 : undefined);
         if (goals.includes(room)) return done(room);
         const burial = CHAPTERS.find(c => c.id === 'burial');
         if (room === 'vault' && burial.sealed) { await band.say(REMARKS.sealed(burial)); prompt(); }
@@ -166,21 +189,46 @@ async function encounter(e) {
 }
 
 // ---- a chapter's game: iris in, title card, the game, iris out, the outro card
+// what a game gets for its act: act one records its moves; act two gets that record as a ghost
+// and may rewrite her line on the Account
+async function actFor(ch) {
+  if (S.act === 'burial') {
+    return {
+      mode: 'burial',
+      ghost: await loadGhost(ch, S.records[ch.id] || []),
+      rewrite: (label, text) => { (S.rewrites[ch.id] ||= {})[label] = text; },
+    };
+  }
+  const list = S.records[ch.id] = [];
+  const t0 = performance.now();
+  return {
+    mode: 'sojourn',
+    record(type, data) {
+      if (list.length >= 4000) return;
+      // {type, t, ...data} as the contract has it (a game's own `type` field wins), and `event`
+      // always keeps the name it was recorded under
+      list.push({ type, t: +((performance.now() - t0) / 1000).toFixed(2), ...data, event: type });
+    },
+  };
+}
+
 async function play(ch, index) {
   const at = where(ch.target);
   map.point(null);
   band.clear();
   await transit.close(at);
   const game = await loadGame(ch);
-  await transit.title({ kicker: ch.ord, title: ch.title }, 1800);
-  // the tarn moves on while the player is away
-  S.truth = ch.truth; S.tarnLine = ch.tarn; S.invite = ''; map.truth(ch.truth); map.fissure(index + 1);
+  const act = await actFor(ch);
+  if (S.act === 'burial') await transit.title({ kicker: `${ch.ord}, below`, title: ch.title }, 1800);
+  else await transit.title({ kicker: ch.ord, title: ch.title }, 1800);
+  // the tarn moves on while the player is away (act one)
+  if (S.act === 'sojourn') { S.truth = ch.truth; S.tarnLine = ch.tarn; S.invite = ''; map.truth(ch.truth); map.fissure(index + 1); }
   if (index === 0) map.title(false);
   S.mode = 'game'; layout(); map.pause();
   // on an upright phone, one small card under the stage: never in the way, gone on a tap or a turn
   turn.hidden = !portrait.matches;
   gameLayer.hidden = false;
-  const { result, teardown } = mount(game, ch, gameStage, S.flags);
+  const { result, teardown } = mount(game, ch, gameStage, S.flags, act);
   await transit.open();
   const r = await result;
   await hold(ch.hold);
@@ -189,6 +237,7 @@ async function play(ch, index) {
   turn.hidden = true;
   gameLayer.hidden = true;
   S.mode = 'map'; layout(); map.resume();
+  if (S.act === 'burial') { S.below[ch.id] = r; await transit.open(where(ch.target)); return r; }
   S.results[ch.id] = r;
   await after(ch, r);
   return r;
@@ -211,7 +260,7 @@ async function hold(ms) {
 async function after(ch, r) {
   // the outro answers to what the player did: a matching line, or the confident one
   // with the truth of it beneath, in red, as the guest's own correction
-  const branch = ch.branch?.(S.flags) || {};
+  const branch = ch.branch?.(S.flags, r) || {};
   const outro = branch.line || ch.outro;
   const note = r.note && r.note.trim() !== outro ? r.note : '';
   if (ch.id === 'door') { map.flyFacade(); map.put('guest', 'hall', 1); }
@@ -312,22 +361,63 @@ async function ending() {
   map.moonSet();
   await account(stage, S.results, S.flags);
   map.title(false);
-  await lastCard(stage, map);
-  forget();
-  location.href = location.pathname;
+  // the tarn's house, upright and whole, every window lit: as at the flight's end, and as act two opens
+  map.truth('whole');
+  const card = await lastCard(stage, map);
+  // Nevertheless.: the ribbons fade, the stage stays turned, and the house is read the other way
+  card.classList.remove('on');
+  await sleep(reducedMotion ? 100 : 1200);
+  card.remove();
+  await turnOver();
+  await below();
+}
+
+// ---- act two: A Burial of Some Weeks. The milestone opens the studio only.
+async function turnOver() {
+  S.act = 'burial';
+  await transit.title({ html: 'A <span class="red">Burial</span> of Some Weeks', during: enterBelow }, 2600);
+}
+function enterBelow() {
+  S.act = 'burial';
+  S.invite = '';
+  frame.classList.remove('ending');
+  document.querySelector('.running span').textContent = 'A Burial of Some Weeks';
+  map.setAct('burial');
+  layout();
+}
+async function below() {
+  const studio = CHAPTERS.find(c => c.id === 'studio');
+  const open = { ...studio, below: REMARKS.belowPrompt };
+  for (;;) {
+    save('studio');
+    heading({ num: 'III', title: 'Under the studio' });
+    map.put('her', [372, 361], 1);
+    map.point('studio');
+    await explore(['studio'], open);
+    map.point(null);
+    await play(studio, CHAPTERS.indexOf(studio));
+    save('studio');
+    if (await herPass(stage, S.results, S.flags, S.rewrites) === 'again') continue;
+    forget();
+    location.href = location.pathname;
+    return;
+  }
 }
 
 // ---- set the house as it would be on reaching chapter `index` (for ?chapter=)
 // set the house as it would be on reaching chapter `index`: from a save, or with stub scores (?chapter=)
-function jumpTo(index, saved) {
+function jumpTo(index, saved, { stubs = true } = {}) {
   for (let i = 0; i < index; i++) {
     const c = CHAPTERS[i];
-    if (!c.sealed) S.results[c.id] = { won: true, score: { ...c.stub.score }, note: '' };
+    if (!c.sealed && stubs) S.results[c.id] = { won: true, score: { ...c.stub.score }, note: '' };
     S.carried = c.sealed ? [...S.carried, ...c.encounters.filter(e => e.carry)] : [];
     S.truth = c.truth;
   }
   S.tarnLine = CHAPTERS[index - 1]?.tarn || '';
-  if (saved) Object.assign(S, { flags: { glances: 0, ...saved.flags }, results: saved.results || {}, truth: saved.truth ?? S.truth, tarnLine: saved.tarnLine ?? S.tarnLine, carried: saved.carried || [] });
+  if (saved) Object.assign(S, {
+    flags: { glances: 0, ...saved.flags }, results: saved.results || {}, records: saved.records || {}, rewrites: saved.rewrites || {},
+    below: saved.below || {}, truth: saved.truth ?? S.truth, tarnLine: saved.tarnLine ?? S.tarnLine, carried: saved.carried || [],
+  });
   map.truth(S.truth); map.fissure(index); map.light(CHAPTERS[index]?.id || 'flight'); map.title(false);
   if (index > 1) map.setFacade(true);
   if (index > 3) map.coffin(true);
@@ -345,14 +435,23 @@ async function main() {
   // jumping to a sealed chapter opens it, so its game can be tried inside the spine
   const target = CHAPTERS.find(c => c.id === want);
   if (target) target.sealed = false;
+  const through = params.get('through');
+  const last = through ? Math.max(0, CHAPTERS.findIndex(c => c.id === through)) : CHAPTERS.length - 1;
   let start = 0;
-  const saved = !want && restore();
-  if (want) {
+  // saves resume a plain run or a through-entry; a bare ?chapter= jump is a test and starts clean
+  const saved = (!want || through) ? restore() : null;
+  if (saved?.act === 'burial') {
+    // resume below: the act-two map, as it was left
+    jumpTo(CHAPTERS.length, saved, { stubs: false });
+    enterBelow();
+    return below();
+  }
+  if (saved) {
+    start = saved.chapter === 'ending' ? last + 1 : Math.max(0, CHAPTERS.findIndex(c => c.id === saved.chapter));
+    jumpTo(start, saved, { stubs: false });
+  } else if (want) {
     start = want === 'ending' ? CHAPTERS.length : Math.max(0, CHAPTERS.findIndex(c => c.id === want));
-    jumpTo(start);
-  } else if (saved) {
-    start = saved.index;
-    jumpTo(start, saved);
+    jumpTo(start, null, { stubs: !through });
   } else {
     map.truth(null);
     map.fissure(0);
@@ -360,13 +459,13 @@ async function main() {
     await letter();
     await approach();
   }
-  for (let i = start; i < CHAPTERS.length; i++) {
+  for (let i = start; i <= last; i++) {
     const ch = CHAPTERS[i];
-    save(i);
+    save(ch.id);
     if (ch.sealed) await sealed(ch, i);
     else await chapter(ch, i, { arrived: i === start });
   }
-  save(CHAPTERS.length);
+  save('ending');
   await ending();
 }
 

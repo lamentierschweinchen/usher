@@ -56,9 +56,12 @@ button { font: inherit; color: inherit; }
 }
 
 /* ---- the map ---- */
-.map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: hidden; transform-origin: 50% 50%; transition: transform 1.6s cubic-bezier(.6, 0, .4, 1); }
+.map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: hidden; }
+/* the last card turns the world over; act two stays turned (the hits and labels never turn) */
+.world { transform-origin: 480px 320px; transition: transform 1.6s cubic-bezier(.6, 0, .4, 1); }
+.world.turned { transform: scaleY(-1); }
+.world.cut { transition: none; }
 .map.paused { visibility: hidden; }
-.map.turned { transform: scaleY(-1); }
 .map text { font-family: var(--sh-serif); }
 
 /* the chapter's light: one backdrop and one glass at a time */
@@ -74,6 +77,9 @@ button { font: inherit; color: inherit; }
 .house-def.open .facade { opacity: 0; }
 .house-def.cut .rooms, .house-def.cut .facade { transition: none; }
 .house-def:not(.buried) .rooms .sh-coffin { visibility: hidden; }
+/* act two: the light house in the tarn keeps only the studio lit; the rest are dim glass */
+.act-burial [data-truth="whole"] { --lit-gal: #17132b; --lit-bed: #17132b; --lit-hall: #17132b; --lit-stair: #120f24; --lit-vault: #0d0b18; }
+.act-burial .ret-house { --lit-studio: url(#sh-room-studio); }
 .half { display: none; }
 .half.on { display: inline; }
 .half.fade { opacity: 0; transition: opacity .8s; }
@@ -149,6 +155,7 @@ button { font: inherit; color: inherit; }
 .t-intertitle { font-size: max(22px, calc(var(--u) * 44)); line-height: 1.1; color: var(--sh-lamp); }
 .t-card-line { font-size: max(16px, calc(var(--u) * 24)); font-style: italic; line-height: 1.35; color: var(--sh-paper); }
 .t-intertitle + .t-card-line { margin-top: .7em; }
+.t-intertitle .red { color: var(--sh-red); }
 
 /* ---- a mini-game's stage, inside the spine's lace frame ---- */
 .game { position: absolute; inset: 0; z-index: 2; background: var(--sh-cut); }
@@ -203,6 +210,13 @@ button { font: inherit; color: inherit; }
 .acc-rather { color: var(--sh-red); font-style: italic; font-size: max(15px, 1em); min-height: 1.28em; padding-left: 1.2em; }
 .acc-rather .blot { position: static; display: inline-block; width: 1.5em; vertical-align: middle; margin-left: .25em; fill: var(--sh-red); }
 .acc-more { position: absolute; right: .7em; bottom: .3em; color: #6e5f57; }
+/* her pass: the act-one red struck through, her line beneath in red, slanting the other way */
+.acc-rather.struck { text-decoration: line-through; text-decoration-thickness: 1.5px; opacity: .7; }
+.acc-rather.hers { font-style: normal; transform: skewX(13deg); transform-origin: 0 100%; padding-left: 1.7em; }
+.acc-choices { display: flex; justify-content: space-between; align-items: baseline; gap: 1em; margin-top: .7em; }
+.acc-choices button { background: none; border: 0; padding: .2em 0; cursor: pointer; font-family: var(--sh-serif); color: var(--sh-cut); text-decoration: underline; text-decoration-color: rgba(11, 8, 9, .3); text-underline-offset: .2em; }
+.acc-nevertheless { font-size: 1.25em; }
+.acc-replay { font-style: italic; font-size: .95em; }
 
 .last { position: absolute; inset: 0; z-index: 8; opacity: 0; transition: opacity 1.2s ease; }
 .last.on { opacity: 1; }
@@ -245,5 +259,5 @@ button { font: inherit; color: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   .target-label.on { animation: none; opacity: 1; }
-  .light, .moon, .house-def .rooms, .house-def .facade, .map, .actor, .letter-sheet, .account .sheet, .truths > *, .cartouche, .title-below { transition: none !important; }
+  .light, .moon, .house-def .rooms, .house-def .facade, .world, .actor, .letter-sheet, .account .sheet, .truths > *, .cartouche, .title-below { transition: none !important; }
 }

@@ -39,7 +39,16 @@ export const ROOMS = {
 };
 
 // A figure for the map: placed with C.place(), never transformed on its outer <g>.
-export const actorFigure = (name, pose, scale = 1) => C.figure(name, { pose, scale });
+// `bright`: drawn as the tarn draws her, gauze at full strength with a glow.
+export const actorFigure = (name, pose, scale = 1, bright = false) =>
+  C.figure(name, { pose, scale, ...(bright ? { faint: false, attrs: 'filter="url(#sh-glow)" style="--gauze:#fff6e0"' } : {}) });
+
+// Act two is the act-one map turned over (the world group scaled −1 about the
+// stage's centre), so the turned last card and the act-two map are one picture.
+// A point on the light house in the tarn (house coordinates) then lands on the
+// stage at y·0.85 − 40.8: the tarn's FLIP followed by the turn.
+export const TURNED_HOUSE = 'matrix(1 0 0 .85 0 -40.8)';
+export const turnedY = y => y * .85 - 40.8;
 export const placeFigure = C.place;
 
 
@@ -48,7 +57,7 @@ export const placeFigure = C.place;
 // once into the always-rendered #sh-defs <svg> at the top of the page.
 export const sharedDefs = () => C.defs();
 
-export function mapMarkup(titles) {
+export function mapMarkup(titles, { act = 'sojourn' } = {}) {
   C.autoLace();
   // clip paths that split the house along its fissure, for the end
   const fp = [[486, 130], [476, 164], [490, 194], [478, 234], [490, 280], [480, 330], [488, 368]].map(p => p.join(' ')).join(' L');
@@ -67,6 +76,7 @@ export function mapMarkup(titles) {
   <radialGradient id="sp-hot" cx=".5" cy=".6" r=".75"><stop offset="0" stop-color="#fffaea"/><stop offset=".6" stop-color="#fde9b8"/><stop offset="1" stop-color="#f6cf7e"/></radialGradient>
 </defs>
 
+<g id="world" class="world${act === 'burial' ? ' turned' : ''}">
 <g id="lights">${lights(ch => C.backdrop(ch))}</g>
 <g id="moon" class="moon">${C.moon(484, 246, 46)}</g>
 
@@ -82,9 +92,10 @@ export function mapMarkup(titles) {
 <g id="cartouche" class="cartouche">${C.card({ text: titles.above, x: 206, y: 30, w: 548, h: 92, size: 40 })}</g>
 
 <g id="glasses">${lights(ch => C.glass(ch))}</g>
-${C.returned('<use href="#grounds"/><use href="#house"/><use href="#cast"/>', { truth: `<g id="truths" class="truths">${TRUTHS}</g>` })}
+${C.returned('<use href="#grounds"/><g class="ret-house"><use href="#house"/></g><use href="#cast"/>', { truth: `<g id="truths" class="truths">${TRUTHS}</g><g id="cast-below" class="cast-below"></g>` })}
 <g id="title-below" class="title-below" filter="url(#sh-ripple)">
   <text class="t-title-below" transform="translate(480 590) scale(1 -.85)" text-anchor="middle">${titles.below}</text>
+</g>
 </g>
 
 <g id="hits"></g>

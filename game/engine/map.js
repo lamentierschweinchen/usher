@@ -2,7 +2,7 @@
 // moves figures, lights the rooms, changes the chapter's light, shows the tarn's truths.
 
 import { svg, tween, sleep, reducedMotion } from './util.js';
-import { mapMarkup, actorFigure, placeFigure, ROOMS, TRUTH_IDS } from './drawing.js';
+import { mapMarkup, actorFigure, placeFigure, ROOMS, TRUTH_IDS, TURNED_HOUSE, turnedY } from './drawing.js';
 
 // Walkable points (feet), and how they join: over the bank, up the arched
 // causeway (it climbs from 350 to 336), through the hall's arch, the stair's two flights.
@@ -35,7 +35,8 @@ const NODE_ROOM = {
   hall: 'hall', stairFoot: 'stair', studio: 'studio', landing: 'stair', bedroom: 'bedroom', stairTop: 'stair', gallery: 'gallery',
 };
 // the library has no peasant; a second servant's cut stands in for him
-const FIG = { guest: 'guest', roderick: 'roderick', madeline: 'madeline', valet: 'valet', physician: 'physician', servant: 'servant', peasant: 'servant', horse: 'horse' };
+const FIG = { guest: 'guest', roderick: 'roderick', madeline: 'madeline', valet: 'valet', physician: 'physician', servant: 'servant', peasant: 'servant', horse: 'horse', her: 'madeline' };
+const INSIDE = ['gallery', 'bedroom', 'hall', 'stair', 'studio', 'vault'];
 const WALK = 90;      // per second (LOOK)
 const GLIDE = 30;     // Madeline
 
@@ -61,8 +62,9 @@ function route(from, to) {
 // wrapper that mirrors about the figure's own x, so a turn can go edge-on
 // (scaleX 1 → 0 → −1, 160 ms) without touching the figure's outer <g>.
 class Actor {
-  constructor(id, castEl) {
+  constructor(id, castEl, bright = false) {
     this.id = id;
+    this.bright = bright;
     // the library bobs a figure while an ancestor is .sh-moving (Madeline never bobs)
     this.g = svg('g', { class: `actor sh-${FIG[id]}`, id: 'a-' + id });
     castEl.append(this.g);
@@ -72,7 +74,7 @@ class Actor {
   pose(p) {
     if (p === this.posed && this.fig) return;
     this.posed = p;
-    this.g.innerHTML = actorFigure(FIG[this.id], p, this.id === 'peasant' ? .94 : 1);
+    this.g.innerHTML = actorFigure(FIG[this.id], p, this.id === 'peasant' ? .94 : 1, this.bright);
     this.fig = this.g.firstElementChild;
     placeFigure(this.fig, this.x, this.y);
   }
@@ -97,13 +99,17 @@ class Actor {
 }
 
 export class MapView {
-  constructor(el, titles, defsEl) {
+  constructor(el, titles, defsEl, { act = 'sojourn' } = {}) {
     this.el = el;
     this.defsEl = defsEl;   // holds the animated ripple; pause it with the map
-    el.innerHTML = mapMarkup(titles);
+    el.innerHTML = mapMarkup(titles, { act });
     this.cast = el.querySelector('#cast');
     this.actors = {};
-    for (const id of Object.keys(FIG)) this.actors[id] = new Actor(id, this.cast);
+    for (const id of Object.keys(FIG)) if (id !== 'her') this.actors[id] = new Actor(id, this.cast);
+    // act two's Madeline walks in the tarn's own layer: bright, unrippled
+    this.actors.her = new Actor('her', el.querySelector('#cast-below'), true);
+    this.act = 'sojourn';
+    this.walker = 'guest';
     this.hoverLabel = el.querySelector('#hover-label');
     this.truths = el.querySelector('#truths');
     this.onPick = () => {};
@@ -145,7 +151,7 @@ export class MapView {
     const below = room === 'tarn';
     this.hoverLabel.textContent = r.label;
     this.hoverLabel.setAttribute('x', x);
-    this.hoverLabel.setAttribute('y', y);
+    this.hoverLabel.setAttribute('y', this.mapY(y));
     this.hoverLabel.classList.toggle('on-ink', below);
     this.hoverLabel.classList.add('on');
   }
@@ -155,10 +161,37 @@ export class MapView {
     this.open = open;
     for (const h of this.el.querySelectorAll('.hit')) {
       const room = h.dataset.room;
-      const inside = ['gallery', 'bedroom', 'hall', 'stair', 'studio', 'vault'].includes(room);
-      const off = room === 'door' ? open : inside && !open;
+      const inside = INSIDE.includes(room);
+      // act two: only the house's rooms, on the light house in the tarn
+      const off = this.act === 'burial' ? !inside : room === 'door' ? open : inside && !open;
       h.style.display = off ? 'none' : '';
     }
+  }
+  // a y in house coordinates, where it shows on the stage in this act
+  mapY(y) { return this.act === 'burial' ? turnedY(y) : y; }
+
+  // act two: the act-one map turned over. Above, the house upright as light, only the
+  // studio lit; below, the black house hanging; Madeline walks the light house.
+  setAct(act) {
+    this.act = act;
+    const two = act === 'burial';
+    this.el.classList.toggle('act-burial', two);
+    this.el.querySelector('#hits').setAttribute('transform', two ? TURNED_HOUSE : '');
+    this.walker = two ? 'her' : 'guest';
+    if (!two) return this.setOpen(this.open);
+    const world = this.el.querySelector('#world');
+    world.classList.add('cut', 'turned'); world.getBoundingClientRect(); world.classList.remove('cut');
+    this.el.classList.remove('turned');
+    this.el.querySelector('#house-whole').style.display = '';
+    for (const h of this.el.querySelectorAll('.half')) { h.classList.remove('on', 'fade'); h.removeAttribute('transform'); }
+    this.el.querySelector('#moon').classList.remove('on');
+    this.setFacade(true);
+    this.coffin(false);
+    this.title(false);
+    this.hideAll();
+    this.light('vault');
+    this.truth('whole');
+    this.fissure(6);
   }
 
   // ---- layout -------------------------------------------------------------
@@ -178,7 +211,7 @@ export class MapView {
     const p = new DOMPoint(x, y).matrixTransform(m);
     return { x: p.x - s.left, y: p.y - s.top };
   }
-  roomPoint(room) { return ROOMS[room]?.anchor || [480, 320]; }
+  roomPoint(room) { const [x, y] = ROOMS[room]?.anchor || [480, 320]; return [x, this.mapY(y)]; }
 
   pause() { this.el.pauseAnimations(); this.defsEl?.pauseAnimations(); this.el.classList.add('paused'); }
   resume() {
@@ -200,8 +233,8 @@ export class MapView {
     if (!t) return;
     const [lx, ly] = t.labelAt || [t.rect[0] + 5, t.rect[1] + 12];
     label.textContent = t.label;
-    label.setAttribute('x', lx); label.setAttribute('y', ly);
-    if (t.lamp) above.style.setProperty(t.lamp, 'url(#sp-hot)');
+    label.setAttribute('x', lx); label.setAttribute('y', this.mapY(ly));
+    if (t.lamp && this.act !== 'burial') above.style.setProperty(t.lamp, 'url(#sp-hot)');
     if (t.rim) for (const el of this.el.querySelectorAll(t.rim)) el.classList.add('target-rim');
   }
 
@@ -218,7 +251,7 @@ export class MapView {
   hideAll(except = []) { for (const id in this.actors) if (!except.includes(id)) this.hide(id); }
   face(id, dir) { const a = this.actors[id]; a.place(a.x, a.y, dir); }
   pose(id, p) { this.actors[id].pose(p); }
-  guestRoom() { return NODE_ROOM[this.actors.guest.node] || null; }
+  guestRoom() { return NODE_ROOM[this.actors[this.walker].node] || null; }
 
   // walk along a list of points; resolves on arrival
   async travel(id, pts, speed = WALK) {
@@ -360,7 +393,8 @@ export class MapView {
     if (reducedMotion) { moon.setAttribute('transform', 'translate(0 84)'); return; }
     await tween(9000, k => moon.setAttribute('transform', `translate(0 ${84 * k})`));
   }
-  flip(on) { this.el.classList.toggle('turned', on); }
+  // the last card's turn: the world group goes over, the hits and labels stay put
+  flip(on) { this.el.querySelector('#world').classList.toggle('turned', on); }
   // the water stirs: the shared ripple swells and settles, three slow times (not under reduced motion)
   async stir() {
     const d = this.defsEl?.querySelector('#sh-ripple feDisplacementMap');

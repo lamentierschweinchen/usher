@@ -65,7 +65,7 @@ export const CHAPTERS = [
       { glide: { madeline: ['galleryEast', 'galleryWest'] }, lines: [['Madeline', '*(passes slowly through, without having noticed you.)*'], ['Roderick', 'We don’t mention her. It tires her.']] },
     ],
     outro: 'Everything is hushed. Roderick thanks you, and goes on listening to it.',
-    branch: f => (f.knockSpared || (f.tapsSpared ?? 0) > 0) ? { line: 'Roderick heard it. He did not thank you.' } : null,
+    branch: (f, r) => (f.knockSpared || (f.tapsSpared ?? 0) > 0 || (r?.score?.['taps let be'] ?? 0) > 0) ? { line: 'Roderick heard it. He did not thank you.' } : null,
     truth: 'cellar', tarn: 'Madeline lying down on a long table in the cellar. Very neatly. A little early.',
     stub: { line: 'Hush the sunbeams, the roses, the brass band — before they reach him.', score: { 'taps hushed': 41 } },
   },
@@ -189,5 +189,9 @@ export const REMARKS = {
     'The water is doing that thing again.',
   ],
   leave: ['You', 'Some weeks, he said. It has been an afternoon.'],
+  // act two
+  belowPrompt: 'Under the studio.',
+  sealedBelow: ['', '*Not yet. The rest of the house is still asleep.*'],
+  herPass: { again: 'Under the studio, again.' },
   sealed: ch => ['', `*${ch.num}. ${ch.title}* — a chapter to come.`],
 };
