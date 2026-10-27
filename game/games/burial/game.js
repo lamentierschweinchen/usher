@@ -172,10 +172,10 @@ const LINES = {
 // door is a library cut (game/shared/cuts.js); only the stairs, portraits,
 // arches, Madeline's bare feet and the screws are cut here, in the same manner.
 const FLOOR = 27; // feet sit this far below a node
-const FS = 1.5; // figure scale on the stair (≈ 66 units: the node grid is 230 apart)
+const FS = 1.95; // figure scale on the stair: ≈ 90 units, as tall as the node grid allows (rooms 98 high, nodes 230 apart)
 const f1 = (n) => Math.round(n * 10) / 10;
 const PI = Math.PI;
-// a bare footprint, for the prints the tarn keeps (red: what really happened)
+// a bare footprint, for the prints the tarn keeps (returned light)
 const FOOT = '<path d="M0-6C2.6-6 3.4-2.6 3-.4C2.6 2.4 2.2 6 0 6C-2 6-2.6 3-2.6.6C-2.8-2.6-2.4-6 0-6Z"/><circle cx="-2.2" cy="-8.4" r="1"/><circle cx="-.5" cy="-9.2" r=".95"/><circle cx="1.1" cy="-9.1" r=".85"/><circle cx="2.5" cy="-8.4" r=".75"/><circle cx="3.5" cy="-7.2" r=".6"/>';
 
 // Little cut-paper helpers (fill comes from the wrapper's currentColor).
@@ -215,40 +215,40 @@ const GAUZE = 'style="fill:var(--gauze,#f6ead2);opacity:var(--gauze-a,.42)"';
 const feet = (shin) => `<g transform="scale(${FS})" ${GAUZE}><path d="M-5.6-${shin}h2.2l.2 ${shin - 2}c1.4.6 3.6 1 4.8 1.6c.6.4.4.8-.4.8H-5.8c-.2-1.2 0-2 .2-3zM2.4-${shin}h2.2l.2 ${shin - 2}c1.4.6 3.6 1 4.8 1.6c.6.4.4.8-.4.8H2.2c-.2-1.2 0-2 .2-3z"/></g>`;
 
 // The bearers, facing right: you behind, Roderick in front, the coffin between at the hands.
-const carry = (cls = '') => C.figure('guest', { x: -40, scale: FS, cls: `gb-guest ${cls}` })
-  + C.coffin({ x: -34, y: -20, w: 68 })
-  + C.figure('roderick', { x: 40, scale: FS, cls: `gb-rodf ${cls}` });
+const carry = (cls = '') => C.figure('guest', { x: -52, scale: FS, cls: `gb-guest ${cls}` })
+  + C.coffin({ x: -44, y: -26, w: 88 })
+  + C.figure('roderick', { x: 52, scale: FS, cls: `gb-rodf ${cls}` });
 const doctor = () => C.figure('physician', { scale: FS, lamp: true });
 
 // Where the paper is cut away (mask: black = hole).
-const HOLES = rect(120, 60, 690, 139) + rect(120, 60, 200, 383) // top landings, the left stair
-  + rect(120, 169, 624, 253) + rect(120, 299, 624, 383) // the two galleries (overlapping the turn: no seam)
-  + poly([[620, 169], [820, 234], [820, 318], [620, 253]]) + poly([[620, 299], [820, 234], [820, 318], [620, 383]]) // the turn
-  + rect(756, 232, 880, 318) + rect(785, 230, 855, 460) + rect(756, 374, 880, 458) // head of the stair, the stair down
-  + poly([[700, 449], [820, 374], [820, 458], [700, 533]]) + rect(200, 449, 766, 533) // down to the copper archway
+const HOLES = rect(120, 42, 690, 139) + rect(120, 42, 200, 383) // top landings, the left stair
+  + rect(120, 155, 624, 253) + rect(120, 285, 624, 383) // the two galleries (overlapping the turn: no seam)
+  + poly([[620, 155], [820, 212], [820, 318], [620, 253]]) + poly([[620, 285], [820, 212], [820, 318], [620, 383]]) // the turn
+  + rect(756, 210, 904, 318) + rect(785, 208, 855, 460) + rect(756, 352, 904, 458) // head of the stair, the stair down
+  + poly([[700, 430], [820, 352], [820, 458], [700, 533]]) + rect(200, 430, 766, 533) // down to the copper archway
   + '<path d="M40 533V436Q40 396 80 396H200V533Z"/>'; // the vault
-const LANDING = { A3: [120, 139, 200, 149], R1: [120, 253, 200, 263], R4: [788, 318, 880, 328], S: [760, 458, 880, 468] };
+const LANDING = { A3: [120, 139, 200, 149], R1: [120, 253, 200, 263], R4: [788, 318, 904, 328], S: [760, 458, 904, 468] };
 
 function stairMarkup(P) {
   const floors = [[200, 690, 139], [200, 620, 253], [120, 620, 383], [40, 760, 533]];
-  const ceilings = [[120, 690, 60, 3], [200, 620, 169, 5], [120, 620, 299, 7]];
+  const ceilings = [[200, 690, 42, 3], [200, 620, 155, 5], [200, 620, 285, 7]];
   let lace = '';
   for (const [a, b, y] of floors) lace += C.scallops(a, b, y, 1.7, 5);
-  for (const [a, b, y, seed] of ceilings) lace += C.fringe(a + 4, b - 4, y, { seed, len: [3, 7], step: 5.2 });
-  lace += `<g fill="currentColor">${along(620, 169, 820, 234, 1.5, 5)}${along(620, 383, 788, 328.4, 1.5, 5)}</g>`;
+  for (const [a, b, y, seed] of ceilings) lace += C.fringe(a + 4, b - 4, y, { seed, len: [2, 4.5], step: 5.2 });
+  lace += `<g fill="currentColor">${along(620, 155, 820, 212, 1.5, 5)}${along(620, 383, 788, 328.4, 1.5, 5)}</g>`;
   let props = '';
   for (const [a, b, c, d] of Object.values(LANDING)) props += rect(a, b, c, d);
-  props += poly([[688, 275.1], [820, 318], [820, 326], [688, 283.1]]); // the turn's floor
+  props += poly([[662, 266.7], [820, 318], [820, 326], [662, 274.7]]); // the turn's floor, from the gallery floor's point
   props += flight(196, 149, 124, 253, 8) + flight(124, 263, 196, 383, 8) + flight(852, 328, 790, 458, 9) + flight(792, 468, 702, 533, 7);
   props += [[275, 197, 1], [505, 197, 0], [275, 327, 0], [505, 327, 1]]
     .map(([x, y, b]) => portrait(x - 11, y, b) + portrait(x + 11, y, !b)).join('');
-  props += hatchment(275, 70) + hatchment(505, 70);
+  props += hatchment(275, 50) + hatchment(505, 50);
   // the copper archway: piers and pointed spandrels between the stations
   for (const [a, b] of [[240, 430], [430, 610], [610, 760]]) {
     const m = (a + b) / 2;
-    props += `<path d="M${a} 449H${b}V476Q${b} 456 ${m} 452Q${a} 456 ${a} 476Z"/>`;
+    props += `<path d="M${a} 430H${b}V458Q${b} 437 ${m} 433Q${a} 437 ${a} 458Z"/>`;
   }
-  for (const x of [240, 430, 610]) props += rect(x - 5, 449, x + 5, 533) + C.curl(x, 478, PI / 2 + 0.6, 7, 1, 1.6, 0.3, 10) + C.curl(x, 478, PI / 2 - 0.6, 7, -1, 1.6, 0.3, 10);
+  for (const x of [240, 430, 610]) props += rect(x - 5, 430, x + 5, 533) + C.curl(x, 460, PI / 2 + 0.6, 7, 1, 1.6, 0.3, 10) + C.curl(x, 460, PI / 2 - 0.6, 7, -1, 1.6, 0.3, 10);
   // the vault's trestles and its iron door, standing open; the door you came down by
   props += '<path d="M92 533l16-26h3l-16 26zM108 533l-16-26h3l16 26zM160 533l16-26h3l-16 26zM176 533l-16-26h3l16 26zM88 505h26v3H88zM156 505h26v3h-26z"/>';
   props += C.door('iron', { x: 202, y: 452, w: 22, h: 81 }) + C.door('arch', { x: 696, y: 80, w: 24, h: 59 });
@@ -355,7 +355,7 @@ function lidMarkup(P) {
       <g style="fill:#c98a52" opacity=".85">${[[776, 214], [792, 208], [776, 300], [792, 296], [776, 390], [792, 388], [776, 470], [792, 466]].map(([x, y]) => dot(x, y, 1.8)).join('')}</g>
     </g>
     <g class="gb-doorway">
-      <g class="gb-rodd">${C.figure('roderick', { x: 852, y: 476, scale: 3.3, flip: true, cls: 'touch gb-rodt' })}</g>
+      <g class="gb-rodd">${C.figure('roderick', { x: 852, y: 476, scale: 4.2, flip: true, cls: 'touch gb-rodt' })}</g>
       <rect class="gb-doorhit" x="760" y="112" width="156" height="384" role="button" tabindex="-1" aria-label="Leave with Roderick"/>
     </g>
     <g class="gb-lid">
@@ -407,12 +407,12 @@ const CSS = `
 .g-burial .gb-cone{fill:var(--sh-lamp,#f7d894);opacity:.3}
 .g-burial .gb-trailp{fill:none;stroke:var(--sh-cut,#0b0809);stroke-width:5.5px;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:.1 12}
 .g-burial .gb-trailt{fill:none;stroke:var(--sh-cut,#0b0809);stroke-width:5px;stroke-linecap:round;stroke-dasharray:.1 9.5}
-.g-burial .gb-print{fill:var(--sh-red,#e0392b)}
+.g-burial .gb-print{fill:var(--sh-return,#f3dba2)}
 .g-burial .gb-sw{font-family:var(--sh-serif,'IM Fell English',Georgia,serif);font-style:italic;font-size:34px;text-anchor:middle;fill:var(--sh-cut,#0b0809);pointer-events:none}
 .g-burial .gb-sw.gb-loud{font-style:normal;font-size:44px;letter-spacing:.04em}
 .g-burial .gb-sw.gb-xl{font-style:normal;font-size:58px;letter-spacing:.04em}
 .g-burial .gb-sw.gb-cutout{fill:var(--sh-lamp,#f7d894)}
-.g-burial .gb-sw.gb-onink{fill:var(--sh-red,#e0392b);font-size:40px}
+.g-burial .gb-sw.gb-onink{fill:var(--sh-return,#f3dba2);font-size:40px}
 .g-burial .gb-fade{animation:gb-sw 1.5s linear forwards}
 .g-burial .gb-flash{opacity:0;animation:gb-flash .3s ease-out forwards}
 .g-burial.gb-rm .gb-flash{animation:none;opacity:.85}
@@ -420,12 +420,12 @@ const CSS = `
 @keyframes gb-bob{50%{transform:translateY(-1.5px)}}
 @keyframes gb-sw{0%,60%{opacity:1}100%{opacity:0}}
 @keyframes gb-flash{0%{opacity:0}35%{opacity:.95}100%{opacity:0}}
-.g-burial .gb-cap{position:absolute;left:calc(var(--u)*40);top:calc(var(--u)*20);width:calc(var(--u)*640);pointer-events:none}
-.g-burial .gb-teach{font-style:italic;font-size:max(13px,calc(var(--u)*26));line-height:1.2;color:var(--sh-paper,#ede2cb)}
+.g-burial .gb-cap{position:absolute;left:calc(var(--u)*44);top:calc(var(--u)*7);width:calc(var(--u)*640);pointer-events:none}
+.g-burial .gb-teach{display:inline-block;padding:0 .35em .05em 0;background:var(--sh-cut,#0b0809);font-style:italic;font-size:max(13px,calc(var(--u)*26));line-height:1.2;color:var(--sh-paper,#ede2cb)}
 .g-burial .gb-two{position:relative;display:inline-block}
 .g-burial .gb-two::after{content:"";position:absolute;left:-.08em;right:-.08em;top:54%;height:max(1.5px,calc(var(--u)*2.6));background:var(--sh-red,#e0392b);transform:scaleX(0);transform-origin:0 50%;transition:transform .7s ease}
 .g-burial .gb-two.gb-struck::after{transform:scaleX(1)}
-.g-burial .gb-say{display:inline-block;margin-top:calc(var(--u)*8);padding:.22em .7em .3em;font-size:max(12px,calc(var(--u)*21));line-height:1.25;color:var(--sh-paper,#ede2cb);background:var(--sh-cut,#0b0809);border-top:1px solid rgba(247,216,148,.35);border-bottom:1px solid rgba(247,216,148,.35);opacity:0;transition:opacity .2s linear}
+.g-burial .gb-say{position:absolute;left:calc(var(--u)*40);top:calc(var(--u)*52);max-width:calc(var(--u)*640);pointer-events:none;padding:.22em .7em .3em;font-size:max(12px,calc(var(--u)*21));line-height:1.25;color:var(--sh-paper,#ede2cb);background:var(--sh-cut,#0b0809);border-top:1px solid rgba(247,216,148,.35);border-bottom:1px solid rgba(247,216,148,.35);opacity:0;transition:opacity .2s linear}
 .g-burial .gb-say.gb-on{opacity:1}
 .g-burial .gb-say b{display:block;font-weight:normal;font-size:max(10px,calc(var(--u)*12));letter-spacing:.2em;text-transform:uppercase;color:var(--sh-speaker,#d79a6a);margin-bottom:.15em}
 .g-burial .gb-say em{font-style:italic;color:var(--sh-paper,#ede2cb)}
@@ -463,6 +463,22 @@ const CSS = `
 .g-burial.gb-rm .gb-lifted .gb-lift{transform:none}
 .g-burial.gb-rm .gb-near,.g-burial.gb-rm .gb-bobbing,.g-burial.gb-rm .gb-well{animation:none!important}
 .g-burial.gb-rm .gb-two::after{transition:none}
+/* small stages (phones): game type ×1.5; the ribbon spans the stage and keeps off the bearers */
+@container (max-width:600px){
+  .g-burial .gb-teach{font-size:calc(max(13px,calc(var(--u)*26))*1.5)}
+  .g-burial .gb-say{top:calc(var(--u)*10 + 30px);right:calc(var(--u)*40);max-width:none;font-size:calc(max(12px,calc(var(--u)*21))*1.5)}
+  .g-burial.gb-saylow .gb-say{top:auto;bottom:calc(var(--u)*24)}
+  .g-burial.gb-teachlow .gb-cap{top:auto;bottom:calc(var(--u)*30)}
+  .g-burial.gb-teachlow .gb-score{opacity:0}
+  .g-burial .gb-say b{display:inline;font-size:calc(max(10px,calc(var(--u)*12))*1.5);margin:0 .6em 0 0}
+  .g-burial .gb-score{bottom:calc(var(--u)*40);font-size:calc(max(10px,calc(var(--u)*17))*1.5)}
+  .g-burial .gb-leave{font-size:calc(max(11px,calc(var(--u)*15))*1.5)}
+  .g-burial .gb-note{font-size:calc(max(14px,calc(var(--u)*26))*1.5)}
+  .g-burial .gb-sw{font-size:51px}
+  .g-burial .gb-sw.gb-loud{font-size:66px}
+  .g-burial .gb-sw.gb-xl{font-size:80px}
+  .g-burial .gb-sw.gb-onink{font-size:60px}
+}
 @media (prefers-reduced-motion:reduce){.g-burial .gb-near,.g-burial .gb-bobbing,.g-burial .gb-well{animation:none!important}}
 `;
 
@@ -511,8 +527,9 @@ export default {
   <g class="gb-sounds"></g>
   ${C.frame()}
 </svg>
-<div class="gb-cap"><div class="gb-teach"></div><div class="gb-say" aria-live="polite"></div></div>
+<div class="gb-cap"><div class="gb-teach"></div></div>
 <div class="gb-score"></div>
+<div class="gb-say" aria-live="polite"></div>
 <div class="gb-leave">leave</div>
 <div class="gb-note"></div>
 <svg class="gb-irisvg" viewBox="0 0 960 640" aria-hidden="true">
@@ -542,6 +559,7 @@ export default {
       const l = sayQ.shift();
       if (!l) { sayEl.classList.remove('gb-on'); return; }
       sayEl.innerHTML = l.who ? `<b>${l.who}</b>${l.text}` : `<em>${l.text}</em>`;
+      placeSay();
       sayEl.classList.add('gb-on');
       sayTimer = later(nextSay, l.ms || 2400);
     }
@@ -549,6 +567,13 @@ export default {
       if (clear) { sayQ.length = 0; if (sayTimer) cancel(sayTimer); sayTimer = null; }
       sayQ.push(...lines);
       if (!sayTimer) nextSay();
+    }
+    // On a small stage the ribbon is big: keep it off the bearers (top normally, bottom while they are upstairs or at the lid).
+    function placeSay() {
+      const low = phase === 'lid' || (phase === 'stair' && NODES[model.p][1] < 300);
+      root.classList.toggle('gb-saylow', low);
+      // the big phone teaching line would hide their heads on the top landings: it waits over the glass till they're down
+      root.classList.toggle('gb-teachlow', phase === 'stair' && NODES[model.p][1] < 150);
     }
     let tilt = 0;
     function sound(text, x, y, kind = '') {
@@ -572,7 +597,8 @@ export default {
     let face = -1, bface = -1, saidDoctors = false, printN = 0, finished = false, ending = false;
 
     function score() {
-      scoreEl.textContent = phase === 'lid' ? `screws ${seatedN} of 4` : `glimpses ${model.glimpses}`;
+      const n = (v) => (v === 0 ? 'none' : v); // an old-style 0 reads as a letter
+      scoreEl.textContent = phase === 'lid' ? `screws ${n(seatedN)} of 4` : `glimpses ${n(model.glimpses)}`;
     }
 
     // ── The stair ──
@@ -595,7 +621,7 @@ export default {
     function placeCoffin(n) {
       const [x, y] = at(n);
       coffPos.style.transform = `translate(${x}px,${y + FLOOR}px)`;
-      reflC.style.transform = `translate(${x}px,563px) scale(.45,-.4)`;
+      reflC.style.transform = `translate(${x}px,563px) scale(.4,-.36)`;
     }
     function facingFor(ph) {
       if (ph.mode === 'guard') return -1;
@@ -612,12 +638,12 @@ export default {
       docAt = ph.at;
       docPos.style.transform = `translate(${x}px,${y + FLOOR}px)`;
       docDir.style.transform = `scaleX(${face})`;
-      reflD.style.transform = `translate(${x}px,563px) scale(.45,-.4)`;
+      reflD.style.transform = `translate(${x}px,563px) scale(.4,-.36)`;
       reflDir.style.transform = `scaleX(${face})`;
     }
     function drawBeams(ph) {
       const [px, py] = at(ph.at);
-      const ox = px + 20 * face, oy = py + FLOOR - 19;
+      const ox = px + 26 * face, oy = py + FLOOR - 25;
       let s = '';
       for (const n of ph.lit) {
         const [lx, ly0] = at(n), ly = ly0 + 6;
@@ -721,6 +747,7 @@ export default {
       const s = ev.show;
       lockFor(rm ? 80 : 240);
       if (!ev.wait) bob();
+      placeSay();
       if (!ev.caught && !ev.wait) { const dx = at(ev.to)[0] - at(ev.from)[0]; if (dx) { bface = Math.sign(dx); setFacing(); } }
       placeCoffin(s.p);
       const step = 150;
@@ -780,6 +807,7 @@ export default {
     on(svg, 'focusout', (e) => hover(e, false));
 
     setFacing();
+    placeSay();
     placeCoffin(model.p);
     renderDoc(model.ph);
     markNear();
@@ -826,6 +854,7 @@ export default {
       scene.innerHTML = lidMarkup(P);
       root.classList.add('gb-lidmode');
       teach.textContent = LINES.lidTeach;
+      placeSay();
       score();
       lidScene = $('.gb-lidscene'); lidG = $('.gb-lid'); lidT = $('.gb-lidt'); lidBody = $('.gb-lidbody');
       screwEls = [...root.querySelectorAll('.gb-screw')];
