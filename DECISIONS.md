@@ -2,6 +2,16 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-27 — Fixes, the full game, and delightful deceit
+
+"integrate the fixes of the critic and already start with the full game."
+
+"I disagree that only the water should "tell the truth", that's too easy and becomes predictable. it shouldn't always be clear what is true and the deceit should be delightful. you can lean on the water but it's fluid and reflections can be tricky."
+
+"i like the idea of the mirror!"
+
+*Replaced:* the tarn as a reliable oracle, and LOOK.md's "red always means what really happened". No single source tells the truth; the water leans true but ripples, inverts and flatters. The mirror second act (*A Burial of Some Weeks*) is in.
+
 ## 2026-10-27 — Past the deadline: build it out
 
 "happy we have an initial result. i want your honest take on it and enlist a critic to rate the entire experience on a scale from 1-10 across different categories like story, gameplay, creativity, etc. then tell me what you'd improve before i go for a first playthrough. also tell me what the estimated time for the full game is (and what you think would be ideal) — we obviously missed submission time so now we have the liberty to build it out into a fully-fledged game full of intrigue, wit, and fun."
