@@ -92,7 +92,7 @@ export function stub(ch) {
         C.card({ text: ch.title, x: 180, y: 214, w: 600, h: 92, size: 36 }) +
         `<text class="g-stub-line" x="480" y="362" text-anchor="middle">A game to come, in games/${ch.id}/.</text>
         <a class="g-stub-win" href="#" role="button"><text x="480" y="430" text-anchor="middle">win</text></a>
-        <text class="sh-score" x="912" y="600" text-anchor="end">${esc(Object.entries(ch.stub.score).map(([k, v]) => `${k} ${v}`).join(' · ').toUpperCase())}</text>`;
+        <text class="sh-score" x="912" y="600" text-anchor="end">${esc(Object.entries(ch.stub.score).map(([k, v]) => `${k} ${v === 0 ? 'none' : v}`).join(' · ').toUpperCase())}</text>`;
       const win = root.querySelector('.g-stub-win');
       const go = e => {
         e.preventDefault();

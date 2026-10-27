@@ -1,7 +1,7 @@
 // The map, cut from the shared library (game/shared/cuts.js, Shadow Theatre).
 // The house, the grounds and the cast are each one def, used twice: upright in
 // black paper against the chapter's light, and returned by the tarn as light.
-// The spine draws nothing of its own here except the manicule and the hit areas.
+// The spine draws nothing of its own here except the invisible hit areas.
 
 import * as C from '../shared/cuts.js';
 
@@ -22,29 +22,27 @@ const TRUTHS = `
 
 export const TRUTH_IDS = ['fissure', 'face', 'cellar', 'lid', 'stair', 'doors', 'whole'];
 
-// Where things are, for hits, labels, the manicule and the iris (map coordinates).
+// Where things are, for hits, labels and the iris (map coordinates). A target is
+// shown by turning up its room's lamp (`lamp`, a --lit-* variable on the upright
+// house only) and rimming a cut in lamplight (`rim`, a selector inside the defs).
 export const ROOMS = {
-  tarn:     { rect: [14, 368, 932, 256], label: 'the tarn', labelAt: [720, 392], anchor: [760, 470], hand: [700, 384, 90] },
+  tarn:     { rect: [14, 368, 932, 256], label: 'the tarn', labelAt: [720, 392], anchor: [760, 470], cue: 'title' },
   bank:     { rect: [14, 300, 120, 68], label: 'the bank', anchor: [70, 340] },
-  causeway: { rect: [134, 320, 146, 48], label: 'the causeway', anchor: [214, 340], hand: [214, 296, 90] },
-  door:     { rect: [270, 176, 410, 164], label: 'the door', labelAt: [430, 356], anchor: [480, 318], hand: [480, 278, 90] },
-  gallery:  { rect: [300, 176, 360, 44], label: 'the gallery', anchor: [480, 200], hand: [530, 170, 90] },
-  bedroom:  { rect: [300, 220, 140, 60], label: 'your bedroom', anchor: [370, 252], hand: [372, 214, 90] },
-  hall:     { rect: [300, 280, 140, 60], label: 'the hall', anchor: [370, 312], hand: [372, 276, 90] },
-  stair:    { rect: [440, 220, 80, 120], label: 'the stair', anchor: [480, 280], hand: [480, 214, 90] },
-  studio:   { rect: [520, 220, 140, 120], label: 'the studio', anchor: [590, 290], hand: [610, 214, 90] },
-  vault:    { rect: [300, 340, 140, 28], label: 'the vault', anchor: [370, 355], hand: [370, 324, 90] },
+  causeway: { rect: [134, 320, 146, 48], label: 'the causeway', anchor: [214, 340], rim: '#grounds .sh-causeway' },
+  door:     { rect: [270, 176, 410, 164], label: 'the door', labelAt: [430, 356], anchor: [480, 318], lamp: '--lit-door', rim: '#house .facade .sh-door' },
+  gallery:  { rect: [300, 176, 360, 44], label: 'the gallery', anchor: [480, 200], lamp: '--lit-gal' },
+  bedroom:  { rect: [300, 220, 140, 60], label: 'your bedroom', anchor: [370, 252], lamp: '--lit-bed' },
+  hall:     { rect: [300, 280, 140, 60], label: 'the hall', anchor: [370, 312], lamp: '--lit-hall' },
+  stair:    { rect: [440, 220, 80, 120], label: 'the stair', anchor: [480, 280], lamp: '--lit-stair' },
+  studio:   { rect: [520, 220, 140, 120], label: 'the studio', anchor: [590, 290], lamp: '--lit-studio' },
+  vault:    { rect: [300, 340, 140, 28], label: 'the vault', anchor: [370, 355], lamp: '--lit-vault' },
 };
 
 // A figure for the map: placed with C.place(), never transformed on its outer <g>.
 export const actorFigure = (name, pose, scale = 1) => C.figure(name, { pose, scale });
 export const placeFigure = C.place;
 
-const hand = `<g id="f-hand" style="color:var(--sh-cut)">
-  <rect x="-36" y="-7" width="7" height="14" fill="currentColor"/>
-  <path style="fill:var(--sh-lamp);stroke:currentColor;stroke-width:1.4" d="M-29-6H-14Q-11-7-8-5.5H8Q11-5.5 11-2.5Q11 .5 8 .5H-5Q-2.5 2.5-5 4.5Q-2.5 6.5-5.5 8.5H-29Z"/>
-  <path style="fill:none;stroke:currentColor;stroke-width:.7" d="M-13 .5H-6M-14 4.5H-6"/>
-</g>`;
+
 
 // The library's shared defs (skies, glass, lamps, lattices, ripple, glow…), drawn
 // once into the always-rendered #sh-defs <svg> at the top of the page.
@@ -63,10 +61,10 @@ export function mapMarkup(titles) {
   <clipPath id="clip-left"><path d="${left}"/></clipPath>
   <clipPath id="clip-right"><path d="${right}"/></clipPath>
   <g id="grounds">${C.bank()}${C.shore()}</g>
-  <!-- the closed façade's body is glass in the tarn (transparent above water), as on the board's title -->
-  <g id="house" class="house-def">${C.shell({ crack: 6 })}<g class="rooms">${C.rooms()}</g><g class="facade"><path d="M300 172h360v196H300z" style="fill:var(--lit-facade,transparent)"/>${C.facadeWindows()}</g></g>
+  <g id="house" class="house-def">${C.shell({ crack: 6 })}<g class="rooms">${C.rooms()}</g><g class="facade">${C.facadeWindows()}</g></g>
   <g id="cast"></g>
-  ${hand}
+  <!-- a target room's lamp, turned up -->
+  <radialGradient id="sp-hot" cx=".5" cy=".6" r=".75"><stop offset="0" stop-color="#fffaea"/><stop offset=".6" stop-color="#fde9b8"/><stop offset="1" stop-color="#f6cf7e"/></radialGradient>
 </defs>
 
 <g id="lights">${lights(ch => C.backdrop(ch))}</g>
@@ -89,8 +87,6 @@ ${C.returned('<use href="#grounds"/><use href="#house"/><use href="#cast"/>', { 
   <text class="t-title-below" transform="translate(480 590) scale(1 -.85)" text-anchor="middle">${titles.below}</text>
 </g>
 
-${C.frame()}
 <g id="hits"></g>
-<g id="hand" class="hand"><use href="#f-hand"/></g>
 <text id="hover-label" class="t-label-svg" x="0" y="0"></text>`;
 }

@@ -2,7 +2,8 @@
 // writes itself beneath in red; the last stops on a blot. Then the stage turns
 // over and the reflected house stands upright.
 
-import { ACCOUNT, CHAPTERS, LAST } from './story.js';
+import * as C from '../shared/cuts.js';
+import { ACCOUNT, CHAPTERS, LAST, num } from './story.js';
 import { md, esc, sleep, tapOrWait, reducedMotion } from './util.js';
 
 const BLOT = `<svg class="blot" viewBox="0 0 40 30" aria-hidden="true"><path d="M20 3c6 0 7 5 11 6s7 5 4 9-2 9-8 9-8-3-12-2-10-1-11-6 3-6 2-10 8-6 14-6Z"/><circle cx="36" cy="5" r="1.6"/><circle cx="5" cy="25" r="1.1"/></svg>`;
@@ -23,13 +24,13 @@ export function accountRows(results, flags = {}) {
     if (row) {
       used = Object.keys(r.score).find(k => row.match.test(k)) || null;
       const n = used ? r.score[used] : row.n;
-      rows.push({ label: row.label, value: `${n}.`, rather: stop((used && r.rather?.[used]) || row.rather(n, flags)) });
+      rows.push({ label: row.label, value: `${num(n)}.`, rather: stop((used && r.rather?.[used]) || row.rather(n, flags)) });
     }
     for (const [label, gloss] of Object.entries(r.rather || {})) {
-      if (label !== used && label in r.score) rows.push({ label: cap(label), value: `${r.score[label]}.`, rather: stop(gloss) });
+      if (label !== used && label in r.score) rows.push({ label: cap(label), value: `${num(r.score[label])}.`, rather: stop(gloss) });
     }
   }
-  for (const row of ACCOUNT.rows.filter(x => !x.ch)) rows.push({ label: row.label, value: `${row.n}.`, rather: row.rather(row.n, flags) });
+  for (const row of ACCOUNT.rows.filter(x => !x.ch)) rows.push({ label: row.label, value: `${num(row.n)}.`, rather: row.rather(row.n, flags) });
   return rows;
 }
 
@@ -54,8 +55,13 @@ export async function account(stage, results, flags) {
   sheet.classList.add('on');
   await sleep(reducedMotion ? 100 : 900);
   const lines = [...sheet.querySelectorAll('.acc-rather')];
-  for (const el of lines) { await write(el, el.dataset.text); await sleep(reducedMotion ? 0 : 260); }
+  for (const el of lines) {
+    el.scrollIntoView({ block: 'nearest' });   // on a small screen the sheet scrolls with the pen
+    await write(el, el.dataset.text);
+    await sleep(reducedMotion ? 0 : 260);
+  }
   lines[lines.length - 1].insertAdjacentHTML('beforeend', BLOT);
+  lines[lines.length - 1].scrollIntoView({ block: 'nearest' });
   await sleep(600);
   sheet.insertAdjacentHTML('beforeend', '<div class="acc-more" aria-hidden="true">›</div>');
   await tapOrWait(sheet);
@@ -64,15 +70,33 @@ export async function account(stage, results, flags) {
   sheet.remove();
 }
 
+// a closing line on the library's black ribbon; wrapped so the type stays legible
+function ribbon(text, cx, y, w) {
+  const per = Math.max(18, Math.floor((w - 60) / 10.2));   // characters per row at 21 units
+  const rows = [];
+  for (const word of text.split(' ')) {
+    const last = rows[rows.length - 1];
+    if (last && (last + ' ' + word).length <= per) rows[rows.length - 1] = last + ' ' + word; else rows.push(word);
+  }
+  const h = 22 + rows.length * 26;
+  return C.banner({ x: cx - w / 2, y, w, h, line: '' }) +
+    rows.map((r, i) => `<text class="last-line" x="${cx}" y="${y + 33 + i * 26}" text-anchor="middle">${esc(r)}</text>`).join('');
+}
+
 export async function lastCard(stage, map) {
   map.clearSky();
   map.flip(true);
   await sleep(reducedMotion ? 50 : 1700);
+  // drawn in units small enough that the ribbons' 21-unit type is at least 15px
+  const W = Math.round(Math.min(960, stage.clientWidth * 21 / 15)), H = Math.round(W * stage.clientHeight / stage.clientWidth);
+  const w = Math.min(W - 70, 820);
   const card = document.createElement('div');
   card.className = 'last';
-  card.innerHTML = `
-    <p class="last-above">${md(LAST.above)}</p>
-    <p class="last-below">${md(LAST.below)}</p>
+  card.innerHTML = `<svg class="last-ribbons" viewBox="0 0 ${W} ${H}" aria-hidden="true">
+      ${ribbon(LAST.above, W / 2, Math.round(H * .045), w)}
+      ${ribbon(LAST.below, W / 2, Math.round(H * .5), w)}
+    </svg>
+    <p class="sr-only">${md(LAST.above)} ${md(LAST.below)}</p>
     <button class="again" type="button">${md(LAST.again)}</button>`;
   stage.append(card);
   await sleep(50);

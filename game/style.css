@@ -48,7 +48,7 @@ button { font: inherit; color: inherit; }
 }
 .frame.tall .stage { aspect-ratio: 9 / 10; }
 .stage::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .16; mix-blend-mode: overlay; z-index: 9;
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .16; mix-blend-mode: overlay; z-index: 10;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
@@ -57,7 +57,6 @@ button { font: inherit; color: inherit; }
 .map.paused { visibility: hidden; }
 .map.turned { transform: scaleY(-1); }
 .map text { font-family: var(--sh-serif); }
-.map.tall .sh-frame { display: none; }
 
 /* the chapter's light: one backdrop and one glass at a time */
 .light { opacity: 0; transition: opacity 3s ease; }
@@ -66,8 +65,6 @@ button { font: inherit; color: inherit; }
 .moon.on { opacity: 1; }
 
 /* the house: closed, its eye-windows lit; once the door gives, the rooms light behind them */
-/* in the tarn the shut façade comes back as dark glass, not a slab of light */
-.sh-return { --lit-facade: #15122a; }
 .house-def .rooms { opacity: 0; transition: opacity 1.6s ease; }
 .house-def .facade { transition: opacity 1.2s ease; }
 .house-def.open .rooms { opacity: 1; }
@@ -91,8 +88,11 @@ button { font: inherit; color: inherit; }
 
 .hit { fill: transparent; pointer-events: all; cursor: pointer; outline: none; }
 .hit:focus-visible { stroke: var(--sh-lamp); stroke-width: 1; stroke-dasharray: 3 4; }
-.hand { opacity: 0; transition: opacity .5s; pointer-events: none; }
-.hand.on { opacity: 1; }
+/* the target: its lamp turned up (map.point) and its doorway rimmed in lamplight, upright house only */
+.above { --target-rim: url(#sh-rim); }
+.target-rim { filter: var(--target-rim, none); }
+/* chapter I's target is the water: the title's reflection comes back to say so */
+.title-below.gone.cue { opacity: 1; }
 .t-label-svg { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; fill: var(--sh-lamp); opacity: 0; pointer-events: none; transition: opacity .2s; paint-order: stroke; stroke: var(--sh-cut); stroke-width: 3px; }
 .t-label-svg.on { opacity: 1; }
 
@@ -118,6 +118,9 @@ button { font: inherit; color: inherit; }
 .band-dock .band:not(.on) { pointer-events: none; }
 .band-dock .band-who { max-width: none; }
 .band-dock .band-more { position: absolute; right: 12px; bottom: 10px; }
+
+/* ---- the lace proscenium: over everything on the stage, so it stays when the iris shuts ---- */
+.proscenium { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9; }
 
 /* ---- iris and intertitles ---- */
 .iris { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 5; }
@@ -145,7 +148,6 @@ button { font: inherit; color: inherit; }
 .game { position: absolute; inset: 0; z-index: 2; background: var(--sh-cut); }
 .game[hidden] { display: none; }
 .game-stage { position: absolute; inset: 0; overflow: hidden; }
-.game-frame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
 /* the stub that stands in for a game until it lands */
 .g-stub { display: block; width: 100%; height: 100%; font-family: var(--sh-serif); }
@@ -183,7 +185,7 @@ button { font: inherit; color: inherit; }
 
 .account { position: absolute; inset: 0; z-index: 7; display: grid; place-items: center; pointer-events: none; }
 .account .sheet {
-  width: min(62%, 30em); max-height: 94%; overflow: auto; font-size: max(13px, calc(var(--u) * 19)); line-height: 1.28; pointer-events: auto; cursor: pointer;
+  width: min(62%, 30em); max-height: 94%; overflow: auto; font-size: max(15px, calc(var(--u) * 19)); line-height: 1.28; pointer-events: auto; cursor: pointer;
   transform: rotate(.8deg) translateY(30px); opacity: 0; transition: transform 1s cubic-bezier(.2, .7, .2, 1), opacity .6s;
 }
 .account.on .sheet { transform: rotate(.8deg); opacity: 1; }
@@ -192,20 +194,48 @@ button { font: inherit; color: inherit; }
 .acc-rows li { margin-bottom: .15em; }
 .acc-entry { display: flex; align-items: baseline; gap: .3em; }
 .acc-entry .dots { flex: 1; border-bottom: 1px dotted #6e5f57; transform: translateY(-.28em); }
-.acc-rather { color: var(--sh-red); font-style: italic; min-height: 1.28em; padding-left: 1.2em; }
+.acc-rather { color: var(--sh-red); font-style: italic; font-size: max(15px, 1em); min-height: 1.28em; padding-left: 1.2em; }
 .acc-rather .blot { position: static; display: inline-block; width: 1.5em; vertical-align: middle; margin-left: .25em; fill: var(--sh-red); }
 .acc-more { position: absolute; right: .7em; bottom: .3em; color: #6e5f57; }
 
 .last { position: absolute; inset: 0; z-index: 8; opacity: 0; transition: opacity 1.2s ease; }
 .last.on { opacity: 1; }
-.last p { position: absolute; left: 8%; right: 8%; margin: 0; text-align: center; font-style: italic; font-size: max(15px, calc(var(--u) * 24)); line-height: 1.3; text-shadow: 0 0 6px var(--sh-cut), 0 0 2px var(--sh-cut); }
-.last-above { top: 4%; color: var(--sh-return); }
-.last-below { top: 52%; color: var(--sh-paper); }
+.last-ribbons { position: absolute; inset: 0; width: 100%; height: 100%; }
+.last-line { font-family: var(--sh-serif); font-style: italic; font-size: 21px; fill: var(--sh-paper); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .again {
   position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%); background: none; border: 0; padding: .3em .6em; cursor: pointer;
   font-size: max(18px, calc(var(--u) * 30)); color: var(--sh-lamp); text-decoration: underline; text-decoration-color: rgba(247, 216, 148, .4); text-underline-offset: .25em;
 }
 .again:hover, .again:focus-visible { color: var(--sh-paper); }
+
+/* ---- under a game the dock goes, and a landscape phone gives the stage its whole height ---- */
+.frame.playing .band-dock, .frame.ending .band-dock { display: none; }
+.frame.docked.playing { width: min(calc(100vw - 16px), calc((100dvh - 90px) * 1.5)); }
+
+/* on an upright phone, one small cut-paper card under the stage before each game; a tap or a turn dismisses it */
+.turn {
+  display: block; margin: 12px auto 0; max-width: 300px; padding: 10px 16px; cursor: pointer;
+  background: linear-gradient(#fff0c2, #f2c06e); color: var(--sh-cut); border: 5px solid var(--sh-cut);
+  font: italic 15px/1.35 var(--sh-serif); text-align: center; box-shadow: 0 8px 18px -10px rgba(0, 0, 0, .6);
+}
+.turn[hidden] { display: none; }
+@media (orientation: landscape) { .turn { display: none; } }
+
+/* phones: no spine type under 15px */
+@media (max-width: 599px), (max-height: 500px) {
+  .running { font-size: 15px; letter-spacing: .1em; }
+  .running span:first-child { display: none; }
+  .band-who, .t-chapter { font-size: 15px; }
+  .letter-sheet .blot { top: -12px; right: -10px; width: 30px; }
+  .account .sheet { width: 92%; padding: 12px 16px; line-height: 1.22; }
+  .acc-title { margin-bottom: .3em; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .frame { width: min(calc(100vw - 16px), calc((100dvh - 36px) * 1.5)); }
+  .frame.playing { width: min(100vw, calc(100dvh * 1.5)); }
+  .frame.playing .running { display: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .light, .moon, .house-def .rooms, .house-def .facade, .map, .actor, .letter-sheet, .account .sheet, .truths > *, .cartouche, .title-below { transition: none !important; }

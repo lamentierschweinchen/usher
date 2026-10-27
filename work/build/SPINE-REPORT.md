@@ -1,18 +1,16 @@
 # Spine report
 
-**Plays start to end in Shadow Theatre:** letter → title → chapters I–VII (all unsealed) → account → last card. Cut from `game/shared/`. Headless Chrome, laptop and phone, stubs and all seven real games: no console errors.
+**Plays start to end in Shadow Theatre:** letter → title → chapters I–VII → account → last card. Headless Chrome at 1280×800 and 390×844 touch, with stubs and all seven real games: no console errors.
 
 **Run:** `cd game && python3 -m http.server 8790`. `?chapter=<id>`/`ending` jumps, `?games=none` stubs, `?debug` skips.
 
-**Built to your notes:**
-- `C.defs()` lives once in `#sh-defs`: the page's first `<svg>`, 960×640, parked off-screen, never hidden. Masks and paints resolve there; tarn fades with depth; tarn, door, studio checked.
-- Figures move with `C.place()`, turn edge-on; no transform on a figure's outer `<g>`.
-- VII is the causeway only: servant and horse, then the flight game.
-- No repeat of chapter I's tarn beat.
-- The account quotes registry flags with defaults; games' own `rather` glosses win.
+**Art critique, done:**
+- No glove. The target room's `--lit-*` lamp turns up. The façade door and the causeway take a lamp rim (`#sh-rim`); in chapter I the title's reflection cues "look down".
+- Phone: no dock under games or the ending. On an upright phone a cut-paper card ("Turn your phone") sits under each game. Landscape gives the stage full height. Spine type ≥15px.
+- Shut façade returns as pale paper; no fissure before I.
+- Account corrections ≥15px; closing lines on `C.banner` ribbons.
+- Blot in the margin; causeway cast ≥50 apart, portrait crop widened to fit it; proscenium above the iris; zero printed as *none*.
 
-**For the lead artist:**
-- The library has no peasant, so a second servant's cut stands in.
-- A shut façade returns as a pale slab. The spine adds a glass panel (`--lit-facade`) to match the board's title; `facadeWindows()` could own it (the tarn game shows the slab).
+**Also:** `#sh-defs` (960×640, off-screen) holds the shared defs; IV and V unsealed; account quotes flags.
 
-**Known:** real games were mounted and skipped, not played through. Spine-own lines: "Some weeks, he said…" and the account's flag variants.
+**Known:** real games mounted and skipped, not played through. Spine-own lines: "Some weeks, he said…", the account's flag variants, "she knocked, and you heard none of it."

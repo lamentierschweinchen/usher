@@ -7,7 +7,7 @@ import { mapMarkup, actorFigure, placeFigure, ROOMS, TRUTH_IDS } from './drawing
 // Walkable points (feet), and how they join: over the bank, up the arched
 // causeway (it climbs from 350 to 336), through the hall's arch, the stair's two flights.
 export const NODES = {
-  off: [-8, 336], bankTop: [56, 334], cwStart: [150, 350], brink: [214, 343], doorSpot: [262, 338],
+  off: [-8, 336], bankTop: [56, 334], cwStart: [150, 350], brink: [228, 342], doorSpot: [266, 337],
   arch: [293, 338], hall: [372, 338], stairFoot: [446, 338], studio: [610, 338],
   landing: [511, 284], bedroom: [372, 278], stairTop: [449, 221], gallery: [560, 216],
 };
@@ -19,11 +19,12 @@ const EDGES = [
 // Where the cast stands (not on the walk graph).
 export const SPOTS = {
   ...NODES,
-  horse: [186, 346], peasant: [158, 349], servant: [262, 338], valet: [228, 342], physician: [282, 336],
-  servantAway: [176, 347], sofa: [566, 338], sofaSit: [541, 325], hallValet: [398, 338], chair: [424, 278], threshold: [446, 278],
+  // on the causeway at least 50 apart, so no hat ends up inside a horse
+  peasant: [124, 348], horse: [176, 347], servant: [278, 336], valet: [214, 343], physician: [162, 348.5],
+  servantAway: [162, 348.5], sofa: [566, 338], sofaSit: [541, 325], hallValet: [398, 338], chair: [424, 278], threshold: [446, 278],
   galleryEast: [640, 216], galleryWest: [316, 216], landingEast: [511, 284],
   hallEast: [404, 338], hallWest: [330, 338], fallen: [398, 272], fallenUnder: [372, 278],
-  servantWait: [200, 345], horseWait: [166, 348],
+  servantWait: [178, 347], horseWait: [126, 348],
 };
 export const ROOM_NODE = {
   bank: 'brink', causeway: 'brink', door: 'doorSpot', hall: 'hall', stair: 'landing',
@@ -39,7 +40,7 @@ const WALK = 90;      // per second (LOOK)
 const GLIDE = 30;     // Madeline
 
 const VIEW_WIDE = '0 0 960 640';
-const VIEW_TALL = '150 40 540 600';
+const VIEW_TALL = '110 30 576 640';   // portrait phones: the house and the whole causeway
 
 function route(from, to) {
   if (from === to) return [from];
@@ -103,7 +104,6 @@ export class MapView {
     this.cast = el.querySelector('#cast');
     this.actors = {};
     for (const id of Object.keys(FIG)) this.actors[id] = new Actor(id, this.cast);
-    this.hand = el.querySelector('#hand');
     this.hoverLabel = el.querySelector('#hover-label');
     this.truths = el.querySelector('#truths');
     this.onPick = () => {};
@@ -166,7 +166,7 @@ export class MapView {
     this.el.setAttribute('viewBox', tall ? VIEW_TALL : VIEW_WIDE);
     this.el.classList.toggle('tall', tall);
     // the title cartouche and its reflection, narrowed to fit the portrait crop
-    const fit = (y) => tall ? `translate(420 ${y}) scale(.84) translate(-480 ${-y})` : '';
+    const fit = (y) => tall ? `translate(398 ${y}) scale(.84) translate(-480 ${-y})` : '';
     this.el.querySelector('#cartouche').setAttribute('transform', fit(70));
     this.el.querySelector('#title-below').setAttribute('transform', fit(586));
   }
@@ -186,14 +186,17 @@ export class MapView {
     if (!reducedMotion) { this.el.unpauseAnimations(); this.defsEl?.unpauseAnimations(); }
   }
 
-  // ---- the manicule -----------------------------------------------------------
+  // ---- the target: its room's lamp turned up and a lamp rim on its doorway ----
   point(room) {
-    const h = ROOMS[room]?.hand;
-    this.hand.dataset.room = h ? room : '';
-    if (!h) { this.hand.classList.remove('on'); return; }
-    const [x, y, rot] = h;
-    this.hand.setAttribute('transform', `translate(${x} ${y}) rotate(${rot}) scale(1.7) translate(-11 0)`);
-    this.hand.classList.add('on');
+    const above = this.el.querySelector('.above');
+    for (const r of Object.values(ROOMS)) if (r.lamp) above.style.removeProperty(r.lamp);
+    for (const el of this.el.querySelectorAll('.target-rim')) el.classList.remove('target-rim');
+    const t = ROOMS[room];
+    this.el.dataset.target = t ? room : '';
+    this.el.querySelector('#title-below').classList.toggle('cue', t?.cue === 'title');
+    if (!t) return;
+    if (t.lamp) above.style.setProperty(t.lamp, 'url(#sp-hot)');
+    if (t.rim) for (const el of this.el.querySelectorAll(t.rim)) el.classList.add('target-rim');
   }
 
   // ---- figures ----------------------------------------------------------------

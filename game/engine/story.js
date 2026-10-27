@@ -117,6 +117,8 @@ export const CHAPTERS = [
 ];
 
 // The confession: "An Account of My Sojourn", in ink, corrected in red.
+// Zero is written "none": an old-style 0 reads as the letter o.
+export const num = n => (n === 0 ? 'none' : String(n));
 // n: the number used when a game reports nothing that matches.
 export const ACCOUNT = {
   title: 'An Account of My Sojourn',
@@ -127,14 +129,14 @@ export const ACCOUNT = {
       const spared = f.tapsSpared ?? 0, knock = f.knockSpared ?? false;
       if (knock) return `she knocked ${n + spared} times, the last one loudest. You let it be.`;
       if (spared) return `she knocked ${n + spared} times. You let ${spared} be.`;
-      return `she knocked ${n} times.`;
+      return n ? `she knocked ${n} times.` : 'she knocked, and you heard none of it.';
     } },
-    { ch: 'burial', label: 'Screws turned', match: /screw/i, n: 4, rather: (n, f) => (f.burialScrewOut ?? false) ? `${n} in, ${n - 1} out.` : `${n} in, ${n} out.` },
+    { ch: 'burial', label: 'Screws turned', match: /screw/i, n: 4, rather: (n, f) => (f.burialScrewOut ?? false) ? `${num(n)} in, ${num(Math.max(0, n - 1))} out.` : `${num(n)} in, ${num(n)} out.` },
     { ch: 'nights', label: 'Noises explained', match: /nois|explain/i, n: 12, rather: (n, f) => {
       const left = Array.isArray(f.nightsUnexplained) ? f.nightsUnexplained : [];
-      return left.length ? `${n} of ${n + left.length + 1}. You left “${left[0]}” alone.` : `${n} of ${n + 1}.`;
+      return left.length ? `${num(n)} of ${n + left.length + 1}. You left “${left[0]}” alone.` : `${num(n)} of ${n + 1}.`;
     } },
-    { ch: 'trist', label: 'Dragons slain', match: /dragon/i, n: 1, rather: (n, f) => (f.tristLastBlow ?? 'struck') === 'gust' ? 'brothers, none. It was the wind.' : `brothers, ${n}.` },
+    { ch: 'trist', label: 'Dragons slain', match: /dragon/i, n: 1, rather: (n, f) => (f.tristLastBlow ?? 'struck') === 'gust' ? 'brothers, none. It was the wind.' : `brothers, ${num(n)}.` },
     { label: 'Days stayed', n: 9, rather: () => 'some weeks.' },
   ],
   last: { label: 'Cheerfulness of my society', value: 'considerable.' },

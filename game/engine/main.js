@@ -9,7 +9,7 @@ import { Band } from './band.js';
 import { Transit } from './transit.js';
 import { loadGame, mount } from './mount.js';
 import { account, lastCard } from './ending.js';
-import { md, sleep, tapOrWait, reducedMotion } from './util.js';
+import { md, svg, sleep, tapOrWait, reducedMotion } from './util.js';
 import { frame as laceFrame } from '../shared/cuts.js';
 
 // the shared sh- defs go in first, before anything refers to them
@@ -20,11 +20,14 @@ const stage = document.getElementById('stage');
 const map = new MapView(document.getElementById('map'), TITLE, defsEl);
 const band = new Band(document.getElementById('band'));
 const transit = new Transit(stage);
+// one lace proscenium over everything on the stage, map and games alike, so it stays when the iris shuts
+const proscenium = svg('svg', { class: 'proscenium', 'aria-hidden': 'true' });
+stage.append(proscenium);
+const turn = document.getElementById('turn');
+turn.addEventListener('click', () => { turn.hidden = true; });
 const gameLayer = document.getElementById('game');
 const gameStage = document.getElementById('game-stage');
 const running = document.getElementById('running-chapter');
-// the games play inside the same lace proscenium as the map
-document.querySelector('.game-frame').innerHTML = laceFrame();
 
 const S = { flags: { glances: 0 }, results: {}, truth: null, carried: [], mode: 'map' };
 const INSIDE = ['gallery', 'bedroom', 'hall', 'stair', 'studio', 'vault'];
@@ -35,14 +38,27 @@ const portrait = matchMedia('(max-width: 599px) and (orientation: portrait)');
 function layout() {
   const tall = portrait.matches && S.mode === 'map';
   frame.classList.toggle('tall', tall);
+  frame.classList.toggle('playing', S.mode === 'game');
   map.setTall(tall);
+  drawFrame();
   const dock = document.getElementById('band-dock');
   if (narrow.matches) { if (band.el.parentNode !== dock) dock.append(band.el); }
   else if (band.el.parentNode !== stage) stage.insertBefore(band.el, transit.iris);
   frame.classList.toggle('docked', narrow.matches);
 }
+// the proscenium is cut in stage units: 960 across, or the portrait crop's 576
+let framed = '';
+function drawFrame() {
+  const w = frame.classList.contains('tall') ? 576 : 960;
+  const h = Math.round(w * (stage.clientHeight / stage.clientWidth || 2 / 3));
+  if (framed === `${w}x${h}`) return;
+  framed = `${w}x${h}`;
+  proscenium.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  proscenium.innerHTML = laceFrame({ w, h });
+}
 narrow.addEventListener('change', layout);
-portrait.addEventListener('change', layout);
+portrait.addEventListener('change', () => { layout(); if (!portrait.matches) turn.hidden = true; });
+new ResizeObserver(drawFrame).observe(stage);
 
 // ---- input: taps on the map advance the band, or go to the room
 let handler = null;
@@ -134,12 +150,15 @@ async function play(ch, index) {
   S.truth = ch.truth; map.truth(ch.truth); map.fissure(index + 1);
   if (index === 0) map.title(false);
   S.mode = 'game'; layout(); map.pause();
+  // on an upright phone, one small card under the stage: never in the way, gone on a tap or a turn
+  turn.hidden = !portrait.matches;
   gameLayer.hidden = false;
   const { result, teardown } = mount(game, ch, gameStage, S.flags);
   await transit.open();
   const r = await result;
   await transit.close();
   teardown();
+  turn.hidden = true;
   gameLayer.hidden = true;
   S.mode = 'map'; layout(); map.resume();
   S.results[ch.id] = r;
@@ -236,6 +255,7 @@ async function approach() {
 }
 
 async function ending() {
+  frame.classList.add('ending');
   heading(null);
   map.point(null);
   map.moonSet();
@@ -276,6 +296,7 @@ async function main() {
     jumpTo(start);
   } else {
     map.truth(null);
+    map.fissure(0);
     map.light('tarn');
     await letter();
     await approach();
