@@ -33,8 +33,9 @@ export const CHAPTERS = [
       { lines: [['Your horse', '*(will not look in the water.)*'], ['You', 'Sensible animal.']], exit: ['servant', 'horse', 'peasant'], turn: { guest: 1 } },
     ],
     outro: 'All differences accounted for. The crack is only in the water, and you aren’t staying in the water.',
-    truth: 'window', tarn: 'A lit window, dark above. Someone in it looks down, as you did.',
-    stub: { line: 'Spot the differences between the house and its reflection.', score: { 'differences found': 7 } },
+    // the tarn game ends on the lit window in the water, so the map's tarn doesn't repeat it
+    truth: null, tarn: 'A lit window, dark above. Someone in it looks down, as you did.',
+    stub: { line: 'Spot the differences between the house and its reflection.', score: { 'differences found': 5 } },
   },
   {
     id: 'door', ord: 'Chapter the Second', num: 'II', title: 'A Mere Different Arrangement',
@@ -53,9 +54,9 @@ export const CHAPTERS = [
     id: 'studio', ord: 'Chapter the Third', num: 'III', title: 'The Cheerfulness of My Society',
     room: 'studio', target: 'studio',
     intro: 'Roderick rises from the sofa, overjoyed, in a whisper.',
-    cast: { roderick: ['sofa', -1], valet: 'hallValet' },
+    cast: { roderick: ['sofaSit', 1, 'sit'], valet: ['hallValet', -1] },
     encounters: [
-      { lines: [['Roderick', 'You came! Is that wool? It’s terribly loud.'], ['You', 'It’s a coat, Roderick.']] },
+      { enter: { roderick: ['sofa', 1] }, lines: [['Roderick', 'You came! Is that wool? It’s terribly loud.'], ['You', 'It’s a coat, Roderick.']] },
       { lines: [['Roderick', 'It’s an incurable family evil. It’ll pass by Thursday.'], ['You', 'Then I’ll stay till Friday.']] },
       { glide: { madeline: ['galleryEast', 'galleryWest'] }, lines: [['Madeline', '*(passes slowly through, without having noticed you.)*'], ['Roderick', 'We don’t mention her. It tires her.']] },
     ],
@@ -78,7 +79,7 @@ export const CHAPTERS = [
     stub: { line: 'Screw down the lid.', score: { 'screws turned': 4 } },
   },
   {
-    id: 'nights', ord: 'Chapter the Fifth', num: 'V', title: 'The Seventh or Eighth Night', sealed: true, night: true,
+    id: 'nights', ord: 'Chapter the Fifth', num: 'V', title: 'The Seventh or Eighth Night', sealed: true,
     room: 'bedroom', target: 'bedroom',
     intro: 'Your bed is directly over the vault. A coincidence, and you explain it as one.',
     encounters: [
@@ -91,7 +92,7 @@ export const CHAPTERS = [
     stub: { line: 'Explain every noise away.', score: { 'noises explained': 12 } },
   },
   {
-    id: 'trist', ord: 'Chapter the Sixth', num: 'VI', title: 'One of Your Favorite Romances', night: true,
+    id: 'trist', ord: 'Chapter the Sixth', num: 'VI', title: 'One of Your Favorite Romances',
     room: 'bedroom', target: 'bedroom',
     intro: 'You read aloud the silliest book in the house. You’re the hero. It’s wonderful.',
     // the romance's own exchanges (hermit, dragon, shield) belong to the trist game
@@ -101,16 +102,13 @@ export const CHAPTERS = [
     stub: { line: 'Ethelred smashes a door, slays a dragon, wins a shield.', score: { 'dragons slain': 1, 'blows struck': 9 } },
   },
   {
-    id: 'flight', ord: 'Chapter the Seventh', num: 'VII', title: 'A Thousand Waters', night: true,
-    room: 'bedroom', target: 'causeway', finale: true,
-    // when the trist game has already played her arrival, the spine only bridges to the flight
-    intro: f => f.tristLastBlow ? 'From that chamber, and from that mansion, you flee aghast.' : 'Roderick finally speaks. He’s been listening all along.',
-    cast: f => f.tristLastBlow ? { roderick: ['chair', 1], madeline: ['fallen', -1] } : { roderick: ['chair', 1] },
-    // if the trist game has already played her arrival (it sets tristLastBlow), don't tell it twice
+    id: 'flight', ord: 'Chapter the Seventh', num: 'VII', title: 'A Thousand Waters',
+    // the trist game plays Roderick's confession and her fall; on the map VII is
+    // only the causeway, and the flight game starts at "I fled aghast" [u50]
+    room: 'causeway', target: 'causeway', finale: true, go: true,
+    cast: { servant: ['servantWait', 1], horse: ['horseWait', -1] },
     encounters: [
-      { skipIf: f => f.tristLastBlow, lines: [['Roderick', 'I heard her days ago. I sent for you because you never hear anything.'], ['You', 'Oh, Roderick.']] },
-      { skipIf: f => f.tristLastBlow, lines: [['Roderick', 'Madman! She now stands without the door!'], ['You', 'That’s only the wind.']] },
-      { skipIf: f => f.tristLastBlow, enter: { madeline: ['threshold', -1] }, lines: [['The doors', '*(open. It is the wind.)*'], ['Madeline', '*(is there anyway.)*']] },
+      { turn: { guest: -1 }, lines: [['Servant', 'It’s been some weeks, sir.'], ['You', 'It’s been *days*!']] },
     ],
     outro: 'A long tumultuous shouting, like a thousand waters. Then the tarn shuts, sullenly and silently, like a book.',
     truth: 'whole', tarn: 'The House of Usher, upright and whole, every window lit. One of them is yours.',
@@ -123,12 +121,20 @@ export const CHAPTERS = [
 export const ACCOUNT = {
   title: 'An Account of My Sojourn',
   rows: [
-    { ch: 'tarn', label: 'Differences found', match: /differ/i, n: 7, rather: () => 'one window uncounted.' },
+    { ch: 'tarn', label: 'Differences found', match: /differ/i, n: 5, rather: () => 'one window uncounted.' },
     { ch: 'door', label: 'Stones set in order', match: /stone/i, n: 8, rather: () => 'the ninth was her.' },
-    { ch: 'studio', label: 'Taps hushed', match: /taps? hush|hush/i, n: 41, rather: n => `she knocked ${n} times.` },
-    { ch: 'burial', label: 'Screws turned', match: /screw/i, n: 4, rather: n => `${n} in, ${n} out.` },
-    { ch: 'nights', label: 'Noises explained', match: /nois|explain/i, n: 12, rather: n => `${n} of ${n + 1}.` },
-    { ch: 'trist', label: 'Dragons slain', match: /dragon/i, n: 1, rather: n => `brothers, ${n}.` },
+    { ch: 'studio', label: 'Taps hushed', match: /taps? hush|hush/i, n: 41, rather: (n, f) => {
+      const spared = f.tapsSpared ?? 0, knock = f.knockSpared ?? false;
+      if (knock) return `she knocked ${n + spared} times, the last one loudest. You let it be.`;
+      if (spared) return `she knocked ${n + spared} times. You let ${spared} be.`;
+      return `she knocked ${n} times.`;
+    } },
+    { ch: 'burial', label: 'Screws turned', match: /screw/i, n: 4, rather: (n, f) => (f.burialScrewOut ?? false) ? `${n} in, ${n - 1} out.` : `${n} in, ${n} out.` },
+    { ch: 'nights', label: 'Noises explained', match: /nois|explain/i, n: 12, rather: (n, f) => {
+      const left = Array.isArray(f.nightsUnexplained) ? f.nightsUnexplained : [];
+      return left.length ? `${n} of ${n + left.length + 1}. You left “${left[0]}” alone.` : `${n} of ${n + 1}.`;
+    } },
+    { ch: 'trist', label: 'Dragons slain', match: /dragon/i, n: 1, rather: (n, f) => (f.tristLastBlow ?? 'struck') === 'gust' ? 'brothers, none. It was the wind.' : `brothers, ${n}.` },
     { label: 'Days stayed', n: 9, rather: () => 'some weeks.' },
   ],
   last: { label: 'Cheerfulness of my society', value: 'considerable.' },

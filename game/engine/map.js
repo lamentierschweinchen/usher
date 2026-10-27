@@ -1,14 +1,15 @@
 // The map: the house in cutaway over its twin in the tarn. Draws once, then
-// moves figures, flies the façade, sinks clouds, shows the tarn's truths.
+// moves figures, lights the rooms, changes the chapter's light, shows the tarn's truths.
 
 import { svg, tween, sleep, reducedMotion } from './util.js';
-import { mapMarkup, ROOMS, TRUTH_IDS } from './drawing.js';
+import { mapMarkup, actorFigure, ROOMS, TRUTH_IDS } from './drawing.js';
 
-// Walkable points (feet), and how they join.
+// Walkable points (feet), and how they join: over the bank, up the arched
+// causeway (it climbs from 350 to 336), through the hall's arch, the stair's two flights.
 export const NODES = {
-  off: [8, 352], bankTop: [70, 334], cwStart: [136, 360], brink: [236, 360], doorSpot: [262, 360],
-  arch: [302, 340], hall: [362, 340], stairFoot: [450, 340], studio: [584, 340],
-  landing: [512, 280], bedroom: [362, 280], stairTop: [450, 220], gallery: [560, 220],
+  off: [-8, 336], bankTop: [56, 334], cwStart: [150, 350], brink: [214, 343], doorSpot: [262, 338],
+  arch: [293, 338], hall: [372, 338], stairFoot: [446, 338], studio: [610, 338],
+  landing: [511, 284], bedroom: [372, 278], stairTop: [449, 221], gallery: [560, 216],
 };
 const EDGES = [
   ['off', 'bankTop'], ['bankTop', 'cwStart'], ['cwStart', 'brink'], ['brink', 'doorSpot'], ['doorSpot', 'arch'],
@@ -18,10 +19,11 @@ const EDGES = [
 // Where the cast stands (not on the walk graph).
 export const SPOTS = {
   ...NODES,
-  horse: [196, 360], peasant: [156, 360], servant: [270, 360], valet: [226, 360], physician: [318, 340],
-  servantAway: [178, 360], sofa: [632, 340], hallValet: [370, 340], chair: [404, 280], threshold: [450, 280],
-  galleryEast: [646, 220], galleryWest: [312, 220], landingEast: [512, 280],
-  hallEast: [404, 340], hallWest: [328, 340], fallen: [416, 280],
+  horse: [186, 346], peasant: [158, 349], servant: [262, 338], valet: [228, 342], physician: [282, 336],
+  servantAway: [176, 347], sofa: [566, 338], sofaSit: [541, 325], hallValet: [398, 338], chair: [424, 278], threshold: [446, 278],
+  galleryEast: [640, 216], galleryWest: [316, 216], landingEast: [511, 284],
+  hallEast: [404, 338], hallWest: [330, 338], fallen: [398, 272], fallenUnder: [372, 278],
+  servantWait: [200, 345], horseWait: [166, 348],
 };
 export const ROOM_NODE = {
   bank: 'brink', causeway: 'brink', door: 'doorSpot', hall: 'hall', stair: 'landing',
@@ -31,7 +33,8 @@ const NODE_ROOM = {
   off: 'bank', bankTop: 'bank', cwStart: 'causeway', brink: 'causeway', doorSpot: 'door', arch: 'hall',
   hall: 'hall', stairFoot: 'stair', studio: 'studio', landing: 'stair', bedroom: 'bedroom', stairTop: 'stair', gallery: 'gallery',
 };
-const FIG = { guest: 'guest', roderick: 'roderick', madeline: 'madeline', valet: 'valet', physician: 'physician', servant: 'servant', peasant: 'peasant', horse: 'horse' };
+// the library has no peasant; a second servant's cut stands in for him
+const FIG = { guest: 'guest', roderick: 'roderick', madeline: 'madeline', valet: 'valet', physician: 'physician', servant: 'servant', peasant: 'servant', horse: 'horse' };
 const WALK = 90;      // per second (LOOK)
 const GLIDE = 30;     // Madeline
 
@@ -56,21 +59,26 @@ function route(from, to) {
 class Actor {
   constructor(id, castEl) {
     this.id = id;
-    this.g = svg('g', { class: 'actor', id: 'a-' + id });
+    // the library bobs a figure while its wrapper is .sh-moving (Madeline never bobs)
+    this.g = svg('g', { class: `actor sh-${FIG[id]}`, id: 'a-' + id });
     this.face = svg('g');
-    this.bob = svg('g', { filter: 'url(#cutout)' });
-    this.bob.append(svg('use', { href: '#f-' + FIG[id] }));
-    this.face.append(this.bob);
     this.g.append(this.face);
     castEl.append(this.g);
-    this.x = 0; this.y = 0; this.dir = 1; this.node = null;
+    this.x = 0; this.y = 0; this.dir = 1; this.node = null; this.posed = undefined;
+    this.pose();
+  }
+  pose(p) {
+    if (p === this.posed && this.face.firstChild) return;
+    this.posed = p;
+    this.face.innerHTML = actorFigure(FIG[this.id], p);
+    if (this.id === 'peasant') this.face.firstChild.setAttribute('transform', 'scale(.94)');
   }
   place(x, y, dir) {
     this.x = x; this.y = y;
     this.g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
     if (dir && dir !== this.dir) { this.dir = dir; this.face.setAttribute('transform', dir < 0 ? 'scale(-1 1)' : ''); }
   }
-  lift(h) { this.bob.setAttribute('transform', h ? `translate(0 ${(-h).toFixed(2)})` : ''); }
+  moving(on) { this.g.classList.toggle('sh-moving', on); }
   show(on) { this.g.classList.toggle('on', on); }
   get shown() { return this.g.classList.contains('on'); }
 }
@@ -173,8 +181,9 @@ export class MapView {
   }
 
   // ---- figures ----------------------------------------------------------------
-  put(id, spot, dir = 1) {
+  put(id, spot, dir = 1, pose) {
     const a = this.actors[id];
+    a.pose(pose);
     const [x, y] = Array.isArray(spot) ? spot : SPOTS[spot];
     a.place(x, y, dir);
     a.node = NODES[spot] ? spot : null;
@@ -183,6 +192,7 @@ export class MapView {
   hide(id) { this.actors[id].show(false); }
   hideAll(except = []) { for (const id in this.actors) if (!except.includes(id)) this.hide(id); }
   face(id, dir) { const a = this.actors[id]; a.place(a.x, a.y, dir); }
+  pose(id, p) { this.actors[id].pose(p); }
   guestRoom() { return NODE_ROOM[this.actors.guest.node] || null; }
 
   // walk along a list of points; resolves on arrival
@@ -207,6 +217,7 @@ export class MapView {
     const counts = id === 'guest';
     if (counts) this.walking++;
     let d = 0, last = performance.now();
+    a.moving(true);
     await new Promise(resolve => {
       let guard = 0, ended = false;
       const done = () => { if (ended) return; ended = true; clearInterval(guard); resolve(); };
@@ -225,13 +236,13 @@ export class MapView {
           }
           k -= s.len;
         }
-        a.lift(d < total ? 1.5 * Math.abs(Math.sin(d / 9 * Math.PI)) : 0);
         if (d < total) requestAnimationFrame(step); else done();
       };
       requestAnimationFrame(step);
       // when frames stall (a hidden or starved page), keep walking on a timer
       guard = setInterval(() => { if (performance.now() - last > 120) step(); }, 100);
     });
+    a.moving(false);
     if (counts) this.walking--;
   }
 
@@ -255,21 +266,29 @@ export class MapView {
   glide(id, from, to) { this.put(id, from, SPOTS[to][0] < SPOTS[from][0] ? -1 : 1); return this.travel(id, [SPOTS[to]], GLIDE); }
 
   // ---- the house ----------------------------------------------------------------
+  get houseDef() { return this.el.querySelector('#house'); }
+  // the door gives: the eye-windows go out and the rooms light up behind them
   flyFacade() {
     this.setOpen(true);
-    this.el.querySelector('#facade').classList.add('flown');
+    this.houseDef.classList.add('open');
   }
   setFacade(open) {
     this.setOpen(open);
-    const f = this.el.querySelector('#facade');
-    f.classList.add('cut'); f.classList.toggle('flown', open);
-    f.getBoundingClientRect(); f.classList.remove('cut');
+    const h = this.houseDef;
+    h.classList.add('cut'); h.classList.toggle('open', open);
+    h.getBoundingClientRect(); h.classList.remove('cut');
   }
-  clouds(step) { this.el.querySelector('#clouds').style.transform = `translateY(${Math.min(40, step * 8)}px)`; }
-  night(on) { this.el.querySelector('#night').classList.toggle('on', on); }
-  coffin(on) { this.el.querySelector('#coffin').classList.toggle('on', on); }
+  // the light behind the chapter: one lit backdrop and one glass at a time
+  light(ch) {
+    for (const l of this.el.querySelectorAll('.light')) l.classList.toggle('on', l.dataset.light === ch);
+  }
+  coffin(on) { this.houseDef.classList.toggle('buried', on); }
+  // the hairline of light where the fissure begins: one segment more per chapter, six in all
   fissure(segments) {
-    this.el.querySelector('#fissure-above').style.strokeDasharray = `${Math.min(7, segments)} 7`;
+    const c = this.houseDef.querySelector('.sh-crack');
+    if (!c) return;
+    c.setAttribute('pathLength', 6);
+    c.style.strokeDasharray = `${Math.max(0, Math.min(6, segments))} 6`;
   }
   title(on) {
     this.el.querySelector('#cartouche').classList.toggle('gone', !on);
@@ -313,15 +332,12 @@ export class MapView {
   }
   async moonSet() {
     const moon = this.el.querySelector('#moon');
-    if (reducedMotion) { moon.setAttribute('cy', 330); return; }
-    await tween(9000, k => moon.setAttribute('cy', 246 + 96 * k));
+    if (reducedMotion) { moon.setAttribute('transform', 'translate(0 84)'); return; }
+    await tween(9000, k => moon.setAttribute('transform', `translate(0 ${84 * k})`));
   }
   flip(on) { this.el.classList.toggle('turned', on); }
   // the last card wants an empty sky: no moon, no cloud
-  clearSky() {
-    this.el.querySelector('#moon').classList.remove('on');
-    this.el.querySelector('#clouds').classList.add('gone');
-  }
+  clearSky() { this.el.querySelector('#moon').classList.remove('on'); }
 }
 
 export { TRUTH_IDS };

@@ -2,6 +2,7 @@
 // (work/design/CONTRACT.md). A game is an ES module at games/<id>/game.js whose
 // default export has mount(stage, api) → cleanup.
 
+import * as C from '../shared/cuts.js';
 import { LIVE } from './registry.js';
 import { esc, reducedMotion } from './util.js';
 
@@ -85,13 +86,13 @@ export function stub(ch) {
       const root = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       root.setAttribute('viewBox', '0 0 960 640');
       root.setAttribute('class', 'g-stub');
-      root.innerHTML = `
-        <text class="g-stub-teach" x="40" y="66">${esc(ch.stub.line)}</text>
-        <rect class="g-stub-mass" x="32" y="560" width="896" height="48"/>
-        <text class="g-stub-title" x="480" y="290" text-anchor="middle">${esc(ch.title)}</text>
-        <text class="g-stub-line" x="480" y="338" text-anchor="middle">A game to come, in games/${ch.id}/.</text>
+      const light = C.LIGHT[ch.id] ? ch.id : 'tarn';
+      root.innerHTML = C.defs({ animate: false }) + C.backdrop(light, { h: 540 }) + C.glass(light, { y: 540, h: 100 }) +
+        `<text class="sh-teach" x="44" y="76">${esc(ch.stub.line)}</text>` +
+        C.card({ text: ch.title, x: 180, y: 214, w: 600, h: 92, size: 36 }) +
+        `<text class="g-stub-line" x="480" y="362" text-anchor="middle">A game to come, in games/${ch.id}/.</text>
         <a class="g-stub-win" href="#" role="button"><text x="480" y="430" text-anchor="middle">win</text></a>
-        <text class="g-stub-score" x="912" y="592" text-anchor="end">${Object.entries(ch.stub.score).map(([k, v]) => `${k} ${v}`).join(' · ').toUpperCase()}</text>`;
+        <text class="sh-score" x="912" y="600" text-anchor="end">${esc(Object.entries(ch.stub.score).map(([k, v]) => `${k} ${v}`).join(' · ').toUpperCase())}</text>`;
       const win = root.querySelector('.g-stub-win');
       const go = e => {
         e.preventDefault();

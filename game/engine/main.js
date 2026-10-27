@@ -9,6 +9,7 @@ import { Transit } from './transit.js';
 import { loadGame, mount } from './mount.js';
 import { account, lastCard } from './ending.js';
 import { md, sleep, tapOrWait, reducedMotion } from './util.js';
+import { frame as laceFrame } from '../shared/cuts.js';
 
 const frame = document.getElementById('frame');
 const stage = document.getElementById('stage');
@@ -18,6 +19,8 @@ const transit = new Transit(stage);
 const gameLayer = document.getElementById('game');
 const gameStage = document.getElementById('game-stage');
 const running = document.getElementById('running-chapter');
+// the games play inside the same lace proscenium as the map
+document.querySelector('.game-frame').innerHTML = laceFrame();
 
 const S = { flags: { glances: 0 }, results: {}, truth: null, carried: [], mode: 'map' };
 const INSIDE = ['gallery', 'bedroom', 'hall', 'stair', 'studio', 'vault'];
@@ -75,27 +78,34 @@ function explore(goals, ch) {
 
 async function glance() {
   S.flags.glances++;
-  const ch = CHAPTERS.find(c => c.truth === S.truth);
+  const ch = S.truth && CHAPTERS.find(c => c.truth === S.truth);
   if (!ch) return;
   await band.say(['', ch.tarn], { truth: true });
   band.clear();
 }
 
+// the trist ends with her fallen upon her brother; the bedroom shows it
+function fallen() {
+  map.put('roderick', 'fallenUnder', 1, 'recline');
+  map.put('madeline', 'fallen', 1, 'lie');
+}
+
 function heading(ch) { running.innerHTML = ch ? `${ch.num} · ${md(ch.title)}` : ''; }
 
+// a cast entry is a spot, or [spot, facing, pose]
 function placeCast(cast = {}) {
   if (typeof cast === 'function') cast = cast(S.flags);
   for (const [id, spot] of Object.entries(cast)) {
-    const [s, dir] = Array.isArray(spot) ? spot : [spot, 1];
-    map.put(id, s, dir);
+    const [s, dir, pose] = Array.isArray(spot) ? spot : [spot, 1];
+    map.put(id, s, dir, pose);
   }
 }
 
 async function encounter(e) {
   if (e.skipIf?.(S.flags)) return;
   for (const [id, spot] of Object.entries(e.enter || {})) {
-    const [s, dir] = Array.isArray(spot) ? spot : [spot, 1];
-    map.put(id, s, dir);
+    const [s, dir, pose] = Array.isArray(spot) ? spot : [spot, 1];
+    map.put(id, s, dir, pose);
   }
   for (const [id, dir] of Object.entries(e.turn || {})) map.face(id, dir);
   const moving = [];
@@ -138,7 +148,7 @@ async function after(ch, r) {
   const outro = r.note || ch.outro;
   if (ch.id === 'door') { map.flyFacade(); map.put('guest', 'hall', 1); }
   if (ch.id === 'studio') map.hideAll(['guest', 'valet']);
-  if (ch.id === 'trist') map.face('roderick', 1);
+  if (ch.id === 'trist') fallen();
   if (ch.finale) {
     map.hideAll(['guest']); map.put('guest', 'brink', -1);
     await transit.open(where('causeway'));
@@ -164,8 +174,7 @@ async function sealed(ch, index) {
   await transit.title({ kicker: ch.ord, title: ch.title, line: 'A chapter to come.', sealed: true }, 2600);
   S.truth = ch.truth; map.truth(ch.truth); map.fissure(index + 1);
   if (ch.id === 'burial') map.coffin(true);
-  if (ch.night) map.night(true);
-  map.clouds(index + 1);
+  map.light(ch.id);
   S.carried.push(...ch.encounters.filter(e => e.carry));
   await transit.open(where(ch.room));
 }
@@ -173,8 +182,7 @@ async function sealed(ch, index) {
 async function chapter(ch, index, { arrived = false } = {}) {
   heading(ch);
   map.title(false);
-  map.clouds(index);
-  if (ch.night) map.night(true);
+  map.light(ch.id);
   placeCast(ch.cast);
   if (!arrived && map.guestRoom() !== ch.room) {
     map.point(ch.room);
@@ -182,11 +190,14 @@ async function chapter(ch, index, { arrived = false } = {}) {
     map.point(null);
   }
   for (const e of S.carried.splice(0)) await encounter(e);
-  await band.say(['', typeof ch.intro === 'function' ? ch.intro(S.flags) : ch.intro]);
+  const intro = typeof ch.intro === 'function' ? ch.intro(S.flags) : ch.intro;
+  if (intro) await band.say(['', intro]);
   for (const e of ch.encounters) await encounter(e);
   band.clear();
-  map.point(ch.target);
-  await explore([ch.target], ch);
+  if (!ch.go) {
+    map.point(ch.target);
+    await explore([ch.target], ch);
+  }
   await play(ch, index);
 }
 
@@ -210,10 +221,10 @@ async function letter() {
 
 async function approach() {
   map.put('guest', 'off', 1);
-  map.put('horse', [-30, 352], -1);
+  map.put('horse', [-40, 336], -1);
   map.face('horse', 1);
   await sleep(reducedMotion ? 0 : 700);
-  const horse = map.travel('horse', [[70, 334], [136, 360], SPOTS.horse]).then(() => map.face('horse', -1));
+  const horse = map.travel('horse', [[56, 334], [150, 350], SPOTS.horse]).then(() => map.face('horse', -1));
   await sleep(reducedMotion ? 0 : 500);
   await map.walkTo('guest', 'brink');
   await horse;
@@ -222,9 +233,8 @@ async function approach() {
 async function ending() {
   heading(null);
   map.point(null);
-  map.night(false);
   map.moonSet();
-  await account(stage, S.results);
+  await account(stage, S.results, S.flags);
   map.title(false);
   await lastCard(stage, map);
   location.href = location.pathname;
@@ -237,11 +247,11 @@ function jumpTo(index) {
     if (!c.sealed) S.results[c.id] = { won: true, score: { ...c.stub.score }, note: '' };
     S.carried = c.sealed ? [...S.carried, ...c.encounters.filter(e => e.carry)] : [];
     S.truth = c.truth;
-    if (c.night) map.night(true);
   }
-  map.truth(S.truth); map.fissure(index); map.clouds(index); map.title(false);
+  map.truth(S.truth); map.fissure(index); map.light(CHAPTERS[index]?.id || 'flight'); map.title(false);
   if (index > 1) map.setFacade(true);
   if (index > 3) map.coffin(true);
+  if (index > 5) fallen();
   const ch = CHAPTERS[index];
   if (ch) map.put('guest', node(ch.room) || 'brink', 1);
 }
@@ -252,12 +262,16 @@ async function main() {
   // ?sealed=none opens the chapters this slice keeps sealed (their games exist)
   if (params.get('sealed') === 'none') for (const c of CHAPTERS) c.sealed = false;
   const want = params.get('chapter');
+  // jumping to a sealed chapter opens it, so its game can be tried inside the spine
+  const target = CHAPTERS.find(c => c.id === want);
+  if (target) target.sealed = false;
   let start = 0;
   if (want) {
     start = want === 'ending' ? CHAPTERS.length : Math.max(0, CHAPTERS.findIndex(c => c.id === want));
     jumpTo(start);
   } else {
     map.truth(null);
+    map.light('tarn');
     await letter();
     await approach();
   }

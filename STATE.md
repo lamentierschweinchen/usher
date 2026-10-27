@@ -1,18 +1,15 @@
-# State — 2026-10-26, about 19:20
+# State — 2026-10-26, about 20:15
 
-**Phase: build the spine; challenge the mini-games.** Lukas: "you can build the spine… for the mini games, i want you to challenge each game and improve it materially before going to production."
+**Game:** *A Sojourn of Some Weeks*: an adventure through the House of Usher (spine + seven mini-games), in **Shadow Theatre** (Lukas's pick).
 
-**Game:** *A Sojourn of Some Weeks*, an adventure through the house with a mini-game at each turn of the plot. Spine: work/design/SPINE.md. Contract: work/design/CONTRACT.md.
+**Now:**
+- All seven mini-games are built and pushed (tarn, door, studio, burial, nights, trist, flight) in the old ink style, with tokenized styling.
+- The lead artist delivered `work/design/LOOK.md` (Shadow Theatre) and the shared cut library `game/shared/` (cuts.js, shadow.css, specimen sheet), and is polishing three rough cuts with the API frozen.
+- Seven recut agents are recutting each game from the library (briefs/recut-*.md); screenshots → work/build/shots/.
+- The spine session (`usher-spine`) has the map, story and ending in progress (checkpoint pushed) and has been told to recut from the library and mount all seven real games.
 
-| Who | Doing | Brief | Output |
-|---|---|---|---|
-| Spine builder (session `usher-spine`) | map, encounters, chapter flow, ending, stubs | handoffs/HANDOFF-spine.md | game/ (except game/games/), work/build/SPINE-REPORT.md |
-| Storyteller | arcs, letter, lines, ending | briefs/design-story.md | work/design/STORY.md |
-| Art director | visual language | briefs/design-look.md | work/design/LOOK.md |
-| Critic (playtester + senior designer) | challenge all seven mini-games | briefs/design-critic.md | work/design/CRITIQUE.md |
+**Next:** art critic reviews every screenshot against the board → fixes → full playthrough in the spine at laptop and phone widths → Lukas plays it.
 
-**Next:** one designer per mini-game rebuilds it from the critique (work/design/games/<id>.md) → coordinator brings Lukas the judgement calls → one builder per game (game/games/<id>/) → integrate, playtest.
+**Open with Lukas:** nothing right now. Pending lore and story calls to raise at playtest: twin burials as family custom (hinted), the physician as the honest one, Madeline may take your horse.
 
-**Open with Lukas:** nothing yet; judgement calls come after the redesigns.
-
-**Rules for builders:** no commits; the coordinator commits everyone's work at checkpoints. Public repo github.com/lamentierschweinchen/usher, `main`.
+**Rules:** builders don't commit; the coordinator checkpoints to public `main` at github.com/lamentierschweinchen/usher. Deploying or sharing the game is Lukas's call.

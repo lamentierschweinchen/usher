@@ -13,7 +13,7 @@ const stop = s => /[.!?]$/.test(s) ? s : s + '.';
 // Each played chapter gives its scripted row (number from the game's matching
 // score; the game's own "say, rather" if it sent one, else the script's), then
 // any other score the game glossed itself. Unplayed chapters give nothing.
-export function accountRows(results) {
+export function accountRows(results, flags = {}) {
   const rows = [];
   for (const ch of CHAPTERS) {
     const r = results[ch.id];
@@ -23,13 +23,13 @@ export function accountRows(results) {
     if (row) {
       used = Object.keys(r.score).find(k => row.match.test(k)) || null;
       const n = used ? r.score[used] : row.n;
-      rows.push({ label: row.label, value: `${n}.`, rather: stop((used && r.rather?.[used]) || row.rather(n)) });
+      rows.push({ label: row.label, value: `${n}.`, rather: stop((used && r.rather?.[used]) || row.rather(n, flags)) });
     }
     for (const [label, gloss] of Object.entries(r.rather || {})) {
       if (label !== used && label in r.score) rows.push({ label: cap(label), value: `${r.score[label]}.`, rather: stop(gloss) });
     }
   }
-  for (const row of ACCOUNT.rows.filter(x => !x.ch)) rows.push({ label: row.label, value: `${row.n}.`, rather: row.rather(row.n) });
+  for (const row of ACCOUNT.rows.filter(x => !x.ch)) rows.push({ label: row.label, value: `${row.n}.`, rather: row.rather(row.n, flags) });
   return rows;
 }
 
@@ -38,8 +38,8 @@ async function write(el, text) {
   for (let i = 1; i <= text.length; i++) { el.textContent = text.slice(0, i); await sleep(28); }
 }
 
-export async function account(stage, results) {
-  const rows = accountRows(results);
+export async function account(stage, results, flags) {
+  const rows = accountRows(results, flags);
   const sheet = document.createElement('div');
   sheet.className = 'account';
   sheet.innerHTML = `<div class="sheet">
