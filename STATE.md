@@ -4,7 +4,7 @@
 
 **Done:** the spine plus all seven games (tarn, door, studio, burial, nights, trist, flight) are built, recut from the shared cut library (`game/shared/`), art-critiqued and fixed, and pushed. The coordinator played chapter I end to end inside the spine and checked the ending. No console errors.
 
-**In progress:** the spine session (`usher-spine`) is fixing three playtest notes: map captions that don't advance, the tarn's last beat cut short, and missing outro lines.
+**In progress:** nothing. The three playtest notes (captions, the tarn's last beat, outro lines) are fixed and pushed.
 
 **Next:** Lukas plays it → his notes → fixes → decide on sharing (deploy is his call).
 
