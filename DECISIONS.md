@@ -2,6 +2,16 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-26 — Design principle (no pick yet)
+
+**Delight without prior knowledge:** "keep in mind that not everyone may be intimately familiar with the words of usher. the games should be delightful and gain in delight through the depth of the understanding of the text itself but not rely on people knowing the story to get the joke. they may even read the book through the story (but we can deceive them if they think they know everything just because they know the book)"
+
+**What hooks him:** "a game that constantly tricks you and plays you as much as you play it, is very interesting."
+
+**Sound:** sound-based play is "a nonstarter unless you have a great idea on how to produce them (or we use a silent film vibe…)". Sound is never load-bearing unless it's music we can make.
+
+*Replaced:* nothing; this sharpens the register.
+
 ## 2026-10-26 — Public repo, competition, time box
 
 **Public repo:** "feel free to set up a public git repo for this, this is part of a little competition and maybe i'll share the game with fellow participants after." → github.com/lamentierschweinchen/usher (public).
