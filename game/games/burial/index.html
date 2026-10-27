@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Burial · dev harness</title>
+<link rel="icon" href="data:,">
+<style>
+  @font-face{font-family:'IM Fell English';src:url('../../fonts/im-fell-normal.woff2') format('woff2');font-style:normal;font-weight:400;font-display:swap}
+  @font-face{font-family:'IM Fell English';src:url('../../fonts/im-fell-italic.woff2') format('woff2');font-style:italic;font-weight:400;font-display:swap}
+  :root{--paper:#f2eee5;--ink:#29272a;--muted:#625d5a;--rule:#cbc3b8;--red:#7a3939;--serif:'IM Fell English',Georgia,serif}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--rule);color:var(--ink);font-family:var(--serif)}
+  main{padding:16px}
+  .wrap{position:relative;width:min(100%,calc((100vh - 150px) * 1.5));aspect-ratio:3/2;margin:0 auto}
+  .stage{position:absolute;inset:0;background:var(--paper)}
+  .frame{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .frame rect{fill:none;stroke:var(--ink)}
+  .bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:center;margin:12px auto 0;font-size:16px}
+  button{font:inherit;padding:6px 14px;background:var(--paper);color:var(--ink);border:1px solid var(--ink);cursor:pointer}
+  #log{max-width:900px;margin:10px auto 0;font:13px/1.45 ui-monospace,Menlo,monospace;white-space:pre-wrap;color:var(--muted)}
+  #result{font-style:italic}
+</style>
+</head>
+<body>
+<main>
+  <div class="wrap">
+    <div class="stage" id="stage"></div>
+    <!-- the spine draws the frame; games keep 32 clear -->
+    <svg class="frame" viewBox="0 0 960 640" aria-hidden="true">
+      <rect x="8" y="8" width="944" height="624" style="stroke-width:1.5"/>
+      <rect x="14" y="14" width="932" height="612" style="stroke-width:.6"/>
+    </svg>
+  </div>
+  <div class="bar">
+    <button id="restart" type="button">Restart</button>
+    <label><input type="checkbox" id="rm"> reduced motion</label>
+    <span id="result">playing</span>
+  </div>
+  <pre id="log"></pre>
+</main>
+<script type="module">
+  import game from './game.js';
+  const stageEl = document.getElementById('stage');
+  const logEl = document.getElementById('log');
+  const resultEl = document.getElementById('result');
+  const rmEl = document.getElementById('rm');
+  const q = new URLSearchParams(location.search);
+  rmEl.checked = q.has('rm') ? q.get('rm') !== '0' : matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let cleanup = null;
+  const log = (s) => { logEl.textContent += s + '\n'; };
+  // Exposed for automated checks in the harness only.
+  window.__burial = { flags: {}, done: [] };
+
+  function start() {
+    if (cleanup) cleanup();
+    stageEl.replaceChildren();
+    logEl.textContent = '';
+    resultEl.textContent = 'playing';
+    window.__burial = { flags: {}, done: [] };
+    const api = {
+      state: {},
+      reducedMotion: rmEl.checked,
+      setFlag(k, v) { window.__burial.flags[k] = v; log(`setFlag(${JSON.stringify(k)}, ${JSON.stringify(v)})`); },
+      done(result) {
+        window.__burial.done.push(result);
+        const n = window.__burial.done.length;
+        log(`done #${n}: ${JSON.stringify(result)}`);
+        resultEl.textContent = n === 1 ? `done: ${result.note}` : `done fired ${n} times!`;
+      },
+    };
+    cleanup = game.mount(stageEl, api);
+    log(`mounted ${game.id} (“${game.title}”), reducedMotion=${api.reducedMotion}`);
+  }
+  document.getElementById('restart').addEventListener('click', start);
+  rmEl.addEventListener('change', start);
+  start();
+</script>
+</body>
+</html>
