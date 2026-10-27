@@ -51,7 +51,9 @@ export default {
 | tarn | `tarnCaught` | `'unaided'` \| `'hinted'` |
 | tarn | `tarnGlancesDown` | number |
 | tarn | `tarnSawHer` | boolean |
-| door | *(set by its spec, prefixed `door…`)* | |
+| door | `doorRoute` | `'long'` \| `'short'` |
+| door | `stonesAskew` | number (0 or 4) |
+| door | `doorHouseMoves` | number |
 | studio | `tapsHushed`, `tapsSpared` | numbers |
 | studio | `knockSpared` | boolean |
 | burial | `burialScrewOut` | boolean (a screw left out; the flight reads it) |
