@@ -31,6 +31,8 @@ const JAGS = [
 const ASKEW = [[1.5, -1, 1.6], [-1, 1.5, -2.1], [1, 1, 1.3], [-1.5, -1, -1.5], [1, 1.5, 2.2], [-1, -1.5, -1.8], [1.5, 1, 1.4],
   [-1.5, 1, -2.3], [1, -1.5, 1.9], [-1, 1, -1.2], [1.5, -1.5, 2], [-1, -1, -1.7], [1, 1, 1.5], [-1.5, 1.5, -2]];
 const MIRROR = 'matrix(1 0 0 -1 0 640)';      // this game's tarn is an exact mirror about y=320 (dragging her depends on it)
+const DROP = 36;                               // the whole picture sits 36 units lower, so the house's roof fits under the proscenium
+const ROOF_S = .64;                            // the library's gable and turrets, at this scale
 const HER_SCALE = 1.95;                        // Madeline in the water: 86 tall, the most her 90-unit cell holds below the waterline
 
 const col = i => i % 5, row = i => (i / 5) | 0;
@@ -108,10 +110,10 @@ const CSS = `
 .g-door .gd-gap rect,.g-door .gd-light,.g-door .gd-voids>rect{fill:url(#gdoor-panel)}
 .g-door .gd-gap.is-hot rect,.g-door .gd-gap.is-held rect{fill:url(#gdoor-panel-hot)}
 .g-door .gd-voids-b rect{fill:none}
-.g-door .gd-edge{fill:none;stroke:var(--sh-red);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .4s}
+.g-door .gd-edge{fill:none;stroke:var(--sh-return);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:.35;transition:stroke .4s,opacity .4s,stroke-width .4s}
 .g-door .gd-edge.gd-stub{stroke-width:1.6}
-.g-door .gd-edge.gd-walked{stroke-width:4.4}
-.g-door .gd-glow path{fill:none;stroke:var(--sh-red);stroke-width:12;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.g-door .gd-edge.gd-walked{stroke:var(--sh-red);opacity:1;stroke-width:4.4}
+.g-door .gd-glow path{fill:none;stroke:var(--sh-return);stroke-width:12;stroke-linecap:round;stroke-linejoin:round;opacity:0}
 .g-door .gd-flare .gd-glow path{animation:gdoor-flare .6s ease-out}
 @keyframes gdoor-flare{0%{opacity:0}18%{opacity:.5}100%{opacity:0}}
 .g-door .gd-herw{--gauze:#fff6e0}
@@ -131,11 +133,13 @@ const CSS = `
 .g-door .gd-doorway>g.gd-shown{opacity:1}
 .g-door .g-door-line{position:absolute;margin:0;left:calc(100cqw*32/960);top:calc(100cqw*58/960);white-space:nowrap;pointer-events:none;
  font-family:var(--sh-serif);font-style:italic;font-size:max(12px,calc(100cqw*23/960));line-height:1.22;color:var(--sh-paper);transition:opacity 2s}
-.g-door .g-door-line.gd-gone{opacity:0}
-@container gdoor (max-width:620px){
- .g-door .g-door-line{left:0;right:0;top:calc(100cqw*608/960 - 7px);text-align:center;font-size:12px;line-height:14px}
- .g-door .g-door-line br{display:none}
- .g-door .gd-word{font-size:34px}
+.g-door .g-door-line.gd-gone,.g-door .gd-ribbon.gd-gone{opacity:0}
+.g-door .gd-ribbon{display:none;pointer-events:none;transition:opacity 2s}
+.g-door .gd-ribbon text{font-family:var(--sh-serif);font-style:italic;font-size:38px;fill:var(--sh-paper)}
+@container gdoor (max-width:600px){                 /* a phone: game type x1.5, the line on a ribbon over the glass */
+ .g-door .g-door-line{display:none}
+ .g-door .gd-ribbon{display:inline}
+ .g-door .gd-word{font-size:45px}
 }
 @media (prefers-reduced-motion:reduce){.g-door .gd-word,.g-door .gd-smudge{animation:none}}
 `;
@@ -178,9 +182,11 @@ export default {
       '<path d="M782 320C806 313 842 308 880 306C910 305 932 305 946 303V320Z"/>' +
       C.tree(842, 314, { h: 148, seed: 23, crown: 46, w: 4.6, lean: .05 }) + C.tree(878, 311, { h: 116, seed: 24, crown: 40, w: 4.2, lean: -.04 }) +
       C.tree(912, 309, { h: 168, seed: 25, crown: 52, w: 5, lean: -.08 }) + C.sedges(786, 944, 316, { count: 30, h: [6, 16], seed: 8, lean: -.05 });
-    // the parapet: a black band with lace standing up, a pinnacle at each end
-    const pin = x => `<path d="M${x - 5} 40V30Q${x} 18 ${x} 8Q${x} 18 ${x + 5} 30V40Z"/>` + C.curl(x - 3, 24, Math.PI + .5, 7, -.9, 1.6, .3, 12) + C.curl(x + 3, 24, -.5, 7, .9, 1.6, .3, 12);
-    const ROOF = '<path d="M168 39H792V48.5H168Z"/>' + C.fringe(186, 774, 39.5, { seed: 5, len: [3, 7], step: 7.5, dir: -1, w: 1.4, dots: false }) + pin(172) + pin(788);
+    // the roof: the house's own gable and turrets from the cut library (C.shell, clipped to roof and spires), on a laced parapet
+    const SHELL = C.shell({ crack: 0 });
+    const part = (clip, x, y, ax, ay) => `<g transform="translate(${x} ${y}) scale(${ROOF_S}) translate(${-ax} ${-ay})"><g clip-path="url(#${clip})">${SHELL}</g></g>`;
+    const ROOF = '<path d="M174 43H786V49.5H174Z"/>' + C.fringe(214, 746, 43.5, { seed: 5, len: [3, 7], step: 7.5, dir: -1, w: 1.4, dots: false }) +
+      part('gdoor-cl-gable', 480, 49.5, 480, 177) + part('gdoor-cl-tl', 192, 49.5, 300, 167) + part('gdoor-cl-tr', 768, 49.5, 660, 167);
     const LAYER = `<g class="gd-bank" fill="currentColor">${BANK}</g><g class="gd-voids"></g><g class="gd-stones"></g><g class="gd-doorway"></g>` +
       `<g class="gd-frame" fill="currentColor" transform="translate(420 230)">${FRAME}</g><g class="gd-fissure"></g><g class="gd-roof" fill="currentColor">${ROOF}</g><g class="gd-words"></g>`;
     const MY_DEFS = `<defs>
@@ -188,7 +194,10 @@ export default {
 <radialGradient id="gdoor-panel-hot" gradientUnits="userSpaceOnUse" cx="480" cy="236" r="340"><stop offset="0" stop-color="#fdeec6"/><stop offset=".5" stop-color="#e6c79c"/><stop offset="1" stop-color="#b58d8e"/></radialGradient>
 <linearGradient id="gdoor-deep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".46"/><stop offset=".45" stop-color="#fff" stop-opacity=".24"/><stop offset=".85" stop-color="#fff" stop-opacity=".07"/></linearGradient>
 <mask id="gdoor-depth" maskUnits="userSpaceOnUse" x="0" y="${WL}" width="960" height="${H - WL}"><rect x="0" y="${WL}" width="960" height="${H - WL}" fill="url(#gdoor-deep)"/></mask>
-<clipPath id="gdoor-arch"><path d="${ARCH}Z"/></clipPath></defs>`;
+<clipPath id="gdoor-arch"><path d="${ARCH}Z"/></clipPath>
+<clipPath id="gdoor-cl-gable"><path d="M290 182L480 74L670 182Z"/></clipPath>
+<clipPath id="gdoor-cl-tl"><rect x="262" y="40" width="74" height="127"/></clipPath><clipPath id="gdoor-cl-tr"><rect x="624" y="40" width="74" height="127"/></clipPath>
+<radialGradient id="gdoor-roofglow" gradientUnits="userSpaceOnUse" cx="480" cy="46" r="420" gradientTransform="translate(480 46) scale(1 .32) translate(-480 -46)"><stop offset="0" stop-color="#f0d2dc" stop-opacity=".8"/><stop offset=".5" stop-color="#a787b0" stop-opacity=".34"/><stop offset="1" stop-color="#a787b0" stop-opacity="0"/></radialGradient></defs>`;
     // the tarn returns the house as light: the library's returned(), on this game's exact mirror and waterline
     const reflection = C.returned(`<g class="gd-below">${LAYER.replace('"gd-voids"', '"gd-voids gd-voids-b"')}</g>`, { still: true, transform: MIRROR })
       .replace('url(#sh-depth)', 'url(#gdoor-depth)');
@@ -199,7 +208,10 @@ export default {
     root.innerHTML = `<style>${CSS}</style>
 <svg viewBox="0 0 960 640" role="img" aria-label="The façade of the House of Usher, cut in black paper against violet light, its stones out of order around a lit gap. In the dark tarn below, the house comes back as light, cracked in red, and a pale figure stands upright in the gap's reflection. Drag the gap, or her.">
 ${C.defs({ animate: false })}${MY_DEFS}
-${C.backdrop('door', { h: WL })}
+<g class="gd-view" transform="translate(0 ${DROP})">
+${C.backdrop('door', { y: -DROP, h: WL + DROP })}
+<rect x="0" y="${-DROP}" width="960" height="${GY + DROP + 12}" fill="url(#gdoor-roofglow)"/>
+${C.clouds(164, 150, { xEnd: 150, seed: 44, r: [14, 26], fill: '#0d0a14', opacity: .9 }).replace('<path', `<path transform="translate(0 ${-DROP})"`)}
 <rect class="gd-light" x="${GX}" y="${GY}" width="${5 * CW}" height="${3 * CH}"/>
 ${C.glass('door', { y: WL, h: H - WL })}
 ${reflection}
@@ -207,12 +219,14 @@ ${reflection}
 <g class="gd-herw" filter="url(#sh-glow)"></g>
 <g class="gd-above" style="color:var(--sh-cut)">${LAYER}</g>
 <rect class="gd-hit"/><rect class="gd-hit"/>
+</g>
+<g class="gd-ribbon">${C.banner({ x: 40, y: DROP + WL + 4, w: 880, h: 52, line: '' })}<text x="480" y="${DROP + WL + 40}" text-anchor="middle">A mere different arrangement of the particulars.</text></g>
 ${C.frame()}
 </svg>
 <p class="g-door-line"><i>A mere different <br>arrangement of <br>the particulars.</i></p>`;
     stage.appendChild(root);
-    const svg = root.querySelector('svg');
-    const line = root.querySelector('.g-door-line');
+    const svg = root.querySelector('svg'), view = svg.querySelector('.gd-view');
+    const line = root.querySelector('.g-door-line'), ribbon = svg.querySelector('.gd-ribbon');
     const layer = side => {
       const g = svg.querySelector('.gd-' + side), q = s => g.querySelector('.gd-' + s);
       return { voids: q('voids'), stones: q('stones'), doorway: q('doorway'), fissure: q('fissure'), words: q('words') };
@@ -296,7 +310,7 @@ ${C.frame()}
         const L = ln.getTotalLength();
         ln.style.strokeDasharray = L; ln.style.strokeDashoffset = L;
         later(drawInAfter + 20, () => {
-          ln.style.transition = 'stroke-dashoffset .7s ease-in-out, stroke-width .4s';
+          ln.style.transition = 'stroke-dashoffset .7s ease-in-out, stroke .4s, opacity .4s, stroke-width .4s';
           ln.style.strokeDashoffset = 0;
         });
       }
@@ -374,7 +388,8 @@ ${C.frame()}
     function word(i, t) {                  // a stone grinds home: the sound is cut type, black on the light of the gap beside it
       const dc = col(i) - col(t), dr = row(i) - row(t);
       let x = midX(t), y = midY(t) + 11, anchor = 'middle';
-      if (dc > 0) { x = cellX(t) + CW - 10; anchor = 'end'; }
+      if (root.clientWidth <= 600) y = midY(t) + 14;             // a phone: the word is half again as big; centre it in the gap
+      else if (dc > 0) { x = cellX(t) + CW - 10; anchor = 'end'; }
       else if (dc < 0) { x = cellX(t) + 10; anchor = 'start'; }
       else if (dr > 0) y = cellY(t) + CH - 14;
       else if (dr < 0) y = cellY(t) + 34;
@@ -400,7 +415,7 @@ ${C.frame()}
       herTo(t, from);
       placeHits();
       if (s.type === HOME[from]) word(from, t);
-      if (who === 'player' && ++playerMoves === 2) line.classList.add('gd-gone');
+      if (who === 'player' && ++playerMoves === 2) { line.classList.add('gd-gone'); ribbon.classList.add('gd-gone'); }
       if (t === 8 && !grown) grow();
       if (t === DOOR) { finish(from); return; }
       if (!drag) armIdle();
@@ -472,7 +487,7 @@ ${C.frame()}
       root.classList.add('gd-ended'); root.classList.remove('gd-dragging');
       setHot(null);
       for (const el of [gap, herEl]) { el.classList.remove('is-held'); el.setAttribute('aria-disabled', 'true'); }
-      line.classList.add('gd-gone');
+      line.classList.add('gd-gone'); ribbon.classList.add('gd-gone');
       const short = from === 13;
       let askew = 0, inOrder = 0;
       for (let i = 0; i < 15; i++) {
@@ -523,7 +538,7 @@ ${C.frame()}
 
     // ---------- input: drag the hole, or her ----------
     function svgPt(e) {
-      const m = svg.getScreenCTM();
+      const m = view.getScreenCTM();
       if (!m) return { x: -1, y: -1 };
       const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
       return { x: p.x, y: p.y };
