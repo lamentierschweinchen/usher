@@ -139,6 +139,7 @@ export function simulate(route, m = createModel()) {
 // ── Words ────────────────────────────────────────────────────────────────
 const LINES = {
   teach: 'We <span class="gb-two">two</span> alone bore it to its rest.',
+  ear: 'He listens for the steps behind you.',
   doctors: [
     { who: 'Roderick', text: '“A fortnight in the vault. The doctors are so <i>eager</i>.”', ms: 2800 },
     { who: 'You', text: '“I don’t feel at liberty to dispute it.”', ms: 2600 },
@@ -221,16 +222,16 @@ const carry = (cls = '') => C.figure('guest', { x: -52, scale: FS, cls: `gb-gues
 const doctor = () => C.figure('physician', { scale: FS, lamp: true });
 
 // Where the paper is cut away (mask: black = hole).
-const HOLES = rect(120, 42, 690, 139) + rect(120, 42, 200, 383) // top landings, the left stair
-  + rect(120, 155, 624, 253) + rect(120, 285, 624, 383) // the two galleries (overlapping the turn: no seam)
+const HOLES = rect(84, 42, 690, 139) + rect(84, 42, 200, 383) // top landings, the left stair (wide enough for the bearers)
+  + rect(84, 155, 624, 253) + rect(84, 285, 624, 383) // the two galleries (overlapping the turn: no seam)
   + poly([[620, 155], [820, 212], [820, 318], [620, 253]]) + poly([[620, 285], [820, 212], [820, 318], [620, 383]]) // the turn
   + rect(756, 210, 904, 318) + rect(785, 208, 855, 460) + rect(756, 352, 904, 458) // head of the stair, the stair down
   + poly([[700, 430], [820, 352], [820, 458], [700, 533]]) + rect(200, 430, 766, 533) // down to the copper archway
   + '<path d="M40 533V436Q40 396 80 396H200V533Z"/>'; // the vault
-const LANDING = { A3: [120, 139, 200, 149], R1: [120, 253, 200, 263], R4: [788, 318, 904, 328], S: [760, 458, 904, 468] };
+const LANDING = { A3: [84, 139, 200, 149], R1: [84, 253, 200, 263], R4: [788, 318, 904, 328], S: [760, 458, 904, 468] };
 
 function stairMarkup(P) {
-  const floors = [[200, 690, 139], [200, 620, 253], [120, 620, 383], [40, 760, 533]];
+  const floors = [[200, 690, 139], [200, 620, 253], [84, 620, 383], [40, 760, 533]];
   const ceilings = [[200, 690, 42, 3], [200, 620, 155, 5], [200, 620, 285, 7]];
   let lace = '';
   for (const [a, b, y] of floors) lace += C.scallops(a, b, y, 1.7, 5);
@@ -403,6 +404,7 @@ const CSS = `
 .g-burial .gb-third{opacity:0;transition:opacity .6s linear}
 .g-burial .gb-lifted .gb-third{opacity:1}
 .g-burial .gb-left{opacity:.3}
+.g-burial .gb-ghost.gb-heard{filter:url(#sh-rim)}
 .g-burial .gb-bobbing{animation:gb-bob .34s ease}
 .g-burial .gb-cone{fill:var(--sh-lamp,#f7d894);opacity:.3}
 .g-burial .gb-trailp{fill:none;stroke:var(--sh-cut,#0b0809);stroke-width:5.5px;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:.1 12}
@@ -470,6 +472,7 @@ const CSS = `
   .g-burial.gb-saylow .gb-say{top:auto;bottom:calc(var(--u)*24)}
   .g-burial.gb-teachlow .gb-cap{top:auto;bottom:calc(var(--u)*30)}
   .g-burial.gb-teachlow .gb-score{opacity:0}
+  .g-burial.gb-teachlow.gb-saylow .gb-say{bottom:calc(var(--u)*30 + 32px)}
   .g-burial .gb-say b{display:inline;font-size:calc(max(10px,calc(var(--u)*12))*1.5);margin:0 .6em 0 0}
   .g-burial .gb-score{bottom:calc(var(--u)*40);font-size:calc(max(10px,calc(var(--u)*17))*1.5)}
   .g-burial .gb-leave{font-size:calc(max(11px,calc(var(--u)*15))*1.5)}
@@ -594,7 +597,7 @@ export default {
     const lockFor = (ms) => { lockUntil = Math.max(lockUntil, performance.now() + ms); };
     const locked = () => performance.now() < lockUntil;
     const model = createModel();
-    let face = -1, bface = -1, saidDoctors = false, printN = 0, finished = false, ending = false;
+    let face = -1, bface = -1, saidDoctors = false, taughtEar = false, printN = 0, finished = false, ending = false;
 
     function score() {
       const n = (v) => (v === 0 ? 'none' : v); // an old-style 0 reads as a letter
@@ -720,6 +723,19 @@ export default {
       void bobG.getBoundingClientRect();
       bobG.classList.add('gb-bobbing');
     }
+    function listen(n) { // a puppet gesture only: the rules and his lit rooms don't change
+      if (phase !== 'stair' || hush) return;
+      const dx = at(n)[0] - at(model.ph.at)[0];
+      if (dx) docDir.style.transform = `scaleX(${Math.sign(dx)})`;
+      C.hinge(docFig, '.sh-arm', -28);
+      ghost.classList.add('gb-heard');
+      say([{ text: LINES.ear, ms: 4200 }]);
+      later(() => {
+        C.hinge(docFig, '.sh-arm', 0);
+        docDir.style.transform = `scaleX(${face})`;
+        ghost.classList.remove('gb-heard');
+      }, 2200);
+    }
     function smudge(n) { // his lamp finds them: the light behind the paper flares
       const [x, y] = at(n);
       smudgeG.innerHTML = `<ellipse class="gb-flash" cx="${x}" cy="${y}" rx="110" ry="70" fill="url(#${P}flash)"/>`;
@@ -752,6 +768,9 @@ export default {
       placeCoffin(s.p);
       const step = 150;
       ev.pats.forEach((p, i) => later(() => patAt(p), 90 + i * step));
+      // The rule, taught before anyone can be caught: the first pat. (always beat 3, before the
+      // earliest catch on beat 6) turns the physician and his lamp toward the echo, not toward you.
+      if (!taughtEar && ev.pats.length && !ev.caught && !model.copper) { taughtEar = true; const echo = ev.pats[0].at; later(() => listen(echo), 300); }
       later(() => ghostAt(model.copper && s.f === s.p ? null : s.f), 90 + Math.max(0, ev.pats.length - 1) * step);
       if (ev.copperStart) {
         docPos.classList.add('gb-left'); reflD.classList.add('gb-gone');
