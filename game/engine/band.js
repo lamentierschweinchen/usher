@@ -18,10 +18,12 @@ export class Band {
   }
   get waiting() { return !!this.resolve; }
 
-  show([who, text], { truth = false, more = true } = {}) {
+  // glass: a line in the tarn's returned light; rather: a red correction beneath it
+  show([who, text], { glass = false, more = true, rather = '' } = {}) {
     this.el.innerHTML =
       (who ? `<span class="band-who">${md(who)}</span>` : '') +
-      `<span class="band-line${truth ? ' is-truth' : ''}${who ? '' : ' is-narration'}">${md(text)}</span>` +
+      `<span class="band-line${glass ? ' is-glass' : ''}${who ? '' : ' is-narration'}">${md(text)}` +
+      (rather ? `<span class="band-rather">Say, rather: ${md(rather)}</span>` : '') + `</span>` +
       (more ? '<span class="band-more" aria-hidden="true">›</span>' : '');
     this.el.classList.add('on');
   }

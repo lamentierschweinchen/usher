@@ -33,6 +33,7 @@ export const CHAPTERS = [
       { lines: [['Your horse', '*(will not look in the water.)*'], ['You', 'Sensible animal.']], exit: ['servant', 'horse', 'peasant'], turn: { guest: 1 } },
     ],
     outro: 'All differences accounted for. The crack is only in the water, and you aren’t staying in the water.',
+    branch: f => f.tarnSawHer ? { rather: 'you saw someone in that window, and crossed her out.' } : null,
     // the tarn game ends on the lit window in the water, so the map's tarn doesn't repeat it
     truth: null, tarn: 'A lit window, dark above. Someone in it looks down, as you did.',
     stub: { line: 'Spot the differences between the house and its reflection.', score: { 'differences found': 5 } },
@@ -48,6 +49,8 @@ export const CHAPTERS = [
       { enter: { servant: 'servantAway' }, lines: [['Servant', 'The family don’t use the door, sir.'], ['You', 'Then how do they get out?']], exit: ['servant', 'valet'] },
     ],
     outro: 'The last stone slides home. The door opens, very nearly by itself.',
+    branch: f => (f.stonesAskew ?? 0) > 0 ? { rather: `${Cap(say(f.stonesAskew))} stones are still askew. She was in a hurry.` }
+      : (f.doorHouseMoves ?? 0) > 0 ? { rather: `the house moved ${say(f.doorHouseMoves)} of them for you.` } : null,
     truth: 'face', tarn: 'The gap you kept pushing about, standing in the doorway. It has a face.',
     stub: { line: 'Slide the stones until the door will open.', score: { 'stones set': 8 } },
   },
@@ -62,6 +65,7 @@ export const CHAPTERS = [
       { glide: { madeline: ['galleryEast', 'galleryWest'] }, lines: [['Madeline', '*(passes slowly through, without having noticed you.)*'], ['Roderick', 'We don’t mention her. It tires her.']] },
     ],
     outro: 'Everything is hushed. Roderick thanks you, and goes on listening to it.',
+    branch: f => (f.knockSpared || (f.tapsSpared ?? 0) > 0) ? { line: 'Roderick heard it. He did not thank you.' } : null,
     truth: 'cellar', tarn: 'Madeline lying down on a long table in the cellar. Very neatly. A little early.',
     stub: { line: 'Hush the sunbeams, the roses, the brass band — before they reach him.', score: { 'taps hushed': 41 } },
   },
@@ -76,6 +80,7 @@ export const CHAPTERS = [
       { lines: [['You', 'She’s blushing.'], ['Roderick', 'It’s usual. In our family.']] },
     ],
     outro: 'Four screws home. The lid is flush, more or less.',
+    branch: f => f.burialScrewOut ? { line: 'Three screws home. That’ll hold.' } : null,
     truth: 'lid', tarn: 'The lid, leaning against the vault wall like a borrowed umbrella.',
     stub: { line: 'Screw down the lid.', score: { 'screws turned': 4 } },
   },
@@ -89,6 +94,10 @@ export const CHAPTERS = [
       { carry: true, enter: { roderick: ['landingEast', -1] }, walk: { roderick: 'chair' }, lines: [['Roderick, with a lamp', 'And you have not *seen* it? Stay. You shall.'], ['You', 'I’ll get my book.']] },
     ],
     outro: 'You run out of stamps before it runs out of noises.',
+    branch: f => {
+      const left = Array.isArray(f.nightsUnexplained) ? f.nightsUnexplained : [];
+      return left.length ? { rather: `you left “${left[0]}” unexplained${left.length > 1 ? `, and ${say(left.length - 1)} more` : ''}.` } : null;
+    },
     truth: 'stair', tarn: 'The iron door ajar, and someone on the stair, resting on every step.',
     stub: { line: 'Explain every noise away.', score: { 'noises explained': 12 } },
   },
@@ -99,6 +108,7 @@ export const CHAPTERS = [
     // the romance's own exchanges (hermit, dragon, shield) belong to the trist game
     encounters: [],
     outro: 'Shield won. You look up, delighted. Roderick has turned his chair to face the door.',
+    branch: f => f.tristLastBlow === 'gust' ? { rather: 'the last blow was the wind’s, not yours.' } : null,
     truth: 'doors', tarn: 'The dragon had her brother’s face. The doors of this room are already open.',
     stub: { line: 'Ethelred smashes a door, slays a dragon, wins a shield.', score: { 'dragons slain': 1, 'blows struck': 9 } },
   },
@@ -112,6 +122,7 @@ export const CHAPTERS = [
       { turn: { guest: -1 }, lines: [['Servant', 'It’s been some weeks, sir.'], ['You', 'It’s been *days*!']] },
     ],
     outro: 'A long tumultuous shouting, like a thousand waters. Then the tarn shuts, sullenly and silently, like a book.',
+    branch: f => f.flight?.madeline === 'out' ? { rather: 'she rode off on your horse.' } : null,
     truth: 'whole', tarn: 'The House of Usher, upright and whole, every window lit. One of them is yours.',
     stub: { line: 'Run the causeway as the house comes apart.', score: { 'yards run': 212 } },
   },
@@ -120,11 +131,15 @@ export const CHAPTERS = [
 // The confession: "An Account of My Sojourn", in ink, corrected in red.
 // Zero is written "none": an old-style 0 reads as the letter o.
 export const num = n => (n === 0 ? 'none' : String(n));
+// and small numbers in prose are words
+const WORDS = ['none', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+export const say = n => WORDS[n] ?? String(n);
+const Cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 // n: the number used when a game reports nothing that matches.
 export const ACCOUNT = {
   title: 'An Account of My Sojourn',
   rows: [
-    { ch: 'tarn', label: 'Differences found', match: /differ/i, n: 5, rather: () => 'one window uncounted.' },
+    { ch: 'tarn', label: 'Differences found', match: /differ/i, n: 5, rather: (n, f) => f.tarnSawHer ? 'one window, crossed out.' : 'one window uncounted.' },
     { ch: 'door', label: 'Stones set in order', match: /stone/i, n: 8, rather: () => 'the ninth was her.' },
     { ch: 'studio', label: 'Taps hushed', match: /taps? hush|hush/i, n: 41, rather: (n, f) => {
       const spared = f.tapsSpared ?? 0, knock = f.knockSpared ?? false;
@@ -132,12 +147,14 @@ export const ACCOUNT = {
       if (spared) return `she knocked ${n + spared} times. You let ${spared} be.`;
       return n ? `she knocked ${n} times.` : 'she knocked, and you heard none of it.';
     } },
-    { ch: 'burial', label: 'Screws turned', match: /screw/i, n: 4, rather: (n, f) => (f.burialScrewOut ?? false) ? `${num(n)} in, ${num(Math.max(0, n - 1))} out.` : `${num(n)} in, ${num(n)} out.` },
+    // a screw left out (the flag) is three, whatever else was counted
+    { ch: 'burial', label: 'Screws turned', match: /screw/i, n: 4, adjust: (n, f) => (f.burialScrewOut ? Math.min(n, 3) : n), rather: (n, f) => (f.burialScrewOut ?? false) ? `${num(n)} in, ${num(n)} out. The fourth she never needed.` : `${num(n)} in, ${num(n)} out.` },
     { ch: 'nights', label: 'Noises explained', match: /nois|explain/i, n: 12, rather: (n, f) => {
       const left = Array.isArray(f.nightsUnexplained) ? f.nightsUnexplained : [];
       return left.length ? `${num(n)} of ${n + left.length + 1}. You left “${left[0]}” alone.` : `${num(n)} of ${n + 1}.`;
     } },
-    { ch: 'trist', label: 'Dragons slain', match: /dragon/i, n: 1, rather: (n, f) => (f.tristLastBlow ?? 'struck') === 'gust' ? 'brothers, none. It was the wind.' : `brothers, ${num(n)}.` },
+    // the trist's own "dragons slain" counts the brother (0 on the gust); the romance's dragon always dies
+    { ch: 'trist', label: 'Dragons slain', fixed: true, n: 1, rather: (n, f) => (f.tristLastBlow ?? 'struck') === 'gust' ? 'brothers, none. It was the wind.' : 'brothers, one.' },
     { label: 'Days stayed', n: 9, rather: () => 'some weeks.' },
   ],
   last: { label: 'Cheerfulness of my society', value: 'considerable.' },
@@ -162,6 +179,15 @@ export const REMARKS = {
     bedroom: 'Up to your room.',
     causeway: 'Out. Now.',
   },
+  // after an outro the strip invites a look at the tarn (until the player takes one)
+  invite: [
+    'The tarn has something to say about that.',
+    'The water seems to have its own view.',
+    'The tarn is unconvinced.',
+    'Something stirs in the tarn. A fish, surely.',
+    'The tarn would like a word.',
+    'The water is doing that thing again.',
+  ],
   leave: ['You', 'Some weeks, he said. It has been an afternoon.'],
   sealed: ch => ['', `*${ch.num}. ${ch.title}* — a chapter to come.`],
 };

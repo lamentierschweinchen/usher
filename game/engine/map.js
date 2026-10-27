@@ -361,6 +361,15 @@ export class MapView {
     await tween(9000, k => moon.setAttribute('transform', `translate(0 ${84 * k})`));
   }
   flip(on) { this.el.classList.toggle('turned', on); }
+  // the water stirs: the shared ripple swells and settles, three slow times (not under reduced motion)
+  async stir() {
+    const d = this.defsEl?.querySelector('#sh-ripple feDisplacementMap');
+    if (!d || reducedMotion || this.stirring) return;
+    this.stirring = true;
+    for (let i = 0; i < 3; i++) await tween(1800, k => d.setAttribute('scale', (7 + 11 * Math.sin(Math.PI * k)).toFixed(2)));
+    d.setAttribute('scale', 7);
+    this.stirring = false;
+  }
   // the last card wants an empty sky: no moon, no cloud
   clearSky() { this.el.querySelector('#moon').classList.remove('on'); }
 }

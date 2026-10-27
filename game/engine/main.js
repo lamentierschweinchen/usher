@@ -29,7 +29,21 @@ const gameLayer = document.getElementById('game');
 const gameStage = document.getElementById('game-stage');
 const running = document.getElementById('running-chapter');
 
-const S = { flags: { glances: 0 }, results: {}, truth: null, carried: [], mode: 'map' };
+const S = { flags: { glances: 0 }, results: {}, truth: null, tarnLine: '', carried: [], mode: 'map', invite: '' };
+
+// ---- a refresh resumes at the current chapter's map scene; "Nevertheless." forgets
+const SAVE = 'usher.sojourn.v1';
+function save(index) {
+  try { sessionStorage.setItem(SAVE, JSON.stringify({ index, flags: S.flags, results: S.results, truth: S.truth, tarnLine: S.tarnLine, carried: S.carried })); }
+  catch { /* private mode or full: play on without it */ }
+}
+function restore() {
+  try {
+    const v = JSON.parse(sessionStorage.getItem(SAVE) || 'null');
+    return v && Number.isInteger(v.index) && v.index > 0 && v.index <= CHAPTERS.length ? v : null;
+  } catch { return null; }
+}
+function forget() { try { sessionStorage.removeItem(SAVE); } catch { /* nothing to forget */ } }
 const INSIDE = ['gallery', 'bedroom', 'hall', 'stair', 'studio', 'vault'];
 
 // ---- layout: a 3:2 stage; on a narrow portrait phone the map takes a taller crop
@@ -79,7 +93,11 @@ function explore(goals, ch) {
     // one target: the strip names it, and a click on the strip goes there
     const goal = goals.length === 1 ? goals[0] : null;
     const words = goal && ((map.guestRoom() === goal && ch?.prompt) || REMARKS.prompt[goal]);
-    const prompt = () => { if (words) band.show(['', words]); else band.clear(); };
+    // after an outro the strip also invites a look at the tarn, until the player takes one
+    const prompt = () => {
+      const line = [S.invite, words].filter(Boolean).join(' ');
+      if (line) band.show(['', line], { more: !!words }); else band.clear();
+    };
     const done = room => { handler = null; band.onIdle = null; band.clear(); resolve(room); };
     band.onIdle = words ? () => handler?.(goal) : null;
     prompt();
@@ -103,11 +121,13 @@ function explore(goals, ch) {
   });
 }
 
+// a look at the tarn: what the water shows now. Reflections are not sworn statements,
+// so the line comes in the tarn's own returned light, not in red.
 async function glance() {
   S.flags.glances++;
-  const ch = S.truth && CHAPTERS.find(c => c.truth === S.truth);
-  if (!ch) return;
-  await band.say(['', ch.tarn], { truth: true });
+  S.invite = '';
+  if (!S.tarnLine) return;
+  await band.say(['', S.tarnLine], { glass: true });
   band.clear();
 }
 
@@ -154,7 +174,7 @@ async function play(ch, index) {
   const game = await loadGame(ch);
   await transit.title({ kicker: ch.ord, title: ch.title }, 1800);
   // the tarn moves on while the player is away
-  S.truth = ch.truth; map.truth(ch.truth); map.fissure(index + 1);
+  S.truth = ch.truth; S.tarnLine = ch.tarn; S.invite = ''; map.truth(ch.truth); map.fissure(index + 1);
   if (index === 0) map.title(false);
   S.mode = 'game'; layout(); map.pause();
   // on an upright phone, one small card under the stage: never in the way, gone on a tap or a turn
@@ -189,7 +209,10 @@ async function hold(ms) {
 
 // after a game: under ink, the game's own epitaph if it wrote one; back on the map, the chapter's outro
 async function after(ch, r) {
-  const outro = ch.outro;
+  // the outro answers to what the player did: a matching line, or the confident one
+  // with the truth of it beneath, in red, as the guest's own correction
+  const branch = ch.branch?.(S.flags) || {};
+  const outro = branch.line || ch.outro;
   const note = r.note && r.note.trim() !== outro ? r.note : '';
   if (ch.id === 'door') { map.flyFacade(); map.put('guest', 'hall', 1); }
   if (ch.id === 'studio') map.hideAll(['guest', 'valet']);
@@ -197,8 +220,9 @@ async function after(ch, r) {
   if (ch.id === 'trist') fallen();
   if (ch.finale) {
     map.hideAll(['guest']); map.put('guest', 'brink', -1);
+    if (note) await transit.title({ line: note });
     await transit.open(where('causeway'));
-    band.show(['', outro], { more: false });
+    band.show(['', outro], { more: false, rather: branch.rather });
     await map.collapse();
     map.face('guest', 1);
     await sleep(600);
@@ -207,8 +231,11 @@ async function after(ch, r) {
   }
   if (note) await transit.title({ line: note });
   await transit.open(where(ch.target));
-  await band.say(['', outro]);
+  await band.say(['', outro], { rather: branch.rather });
   band.clear();
+  // and the water stirs, in case anyone is looking
+  S.invite = REMARKS.invite[CHAPTERS.indexOf(ch) % REMARKS.invite.length];
+  map.stir();
 }
 
 // a sealed chapter: walk to its door, read that it is to come; the tarn tells it anyway
@@ -220,7 +247,7 @@ async function sealed(ch, index) {
   map.point(null);
   await transit.close(where(ch.room));
   await transit.title({ kicker: ch.ord, title: ch.title, line: 'A chapter to come.', sealed: true }, 2600);
-  S.truth = ch.truth; map.truth(ch.truth); map.fissure(index + 1);
+  S.truth = ch.truth; S.tarnLine = ch.tarn; S.invite = ''; map.truth(ch.truth); map.fissure(index + 1);
   if (ch.id === 'burial') map.coffin(true);
   map.light(ch.id);
   S.carried.push(...ch.encounters.filter(e => e.carry));
@@ -286,17 +313,21 @@ async function ending() {
   await account(stage, S.results, S.flags);
   map.title(false);
   await lastCard(stage, map);
+  forget();
   location.href = location.pathname;
 }
 
 // ---- set the house as it would be on reaching chapter `index` (for ?chapter=)
-function jumpTo(index) {
+// set the house as it would be on reaching chapter `index`: from a save, or with stub scores (?chapter=)
+function jumpTo(index, saved) {
   for (let i = 0; i < index; i++) {
     const c = CHAPTERS[i];
     if (!c.sealed) S.results[c.id] = { won: true, score: { ...c.stub.score }, note: '' };
     S.carried = c.sealed ? [...S.carried, ...c.encounters.filter(e => e.carry)] : [];
     S.truth = c.truth;
   }
+  S.tarnLine = CHAPTERS[index - 1]?.tarn || '';
+  if (saved) Object.assign(S, { flags: { glances: 0, ...saved.flags }, results: saved.results || {}, truth: saved.truth ?? S.truth, tarnLine: saved.tarnLine ?? S.tarnLine, carried: saved.carried || [] });
   map.truth(S.truth); map.fissure(index); map.light(CHAPTERS[index]?.id || 'flight'); map.title(false);
   if (index > 1) map.setFacade(true);
   if (index > 3) map.coffin(true);
@@ -315,9 +346,13 @@ async function main() {
   const target = CHAPTERS.find(c => c.id === want);
   if (target) target.sealed = false;
   let start = 0;
+  const saved = !want && restore();
   if (want) {
     start = want === 'ending' ? CHAPTERS.length : Math.max(0, CHAPTERS.findIndex(c => c.id === want));
     jumpTo(start);
+  } else if (saved) {
+    start = saved.index;
+    jumpTo(start, saved);
   } else {
     map.truth(null);
     map.fissure(0);
@@ -327,9 +362,11 @@ async function main() {
   }
   for (let i = start; i < CHAPTERS.length; i++) {
     const ch = CHAPTERS[i];
+    save(i);
     if (ch.sealed) await sealed(ch, i);
     else await chapter(ch, i, { arrived: i === start });
   }
+  save(CHAPTERS.length);
   await ending();
 }
 

@@ -22,8 +22,8 @@ export function accountRows(results, flags = {}) {
     const row = ACCOUNT.rows.find(x => x.ch === ch.id);
     let used = null;
     if (row) {
-      used = Object.keys(r.score).find(k => row.match.test(k)) || null;
-      const n = used ? r.score[used] : row.n;
+      used = row.fixed ? null : Object.keys(r.score).find(k => row.match.test(k)) || null;
+      const n = (row.adjust || (x => x))(used ? r.score[used] : row.n, flags);
       rows.push({ label: row.label, value: `${num(n)}.`, rather: stop((used && r.rather?.[used]) || row.rather(n, flags)) });
     }
     for (const [label, gloss] of Object.entries(r.rather || {})) {
@@ -32,6 +32,17 @@ export function accountRows(results, flags = {}) {
   }
   for (const row of ACCOUNT.rows.filter(x => !x.ch)) rows.push({ label: row.label, value: `${num(row.n)}.`, rather: row.rather(row.n, flags) });
   return rows;
+}
+
+// size the account to the stage: measured with every correction written out, the type
+// steps down until the whole card fits (never under 15px on a phone, where it may scroll instead)
+function fit(card, stage, lines) {
+  for (const el of lines) el.textContent = el.dataset.text + ' ●';
+  const room = stage.clientHeight * .92;
+  const floor = Math.min(innerWidth, innerHeight) < 600 ? 15 : 12;
+  let size = parseFloat(getComputedStyle(card).fontSize);
+  while (card.scrollHeight > room && size > floor) { size -= .5; card.style.fontSize = `${size}px`; }
+  for (const el of lines) el.textContent = '';
 }
 
 async function write(el, text) {
@@ -51,10 +62,11 @@ export async function account(stage, results, flags) {
     </ol>
   </div>`;
   stage.append(sheet);
+  const lines = [...sheet.querySelectorAll('.acc-rather')];
+  fit(sheet.querySelector('.sheet'), stage, lines);
   await sleep(50);
   sheet.classList.add('on');
   await sleep(reducedMotion ? 100 : 900);
-  const lines = [...sheet.querySelectorAll('.acc-rather')];
   for (const el of lines) {
     el.scrollIntoView({ block: 'nearest' });   // on a small screen the sheet scrolls with the pen
     await write(el, el.dataset.text);

@@ -4,11 +4,10 @@
 
 **Run:** `cd game && python3 -m http.server 8790`. `?chapter=<id>`/`ending` jumps, `?games=none` stubs, `?debug` skips.
 
-**Playtest notes, done:**
-- While a target waits, the strip names it with › ("Look down. Everyone does.", "To the studio."). A click on it walks there and begins. The target's name pulses in lamplight (still under reduced motion). A run clicking only the strip reaches the end.
-- The tarn game's last frame holds 4.5 s after `done` (a click goes on after 1 s).
-- Every chapter's STORY outro now shows on the map after its game. A game's differing `note` shows first, under ink.
+**Experience critique, done (with Lukas's change):**
+- After each outro the tarn's ripple swells three times. The prompt gains a wry invitation ("The tarn would like a word.") until the player looks. Nothing auto-plays; the glance line is in the tarn's own light, not red.
+- Outros read the flags: a matching line (spared knock, three screws), or the confident line with a red *Say, rather:* beneath (askew stones, unexplained noises, the gust, the horse). The ledger agrees: the dragon always counts, the brother is the correction; a screw left out makes three.
+- A refresh resumes at the chapter's map scene (sessionStorage, guarded); "Nevertheless." clears it.
+- The ledger sizes to the stage: 1280×800 fits; on a portrait phone the ending stage grows taller so all of it fits at 15px.
 
-**Earlier:** the art critique's spine fixes (lit target rooms, no glove, phone dock and turn card, ribbons, 15px type); `#sh-defs` holds shared defs; IV and V unsealed; account quotes flags.
-
-**Known:** real games mounted and skipped, not played through. Spine-own lines: the strip prompts, "Some weeks, he said…", the account's flag variants.
+**Known:** real games mounted and skipped, not played through. Spine-own lines: prompts, invitations, outro corrections, account variants.
