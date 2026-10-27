@@ -7,7 +7,8 @@
 - **Props cut here in the same manner:** the hermit's hut and planks, the arcade, shield, tongue, the dragon's raised paws, the chair and footstool, the book, the lamp, the vault walls, the coppered arch and bars, and the stair.
 - **Light:** rain-night at the door, with your strokes cut through the planks as light. The hall is the "palace of gold", a lamp-lit room behind a black arcade. After the page turns it's the vault light, with the room's lamp spilling down the stair.
 - **Glass:** the romance comes back in the glass as a live `<use>` inside `returned(..., {still:true})`. Red truths stay unrippled: her upside-down echoes, Madeline's heart, your door strokes re-cut on the coffin, the "say, rather" corrections, Roderick's lines and the off-beat scratches.
-- **Phones:** under a 640 px stage the type scales up (teach 40, caption 30, speech 32 or 27, sound-words ×1.38) and rewraps. Under a `<use>` clone class rules don't paint, so everything inside the reflected scene is styled inline.
+- **Phones:** under a 600 px stage every line of type is ×1.5 (teach, caption, speech, captions, sound-words, score), rewrapped into balanced lines. Under a `<use>` clone class rules don't paint, so everything inside the reflected scene is styled inline.
+- **Art critique (round 2):** the lamp hairline box around the vault and the inset is gone. The heartbeat is now carried by the vault's own light, which throbs with her heart, alongside the two red hearts. The book's echo in the room shows one word at a time, in the room's empty top-left corner, clear of the reader's hat. A zero score reads BLOWS STRUCK NONE.
 
 **Changed to fit the look (worth knowing):**
 - The mace still points at your stroke's angle, so Ethelred's arm hinge turns past LOOK's 30°. That angle is part of the spec's aim mechanic.

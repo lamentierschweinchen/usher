@@ -113,19 +113,18 @@ const CSS = `
 .g-trist .tally{fill:none;stroke-width:1.8;stroke-linecap:round}
 .g-trist .tally.rule{stroke:var(--sh-lamp,#f7d894);opacity:.85}
 .g-trist .tally.paper{stroke:var(--sh-gauze,#f6ead2);opacity:.8}
-.g-trist .vborder{fill:none;stroke:var(--sh-lamp,#f7d894);stroke-linejoin:round;opacity:.5}
 .g-trist .streak{stroke:var(--sh-gauze,#f6ead2);stroke-width:1.6;stroke-linecap:round}
 .g-trist .heart{fill:var(--sh-red,#e0392b)}
 .g-trist .blk-r{fill:var(--sh-cut,#0b0809)}
 .g-trist .stairtex{display:none}
-/* phones: type the eye can read at 390 px */
-.g-trist.is-narrow .teach{font-size:40px}
-.g-trist.is-narrow .say{font-size:32px}
-.g-trist.is-narrow .vcap text{font-size:30px}
-.g-trist.is-narrow .vcap .R{font-size:38px}
-.g-trist.is-narrow .vcap .l{font-size:20px}
-.g-trist.is-narrow .lab{font-size:26px}
-.g-trist.is-narrow .end-line{font-size:32px}
+/* phones (stage under 600 px): every line of type ×1.5 */
+.g-trist.is-narrow .teach{font-size:39px}
+.g-trist.is-narrow .say{font-size:31.5px}
+.g-trist.is-narrow .vcap text{font-size:31.5px}
+.g-trist.is-narrow .vcap .R{font-size:42px}
+.g-trist.is-narrow .vcap .l{font-size:21px}
+.g-trist.is-narrow .lab{font-size:25.5px}
+.g-trist.is-narrow .end-line{font-size:33px}
 .g-trist.is-narrow .tally{stroke-width:2.6}
 .g-trist.is-narrow .hint{stroke-width:6;stroke-dasharray:.1 14}
 .g-trist.is-narrow .stroke{stroke-width:5}
@@ -200,6 +199,7 @@ ${C.defs({ animate: false })}
   <radialGradient id="gt-hall" cx=".55" cy=".62" r=".75"><stop offset="0" stop-color="#fff0c2"/><stop offset=".5" stop-color="#f2c06e"/><stop offset="1" stop-color="#c0814a"/></radialGradient>
   <radialGradient id="gt-glow" gradientUnits="userSpaceOnUse" cx="470" cy="300" r="400"><stop offset="0" stop-color="#e6ddf2" stop-opacity=".62"/><stop offset=".5" stop-color="#c8bce0" stop-opacity=".3"/><stop offset="1" stop-color="#c8bce0" stop-opacity="0"/></radialGradient>
   <radialGradient id="gt-well" gradientUnits="userSpaceOnUse" cx="860" cy="170" r="360"><stop offset="0" stop-color="#f2b866" stop-opacity=".42"/><stop offset=".55" stop-color="#b97a4c" stop-opacity=".14"/><stop offset="1" stop-color="#b97a4c" stop-opacity="0"/></radialGradient>
+  <radialGradient id="gt-beat" gradientUnits="userSpaceOnUse" cx="430" cy="470" r="560"><stop offset="0" stop-color="#e2a06e" stop-opacity=".62"/><stop offset=".5" stop-color="#b97a4c" stop-opacity=".26"/><stop offset="1" stop-color="#b97a4c" stop-opacity="0"/></radialGradient>
   <pattern id="gt-rain" width="46" height="40" patternUnits="userSpaceOnUse"><path class="rain-l" d="${rainD}"/></pattern>
   <clipPath id="gt-clip"><rect x="14" y="86" width="932" height="${FLOOR - 86}"/></clipPath>
   <clipPath id="gt-band"><rect x="0" y="${GLASS}" width="960" height="${640 - GLASS}"/></clipPath>
@@ -240,13 +240,14 @@ ${C.defs({ animate: false })}
   <text class="teach rom-teach" x="48" y="62">Draw the blow.</text>
   <g class="echo"></g>
   <g class="tally1"></g>
-  <text class="lab tl1" x="912" y="606" text-anchor="end">BLOWS STRUCK 0</text>
+  <text class="lab tl1" x="912" y="606" text-anchor="end">BLOWS STRUCK NONE</text>
 </g>
 
 <!-- ═════ The page turned over: the vault, and the room above it ═════ -->
 <g class="vlt" style="display:none">
   ${C.backdrop('vault', { h: 580, clouds: false, hills: false })}
   <rect x="0" y="0" width="960" height="580" fill="url(#gt-well)"/>
+  <rect class="beat" x="0" y="0" width="960" height="580" fill="url(#gt-beat)" style="opacity:.12"/>
   <rect class="lit-room" x="536" y="36" width="280" height="134"/>
   <g style="color:var(--sh-cut)" fill="currentColor">
     <path d="M656 170h8v-3h-3V124h-2v43h-3z"/><path d="M648 126h24l-6-16h-12z"/><ellipse cx="660" cy="129" rx="7" ry="2.6" style="fill:#fff3d0"/>
@@ -268,14 +269,13 @@ ${C.defs({ animate: false })}
   <text class="teach vteach" x="48" y="62"></text>
   <g class="vcap"></g>
   <g class="recho"></g>
-  <path class="vborder" d="M40 178H820V40H920V600H40Z" style="stroke-width:1.5"/>
   <g class="tally2"></g>
   <g class="scratches"></g>
   ${C.figure('madeline', { x: 372, y: 580, scale: 2.3, heart: true, faint: false, cls: 'mad', attrs: 'style="opacity:0" filter="url(#sh-glow)"' })}
   <path class="hint vhint" style="opacity:0" d="M870 96Q836 46 806 104"/>
   <g class="vfx"></g>
   <g class="gust"></g>
-  <text class="lab tl2" x="904" y="588" text-anchor="end">BLOWS STRUCK 0</text>
+  <text class="lab tl2" x="904" y="588" text-anchor="end">BLOWS STRUCK NONE</text>
   <g class="blk" style="display:none"><rect x="0" y="0" width="960" height="640" class="blk-r"/></g>
 </g>
 </g>
@@ -337,7 +337,7 @@ export default {
 
     // ── phones: larger type, rewrapped ─────────────────────────────────────
     let narrow = false;
-    const TS = () => (narrow ? 1.38 : 1);
+    const TS = () => (narrow ? 1.5 : 1);
     const meas = q('.meas text');
     function textW(t, size, italic = true) {
       meas.style.fontSize = size + 'px';
@@ -378,7 +378,7 @@ export default {
 
     // ── type ───────────────────────────────────────────────────────────────
     function word(parent, x, y, text, size, cls = '', rot = rnd(-4, 4), hold = 900) {
-      const t = el('text', { x: 0, y: 0, 'text-anchor': 'middle', class: 'snd ' + cls, transform: `translate(${f1(x)} ${f1(y)}) rotate(${f1(rot)})` }, parent);
+      const t = el('text', { x: 0, y: 0, 'text-anchor': cls === 'lead' ? 'start' : 'middle', class: 'snd ' + cls, transform: `translate(${f1(x)} ${f1(y)}) rotate(${f1(rot)})` }, parent);
       t.style.fontSize = f1(size * TS()) + 'px';
       t.textContent = text;
       if (RM) { transient.push(t); return t; }
@@ -389,22 +389,20 @@ export default {
     // Her noise, upside down and red in the glass, a beat before your blow.
     function echo(text) { word(echoG, rnd(110, 640), 548, text, 30, 'truth', 180 + rnd(-4, 4)); }
     function speak(x, y, text, ms = 2400, maxW = 860) {
-      let size = narrow ? 32 : 21, lines = [text];
-      if (narrow && textW(text, size) > maxW) {
-        if (textW(text, 27) <= maxW) size = 27; else lines = wrap(text, size, maxW, true);
-      }
+      const size = narrow ? 31.5 : 21;
+      const lines = narrow && textW(text, size) > maxW ? wrap(text, size, maxW, true) : [text];
       const hw = Math.max(...lines.map(l => textW(l, size))) / 2;
       const cx = f1(clamp(x, 64 + hw, 896 - hw));
       const t = el('text', { x: cx, y, 'text-anchor': 'middle', class: 'say' }, speechG);
       t.style.fontSize = size + 'px';
-      lines.forEach((l, i) => { el('tspan', { x: cx, dy: i ? f1(size * 1.15) : 0 }, t).textContent = l; });
+      lines.forEach((l, i) => { el('tspan', { x: cx, dy: i ? f1(size * 1.08) : 0 }, t).textContent = l; });
       later(ms, () => { t.style.transition = 'opacity .6s'; t.style.opacity = '0'; later(650, () => t.remove()); });
     }
     // The book's two lines, paper on a black ribbon over the glass.
     let capLines = CAP.door;
     function caption(lines) {
       capLines = lines;
-      const size = narrow ? 30 : 21, lh = Math.round(size * 1.24);
+      const size = narrow ? 31.5 : 21, lh = Math.round(size * 1.24);
       const out = [];
       for (const line of lines) if (line) out.push(...wrap(line, size, 856, true));
       const h = out.length * lh + 20;
@@ -432,8 +430,8 @@ export default {
     }
     function drawTally() {
       tally1.replaceChildren(el('path', { class: 'tally rule', d: tallyPath(blows, 722, 528, 5, 2, false) }));
-      tally2.replaceChildren(el('path', { class: 'tally paper', d: tallyPath(blows, 60, 240, 8, 4, true) }));
-      tl1.textContent = tl2.textContent = `BLOWS STRUCK ${blows}`;
+      tally2.replaceChildren(el('path', { class: 'tally paper', d: tallyPath(blows, 60, narrow ? 300 : 240, 8, 4, true) }));
+      tl1.textContent = tl2.textContent = `BLOWS STRUCK ${blows || 'NONE'}`;
     }
 
     // ── the door's planks: black paper over the lit doorway ────────────────
@@ -624,7 +622,7 @@ export default {
       poseDragon(604, 206, 0, null, true);
       if (!saidSensitive) {
         saidSensitive = true;
-        speak(590, 140, 'Please. I’m very sensitive to noise.', 2200, 420);
+        speak(586, narrow ? 128 : 140, 'Please. I’m very sensitive to noise.', 2200, 330);
         later(1300, () => speak(146, 170, 'Sorry.', 1500, 140));
         later(1700, resume);
       } else {
@@ -684,7 +682,7 @@ export default {
     const chestHeart = mad.querySelector('path[style*="sh-red"]'), lidHeart = q('.lidheart');
     const MS = 2.3;
     const lid = q('.sh-coffin .sh-lid'), idoor = q('.idoor'), bars = q('.bars'), rod = q('.rod'), rodFig = q('.gt-rod'), rdoor = q('.rdoor');
-    const vborder = q('.vborder'), vcap = q('.vcap'), vteach = q('.vteach'), recho = q('.recho');
+    const beatLight = q('.beat'), vcap = q('.vcap'), vteach = q('.vteach'), recho = q('.recho');
     const vfx = q('.vfx'), scratches = q('.scratches'), vhint = q('.vhint');
     const marks = { lid: q('.lidmarks'), door: q('.idmarks'), arch: q('.armarks'), stair: q('.stmarks') };
     let station = 0, stationHits = 0, onBeats = 0, misses = 0, mercy = false;
@@ -714,7 +712,7 @@ export default {
     function vcaption(key) {
       vKey = key;
       vcap.replaceChildren();
-      const k = narrow ? 1.42 : 1;
+      const k = narrow ? 1.5 : 1;
       let y = 98;
       VCAP[key].forEach(([t, c], i) => {
         const size = (c === 'R' ? 28 : c === 'l' ? 14 : 21) * k;
@@ -777,7 +775,7 @@ export default {
       const [w, size] = st.words[Math.min(stationHits, st.words.length - 1)];
       word(vfx, bx, by - bh / 2 - 14, w, size, 'paper');
       const e = st.echo[stationHits];
-      if (e) later(420, () => word(recho, 596, 78, e, 19, '', rnd(-3, 3), 1100));   // the book follows her
+      if (e) later(420, () => { recho.replaceChildren(); word(recho, 548, 60, e, 19, 'lead', rnd(-2, 2), 1100); });   // the book follows her
       stationHits++;
       if (stationHits >= st.n) advance();
     }
@@ -941,8 +939,8 @@ export default {
     function relayout() {
       if (!alive) return;
       const w = root.clientWidth;
-      const n = w > 0 && w < 640;
-      if (n !== narrow) { narrow = n; root.classList.toggle('is-narrow', n); }
+      const n = w > 0 && w < 600;
+      if (n !== narrow) { narrow = n; root.classList.toggle('is-narrow', n); drawTally(); }
       caption(capLines);
       if (vKey) vcaption(vKey);
     }
@@ -978,8 +976,7 @@ export default {
           if (now > nextBeat) { lastBeat = now; nextBeat = now + interval(); }
         }
         const pulse = beating ? clamp(1 - (now - lastBeat) / 240, 0, 1) : 0;
-        vborder.style.strokeWidth = f1(1.5 + 3 * pulse);
-        vborder.style.opacity = f1(.45 + .4 * pulse);
+        beatLight.style.opacity = f1(.12 + .88 * pulse);           // the vault's light throbs with her heart
         if (RM) {
           lidHeart.style.opacity = chestHeart.style.opacity = f1(.55 + .45 * pulse);
         } else {
