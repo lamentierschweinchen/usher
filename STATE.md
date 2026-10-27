@@ -2,7 +2,7 @@
 
 **Phase 1: Story → concept.** Back to the drawing board (Lukas, 18:50): recognizable genre, visually pleasing, a simple graphic interface that carries the story; the twist / mirror / upside-down house.
 
-**Now:** concept options ready in work/concept/OPTIONS.md (Seven Differences, The Arrangement, Keeping House). Coordinator pick: Seven Differences.
+**Now:** five concepts in work/concept/; OPTIONS.md lists four. Coordinator pick: Hush (with the tarn reflection). Build handoff drafted in handoffs/HANDOFF-build.md, concept slot blank until the pick.
 
 
 **Next:** coordinator distils 2–3 concepts with one pick → Lukas picks → build handoff (about 60 min of build).

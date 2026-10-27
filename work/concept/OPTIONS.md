@@ -20,6 +20,12 @@ All four specialists independently landed on the same screen: the house above, i
 **Only Usher:** The narrator's cure for gloom is "a different arrangement of the particulars" [u02]; every tidy click inks the fissure, and the last chore is shutting the door on her. At 100%: "Everything in its place." The house sinks.
 **Risk:** Without a really tactile snap it's mere drag-and-drop, and it's the most build of the three.
 
+## 4. Hush (05-genre-mashup.md, added on Lukas's character × genre prompt)
+**Pitch:** Whack-a-mole for the most sensitive man alive: silence every sunbeam, rose and creak before it reaches Roderick Usher, and score best for hushing the tapping in the vault.
+**First minute:** A dollhouse cutaway of the house, frantic and funny: a sunbeam (drop the drape), a rose (it wilts), a brass band (it shrinks to a lute's *plink*), each sound a typeset word crawling up the stairs toward his ear. Amid the rush, a small *tap.* in the vault. Hush it: "Hushed. Roderick thanks you." Each tap takes one more click.
+**Only Usher:** Roderick's own list of torments [u11] is the enemy roster, and he heard her for days and "dared not speak" [u48]: you are his silence, and the game pays you for it. At the Mad Trist each noise arrives *before* its line and the romance rewrites itself to fit her. Final ledger: sunbeams 9, roses 4, trumpets 3, *her* 41. High score.
+**Risk:** If the first act isn't genuinely frantic and funny, the turn has nothing to betray.
+
 *Cut:* The Direct Line (03-deduction.md). Its ledger is the reading-and-choosing Lukas rejected, but its lore is worth stealing into any option: the Usher line stays branchless because one twin per generation goes into the vault.
 
-**Coordinator's pick:** Seven Differences.
+**Coordinator's pick (revised after Hush):** Hush, with Seven Differences' tarn under the cutaway: the reflection shows what you're really hushing.
