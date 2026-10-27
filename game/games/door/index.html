@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Door · dev harness</title>
+<style>
+@font-face{font-family:'IM Fell English';src:url('../../fonts/im-fell-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'IM Fell English';src:url('../../fonts/im-fell-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
+:root{--paper:#f2eee5;--ink:#29272a;--muted:#625d5a;--rule:#cbc3b8;--red:#7a3939;--serif:'IM Fell English', Georgia, serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif)}
+body{padding:16px}
+.box{position:relative;width:min(100%, calc((100svh - 170px) * 1.5));aspect-ratio:3/2;margin:0 auto}
+.stage{position:absolute;inset:0;background:var(--paper)}
+.frame{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.frame rect{fill:none;stroke:var(--ink)}
+.bar{max-width:960px;margin:12px auto 0;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:15px;color:var(--muted)}
+.bar button{font:inherit;color:var(--ink);background:none;border:1px solid var(--rule);padding:4px 14px;cursor:pointer}
+.bar label{display:flex;gap:6px;align-items:center;cursor:pointer}
+pre{max-width:960px;margin:10px auto;white-space:pre-wrap;font:13px/1.45 ui-monospace,Menlo,monospace;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="stage" id="stage"></div>
+  <svg class="frame" viewBox="0 0 960 640" aria-hidden="true">
+    <rect x="8" y="8" width="944" height="624" style="stroke-width:1.5"/>
+    <rect x="14" y="14" width="932" height="612" style="stroke-width:.6"/>
+  </svg>
+</div>
+<div class="bar">
+  <button id="again" type="button">Again</button>
+  <label><input id="rm" type="checkbox"> reduced motion</label>
+  <span>II. A Mere Different Arrangement · dev harness</span>
+</div>
+<pre id="out"></pre>
+<script type="module">
+import game from './game.js';
+const stage = document.getElementById('stage'), out = document.getElementById('out'), rm = document.getElementById('rm');
+rm.checked = new URLSearchParams(location.search).has('reduced') || matchMedia('(prefers-reduced-motion: reduce)').matches;
+let cleanup = null;
+function start() {
+  if (cleanup) cleanup();
+  stage.replaceChildren();
+  const log = [], flags = {}, t0 = performance.now();
+  let doneCount = 0;
+  const stamp = () => ((performance.now() - t0) / 1000).toFixed(1) + 's';
+  const show = () => { out.textContent = log.join('\n') || 'Playing…'; };
+  const api = {
+    state: {},
+    reducedMotion: rm.checked,
+    setFlag(k, v) { flags[k] = v; log.push(`${stamp()}  setFlag ${k} = ${JSON.stringify(v)}`); show(); },
+    done(result) {
+      doneCount++;
+      if (doneCount > 1) console.error('door: api.done called more than once');
+      log.push(`${stamp()}  done #${doneCount}\n${JSON.stringify(result, null, 2)}`); show();
+    },
+  };
+  window.__door = { api, flags, get doneCount() { return doneCount; } };
+  show();
+  cleanup = game.mount(stage, api);
+}
+document.getElementById('again').addEventListener('click', start);
+rm.addEventListener('change', start);
+start();
+</script>
+</body>
+</html>

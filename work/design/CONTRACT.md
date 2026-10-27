@@ -32,7 +32,7 @@ export default {
 ```
 
 ## `api` (provided by the spine; the dev harness stubs it)
-- `api.done(result)`: call exactly once when the chapter ends. `result = { won: true|false, score: { "<label>": number, ... }, note: "optional one-line epitaph" }`. Score labels are read back in the ending's confession, e.g. `{ "taps hushed": 41 }`, so word them in the game's voice.
+- `api.done(result)`: call exactly once when the chapter ends. `result = { won: true|false, score: { "<label>": number, ... }, note: "optional one-line epitaph" }`. Score labels are read back in the ending's confession, e.g. `{ "taps hushed": 41 }`, so word them in the game's voice. Optional: `rather: { "<label>": "red correction" }`, the confession's *say, rather:* line for that score; the spine falls back to its own glosses when absent.
 - `api.state`: a read-only object of flags from earlier chapters (e.g. `state.tapsHushed`). Never require a flag; always have a default.
 - `api.setFlag(key, value)`: write a flag for later chapters.
 - `api.reducedMotion`: boolean. Honour it.
