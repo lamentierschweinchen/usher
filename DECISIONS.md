@@ -2,6 +2,12 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-26 — An adventure with mini-games
+
+"again, i find all three unconvincing. what i feel might be interesting is more of a zelda (i don't play games, but i think this is the right reference, keep reading) style game where you have a main plot and then mini games you play. this then could involve a diverse array like the one above while keeping a plot, having character development, encounters, etc. we are entering the house of usher. to open the door, we need to solve something. then we play through the story itself (not necessarily all of it, not necessarily in a literal reading) and encounter various fun challenges along the way."
+
+*Replaced:* the single-mechanic concepts as the whole game. Seven Differences, The Arrangement, Keeping House, Hush and the runners-up become candidate mini-games inside one plot.
+
 ## 2026-10-26 — One more lens: character × genre
 
 "pick one character and make a game 'for them' that informs regular genre. let's say 'mario kart but it's in the house of usher'. or pick a character from the story and put them in a weird/funny environment with specific usher twists."
