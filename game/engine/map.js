@@ -194,7 +194,13 @@ export class MapView {
     const t = ROOMS[room];
     this.el.dataset.target = t ? room : '';
     this.el.querySelector('#title-below').classList.toggle('cue', t?.cue === 'title');
+    // its name, breathing slowly in lamplight
+    const label = this.el.querySelector('#target-label');
+    label.classList.toggle('on', !!t);
     if (!t) return;
+    const [lx, ly] = t.labelAt || [t.rect[0] + 5, t.rect[1] + 12];
+    label.textContent = t.label;
+    label.setAttribute('x', lx); label.setAttribute('y', ly);
     if (t.lamp) above.style.setProperty(t.lamp, 'url(#sp-hot)');
     if (t.rim) for (const el of this.el.querySelectorAll(t.rim)) el.classList.add('target-rim');
   }

@@ -4,13 +4,11 @@
 
 **Run:** `cd game && python3 -m http.server 8790`. `?chapter=<id>`/`ending` jumps, `?games=none` stubs, `?debug` skips.
 
-**Art critique, done:**
-- No glove. The target room's `--lit-*` lamp turns up. The façade door and the causeway take a lamp rim (`#sh-rim`); in chapter I the title's reflection cues "look down".
-- Phone: no dock under games or the ending. On an upright phone a cut-paper card ("Turn your phone") sits under each game. Landscape gives the stage full height. Spine type ≥15px.
-- Shut façade returns as pale paper; no fissure before I.
-- Account corrections ≥15px; closing lines on `C.banner` ribbons.
-- Blot in the margin; causeway cast ≥50 apart, portrait crop widened to fit it; proscenium above the iris; zero printed as *none*.
+**Playtest notes, done:**
+- While a target waits, the strip names it with › ("Look down. Everyone does.", "To the studio."). A click on it walks there and begins. The target's name pulses in lamplight (still under reduced motion). A run clicking only the strip reaches the end.
+- The tarn game's last frame holds 4.5 s after `done` (a click goes on after 1 s).
+- Every chapter's STORY outro now shows on the map after its game. A game's differing `note` shows first, under ink.
 
-**Also:** `#sh-defs` (960×640, off-screen) holds the shared defs; IV and V unsealed; account quotes flags.
+**Earlier:** the art critique's spine fixes (lit target rooms, no glove, phone dock and turn card, ribbons, 15px type); `#sh-defs` holds shared defs; IV and V unsealed; account quotes flags.
 
-**Known:** real games mounted and skipped, not played through. Spine-own lines: "Some weeks, he said…", the account's flag variants, "she knocked, and you heard none of it."
+**Known:** real games mounted and skipped, not played through. Spine-own lines: the strip prompts, "Some weeks, he said…", the account's flag variants.

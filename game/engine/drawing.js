@@ -88,5 +88,6 @@ ${C.returned('<use href="#grounds"/><use href="#house"/><use href="#cast"/>', { 
 </g>
 
 <g id="hits"></g>
-<text id="hover-label" class="t-label-svg" x="0" y="0"></text>`;
+<text id="hover-label" class="t-label-svg" x="0" y="0"></text>
+<text id="target-label" class="t-label-svg target-label" x="0" y="0"></text>`;
 }

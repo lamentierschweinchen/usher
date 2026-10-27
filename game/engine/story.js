@@ -36,10 +36,11 @@ export const CHAPTERS = [
     // the tarn game ends on the lit window in the water, so the map's tarn doesn't repeat it
     truth: null, tarn: 'A lit window, dark above. Someone in it looks down, as you did.',
     stub: { line: 'Spot the differences between the house and its reflection.', score: { 'differences found': 5 } },
+    hold: 4500,   // the game ends on the red window in the water: let it stay (a click goes on sooner)
   },
   {
     id: 'door', ord: 'Chapter the Second', num: 'II', title: 'A Mere Different Arrangement',
-    room: 'door', target: 'door',
+    room: 'door', target: 'door', prompt: 'Try the door.',
     intro: 'Every stone is sound, and none is where it belongs. A sensible man could fix that.',
     encounters: [
       { enter: { valet: 'valet' }, turn: { guest: -1 }, lines: [['The valet, of stealthy step', '*(has been behind you some time. Says nothing, at length.)*'], ['You', 'Good Lord.']] },
@@ -52,7 +53,7 @@ export const CHAPTERS = [
   },
   {
     id: 'studio', ord: 'Chapter the Third', num: 'III', title: 'The Cheerfulness of My Society',
-    room: 'studio', target: 'studio',
+    room: 'studio', target: 'studio', prompt: 'Sit with him.',
     intro: 'Roderick rises from the sofa, overjoyed, in a whisper.',
     cast: { roderick: ['sofaSit', 1, 'sit'], valet: ['hallValet', -1] },
     encounters: [
@@ -80,7 +81,7 @@ export const CHAPTERS = [
   },
   {
     id: 'nights', ord: 'Chapter the Fifth', num: 'V', title: 'The Seventh or Eighth Night',
-    room: 'bedroom', target: 'bedroom',
+    room: 'bedroom', target: 'bedroom', prompt: 'To bed.',
     intro: 'Your bed is directly over the vault. A coincidence, and you explain it as one.',
     encounters: [
       { enter: { roderick: ['landingEast', -1] }, lines: [['Roderick, roaming', 'Do you hear —'], ['You', 'The draperies, old man.']], exit: ['roderick'] },
@@ -93,7 +94,7 @@ export const CHAPTERS = [
   },
   {
     id: 'trist', ord: 'Chapter the Sixth', num: 'VI', title: 'One of Your Favorite Romances',
-    room: 'bedroom', target: 'bedroom',
+    room: 'bedroom', target: 'bedroom', prompt: 'Read to him.',
     intro: 'You read aloud the silliest book in the house. You’re the hero. It’s wonderful.',
     // the romance's own exchanges (hermit, dragon, shield) belong to the trist game
     encounters: [],
@@ -151,6 +152,16 @@ export const LAST = {
 
 // Small things the guest says on the map. Spine's own, not STORY's: keep them few.
 export const REMARKS = {
+  // while a target waits, the strip says where to go; a click on it goes there
+  // (a chapter's own `prompt` is used for its game's target)
+  prompt: {
+    tarn: 'Look down. Everyone does.',
+    door: 'The door, then.',
+    studio: 'To the studio.',
+    vault: 'Down to the vault.',
+    bedroom: 'Up to your room.',
+    causeway: 'Out. Now.',
+  },
   leave: ['You', 'Some weeks, he said. It has been an afternoon.'],
   sealed: ch => ['', `*${ch.num}. ${ch.title}* — a chapter to come.`],
 };

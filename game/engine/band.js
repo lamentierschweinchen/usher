@@ -7,11 +7,13 @@ export class Band {
   constructor(el) {
     this.el = el;
     this.resolve = null;
-    el.addEventListener('click', e => { e.stopPropagation(); this.advance(); });
+    // a click on a waiting line reads on; on an idle prompt it does the prompt's errand
+    this.onIdle = null;
+    el.addEventListener('click', e => { e.stopPropagation(); if (this.resolve) this.advance(); else this.onIdle?.(); });
     document.addEventListener('keydown', e => {
-      if (this.resolve && ['Enter', ' ', 'ArrowRight'].includes(e.key) && !e.target.closest?.('.hit')) {
-        e.preventDefault(); this.advance();
-      }
+      if (!['Enter', ' ', 'ArrowRight'].includes(e.key) || e.target.closest?.('.hit, button')) return;
+      if (this.resolve) { e.preventDefault(); this.advance(); }
+      else if (this.onIdle && this.el.classList.contains('on')) { e.preventDefault(); this.onIdle(); }
     });
   }
   get waiting() { return !!this.resolve; }

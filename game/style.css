@@ -95,6 +95,8 @@ button { font: inherit; color: inherit; }
 .title-below.gone.cue { opacity: 1; }
 .t-label-svg { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; fill: var(--sh-lamp); opacity: 0; pointer-events: none; transition: opacity .2s; paint-order: stroke; stroke: var(--sh-cut); stroke-width: 3px; }
 .t-label-svg.on { opacity: 1; }
+.target-label.on { animation: lamp-pulse 2.6s ease-in-out infinite; }
+@keyframes lamp-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 
 /* ---- the dialogue band: a black cut ribbon on the glass; docked under the stage on narrow screens ---- */
 .band {
@@ -238,5 +240,6 @@ button { font: inherit; color: inherit; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .target-label.on { animation: none; opacity: 1; }
   .light, .moon, .house-def .rooms, .house-def .facade, .map, .actor, .letter-sheet, .account .sheet, .truths > *, .cartouche, .title-below { transition: none !important; }
 }

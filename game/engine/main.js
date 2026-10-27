@@ -76,21 +76,28 @@ function where(room) { return map.screenPoint(map.roomPoint(room), stage); }
 function explore(goals, ch) {
   return new Promise(resolve => {
     let busy = false;
+    // one target: the strip names it, and a click on the strip goes there
+    const goal = goals.length === 1 ? goals[0] : null;
+    const words = goal && ((map.guestRoom() === goal && ch?.prompt) || REMARKS.prompt[goal]);
+    const prompt = () => { if (words) band.show(['', words]); else band.clear(); };
+    const done = room => { handler = null; band.onIdle = null; band.clear(); resolve(room); };
+    band.onIdle = words ? () => handler?.(goal) : null;
+    prompt();
     handler = async room => {
       if (busy) return;
       busy = true;
       try {
-        if (room === 'tarn' && !goals.includes('tarn')) { await glance(ch); return; }
-        if (room === 'tarn') { handler = null; return resolve(room); }
+        if (room === 'tarn' && !goals.includes('tarn')) { await glance(ch); prompt(); return; }
+        if (room === 'tarn') return done(room);
         if (!map.open && INSIDE.includes(room)) return;
         if (map.open && room === 'door') room = 'hall';
         if (map.open && (room === 'causeway' || room === 'bank') && !goals.includes('causeway')) {
-          await band.say(REMARKS.leave); band.clear(); return;
+          await band.say(REMARKS.leave); prompt(); return;
         }
         await map.walkTo('guest', node(room), ch?.finale && room === 'causeway' ? 200 : undefined);
-        if (goals.includes(room)) { handler = null; return resolve(room); }
+        if (goals.includes(room)) return done(room);
         const burial = CHAPTERS.find(c => c.id === 'burial');
-        if (room === 'vault' && burial.sealed) { await band.say(REMARKS.sealed(burial)); band.clear(); }
+        if (room === 'vault' && burial.sealed) { await band.say(REMARKS.sealed(burial)); prompt(); }
       } finally { busy = false; }
     };
   });
@@ -156,6 +163,7 @@ async function play(ch, index) {
   const { result, teardown } = mount(game, ch, gameStage, S.flags);
   await transit.open();
   const r = await result;
+  await hold(ch.hold);
   await transit.close();
   teardown();
   turn.hidden = true;
@@ -167,8 +175,22 @@ async function play(ch, index) {
 }
 
 // what changes on the map at a chapter's end (done under ink)
+// let a game's last frame stay a while after done; past the first second a click goes on
+async function hold(ms) {
+  if (!ms) return;
+  let armed = false;   // the game's own last click shouldn't skip the hold, and later clicks stay with the spine
+  const stop = e => { if (armed) { e.stopPropagation(); e.preventDefault(); } };
+  gameLayer.addEventListener('click', stop, true);
+  await sleep(1000);
+  armed = true;
+  await Promise.race([sleep(ms - 1000), new Promise(r => gameLayer.addEventListener('click', r, { once: true, capture: true }))]);
+  gameLayer.removeEventListener('click', stop, true);
+}
+
+// after a game: under ink, the game's own epitaph if it wrote one; back on the map, the chapter's outro
 async function after(ch, r) {
-  const outro = r.note || ch.outro;
+  const outro = ch.outro;
+  const note = r.note && r.note.trim() !== outro ? r.note : '';
   if (ch.id === 'door') { map.flyFacade(); map.put('guest', 'hall', 1); }
   if (ch.id === 'studio') map.hideAll(['guest', 'valet']);
   if (ch.id === 'burial') map.coffin(true);
@@ -183,8 +205,10 @@ async function after(ch, r) {
     band.clear();
     return;
   }
-  await transit.title({ line: outro });
+  if (note) await transit.title({ line: note });
   await transit.open(where(ch.target));
+  await band.say(['', outro]);
+  band.clear();
 }
 
 // a sealed chapter: walk to its door, read that it is to come; the tarn tells it anyway
