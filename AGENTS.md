@@ -8,3 +8,4 @@ Read first: `STATE.md` (where we are), `DECISIONS.md` (Lukas's calls), then `bri
 - History: public GitHub repo `lamentierschweinchen/usher` (approved by Lukas 2026-10-26). Push completed checkpoints to `main`. Anything here is public: no secrets, no private material. Deploying or sharing the game is a separate call of Lukas's.
 - Specialists write to `work/`, never to `DECISIONS.md` or `STATE.md` (the coordinator owns those).
 - Don't modify the reading edition; read from it only.
+- Preview servers listen on loopback only: `python3 -m http.server <port> --bind 127.0.0.1` (work/audio/LOOPBACK-RECEIPT.md).

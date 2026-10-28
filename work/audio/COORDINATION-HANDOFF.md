@@ -16,7 +16,7 @@ From the Usher coordinator to the composer/sound designer's coordinator. Lukas m
   - http://localhost:8300/games/studio/?mode=burial&fixture=1 plays act two against the fixture ghost.
   - Test audio at `speed=1` only. 2×/4×/8× are a dev aid and will sound wrong.
 
-If nothing answers on 8300: `cd game && python3 -m http.server 8300`. ES modules won't load from file://.
+If nothing answers on 8300: `cd game && python3 -m http.server 8300 --bind 127.0.0.1` (loopback only; see `LOOPBACK-RECEIPT.md`). ES modules won't load from file://.
 
 **Today's sound.** Only the mirror studio (act two) makes any. Everything is local to the studio: `makeWaltz()` in `game/games/studio/waltz.js` (its lifecycle and tests: `LIFECYCLE-REVIEW.md`):
 - **A synthesised Karplus–Strong waltz:**
