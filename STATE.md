@@ -9,6 +9,6 @@
 
 **Open with Lukas:** the bible's five calls: (1) it was Roderick's turn below; (2) "the yet unscrewed lid" as a flagged misreading; (3) no retries; (4) act two about 28 min; (5) music on after the first tap, with a mute.
 
-**Next:** Lukas's calls → the milestone 1 playtest → M2 (the spine both ways: interludes, letter, Nevertheless, tarn both ways) and on through M9.
+**Next:** M2 (the spine both ways: interludes, letter, Nevertheless, tarn both ways). The lead designer is writing work/fullgame/MILESTONE-2.md on the bible's recommended answers to calls 1, 3 and 4, each marked so a different ruling flips cheaply; then the spine and tarn builders start in parallel. Lukas's own M1 playthrough and his five calls can land any time before the build. Then on through M9.
 
 **Rules:** builders don't commit; the coordinator checkpoints to public `main`, github.com/lamentierschweinchen/usher.
