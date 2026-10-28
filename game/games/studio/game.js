@@ -6,6 +6,7 @@
 // the vault below the boards as glass, red only for the tap (and the KNOCK, its loudest form).
 
 import * as C from '../../shared/cuts.js';
+import { makeWaltz } from './waltz.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 
@@ -1096,61 +1097,6 @@ const mirrorCss = u => `
 .g-mirror.gs-narrow .gm-tap,.g-mirror.gs-narrow .gm-settle{font-size:33px}
 `;
 
-// Optional sound, local to this game: Roderick's waltz on a plucked (Karplus–Strong) string, and her wooden taps.
-// Every cue is also seen. It starts only on a real tap (never before a user gesture) and closes with the game.
-function makeWaltz(enabled) {
-  let ctx = null, out = null, nextN = 0;
-  const cache = new Map();
-  const BARS = [[65.41, [261.63, 329.63, 392.0]], [49.0, [246.94, 293.66, 349.23]], [49.0, [246.94, 293.66, 349.23]], [65.41, [261.63, 329.63, 392.0]]];
-  function string(freq) {
-    if (cache.has(freq)) return cache.get(freq);
-    const sr = ctx.sampleRate, n = Math.floor(sr * 1.6), N = Math.max(2, Math.round(sr / freq));
-    const buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
-    for (let i = 0; i < N; i++) d[i] = Math.random() * 2 - 1;
-    d[N] = d[0] * 0.99;
-    for (let i = N + 1; i < n; i++) d[i] = 0.4975 * (d[i - N] + d[i - N - 1]);
-    cache.set(freq, buf);
-    return buf;
-  }
-  function play(buf, when, gain, filterHz) {
-    const s = ctx.createBufferSource(), g = ctx.createGain();
-    s.buffer = buf; g.gain.value = gain;
-    if (filterHz) { const bq = ctx.createBiquadFilter(); bq.type = 'bandpass'; bq.frequency.value = filterHz; bq.Q.value = 3; s.connect(bq); bq.connect(g); } else s.connect(g);
-    g.connect(out);
-    s.start(Math.max(ctx.currentTime, when));
-  }
-  let wood = null;
-  return {
-    start() {
-      if (ctx || !enabled) return;
-      const AC = typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext);
-      if (!AC) return;
-      try { ctx = new AC(); out = ctx.createGain(); out.gain.value = 0.22; out.connect(ctx.destination); } catch (e) { ctx = null; }
-    },
-    schedule(T, speed) {
-      if (!ctx) return;
-      if (nextN * BEAT < T - 0.02) nextN = Math.ceil((T - 0.02) / BEAT);
-      while (nextN * BEAT < T + 0.12) {
-        const when = ctx.currentTime + (nextN * BEAT - T) / speed, b = nextN % 3, [bass, chord] = BARS[Math.floor(nextN / 3) % 4];
-        if (b === 0) play(string(bass), when, 0.9);
-        else chord.forEach((fq, j) => play(string(fq), when + j * 0.014, b === 2 ? 0.34 : 0.2));
-        nextN++;
-      }
-    },
-    tap() {
-      if (!ctx) return;
-      if (!wood) {
-        const sr = ctx.sampleRate, n = Math.floor(sr * 0.09);
-        wood = ctx.createBuffer(1, n, sr);
-        const d = wood.getChannelData(0);
-        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sr * 0.012));
-      }
-      play(wood, ctx.currentTime, 1.4, 640);
-    },
-    close() { try { if (ctx) ctx.close(); } catch (e) { /* already closed */ } ctx = null; },
-  };
-}
-
 function watchNarrow(root) {
   // under a 600px stage, game type is ×1.5 (sizes the hit areas never use)
   const setNarrow = () => root.classList.toggle('gs-narrow', root.clientWidth > 0 && root.clientWidth < 600);
@@ -1231,7 +1177,7 @@ function mountBurial(stage, api) {
   const herG = $('[data-l="her"]'), herFig = herG.querySelector('.sh-fig');
   const teach = $('[data-mteach]'), hudT = $('[data-mhud]');
   const boardEls = [...svg.querySelectorAll('.gm-board')];
-  const audio = makeWaltz(api.sound !== false);
+  const audio = makeWaltz(api.sound !== false, BEAT);   // optional; its lifecycle is in waltz.js
 
   // ---- the ghost: your act one, or the fixture (a builder's real run) when it's missing or thin ----
   let G = null, synthetic = false, ready = false, dead = false;
@@ -1385,6 +1331,7 @@ function mountBurial(stage, api) {
     endClock = 0;
     hold = null;
     chargeP.setAttribute('d', '');
+    audio.release();                         // queued notes go; what is sounding rings into the tableau
     if (knockState === 'heard') poseOverride = 'startled';
   }
   function finish() {
@@ -1555,7 +1502,7 @@ function mountBurial(stage, api) {
       T += dt;
       step(dt);
       S.advance(dt);
-      audio.schedule(T, SPEED);
+      if (!ending) audio.schedule(T, SPEED);
     } else {
       endClock += dt;
       if (endClock >= TABLEAU) finish();
@@ -1592,6 +1539,10 @@ function mountBurial(stage, api) {
     if (!h.charged || knockUsed || ending) return;
     if (onBeat3(T)) launchKnock(h.board); else settle(h.board);   // off the beat, it's only the house
   }
+  function onCancel(e) {                     // the browser took the pointer: the hold is abandoned, never a knock
+    if (hold && e.pointerId === hold.id) hold = null;
+  }
+  const onVisibility = () => { if (document.hidden) audio.suspend(); else audio.resync(); };
   function onMove(e) {
     if (e.pointerType !== 'mouse') return;
     const b = boardAt(toSvg(e)), t = b >= 0 && !ending ? boardEls[b] : null;
@@ -1605,13 +1556,14 @@ function mountBurial(stage, api) {
   boardEls.forEach(g => g.classList.add('touch'));
   svg.addEventListener('pointerdown', onDown);
   svg.addEventListener('pointerup', onUp);
-  svg.addEventListener('pointercancel', onUp);
+  svg.addEventListener('pointercancel', onCancel);
+  document.addEventListener('visibilitychange', onVisibility);
   svg.addEventListener('pointermove', onMove);
   svg.addEventListener('pointerleave', onLeave);
   svg.addEventListener('contextmenu', noMenu);
 
   // read-only state for tests
-  root.__mirror = () => ({ T, heard, hushed: hushedN, broke, knock: knockState, lag, ready, synthetic, free, hand, taps: taps.map(t => ({ b: t.board, born: +t.born.toFixed(2), beat3: t.beat3, alive: t.alive })), stillUntil, ending });
+  root.__mirror = () => ({ T, heard, hushed: hushedN, broke, knock: knockState, lag, ready, synthetic, free, hand, taps: taps.map(t => ({ b: t.board, born: +t.born.toFixed(2), beat3: t.beat3, alive: t.alive })), stillUntil, ending, hold: hold && { board: hold.board, charged: hold.charged }, voices: audio.voices });
   loadGhost();
   raf = requestAnimationFrame(frame);
   return () => {
@@ -1620,7 +1572,8 @@ function mountBurial(stage, api) {
     if (ro) ro.disconnect();
     svg.removeEventListener('pointerdown', onDown);
     svg.removeEventListener('pointerup', onUp);
-    svg.removeEventListener('pointercancel', onUp);
+    svg.removeEventListener('pointercancel', onCancel);
+    document.removeEventListener('visibilitychange', onVisibility);
     svg.removeEventListener('pointermove', onMove);
     svg.removeEventListener('pointerleave', onLeave);
     svg.removeEventListener('contextmenu', noMenu);

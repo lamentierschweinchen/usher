@@ -18,7 +18,7 @@ From the Usher coordinator to the composer/sound designer's coordinator. Lukas m
 
 If nothing answers on 8300: `cd game && python3 -m http.server 8300`. ES modules won't load from file://.
 
-**Today's sound.** Only the mirror studio (act two) makes any. Everything is local to `game/games/studio/game.js`, `makeWaltz()`, about lines 1099–1150:
+**Today's sound.** Only the mirror studio (act two) makes any. Everything is local to the studio: `makeWaltz()` in `game/games/studio/waltz.js` (its lifecycle and tests: `LIFECYCLE-REVIEW.md`):
 - **A synthesised Karplus–Strong waltz:**
   - A 4-bar loop: C | G7 | G7 | C.
   - Bass on beat one; chords on beats two and three, with three louder (0.34 vs 0.2).
