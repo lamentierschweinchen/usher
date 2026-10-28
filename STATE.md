@@ -7,8 +7,8 @@
 - The bible folds in the first-timer review: act one is about 52 min, act two about 28, and the hinge interrupts.
 - **Audio:** at Lukas's request a composer/sound designer is starting under another coordinator. Handoff: work/audio/COORDINATION-HANDOFF.md. They deliver to `work/audio/handoff/`; we integrate into `game/`. Their audit's lifecycle and input faults are fixed and tested (work/audio/LIFECYCLE-REVIEW.md). Lukas rejected their first delivery; a new 1:45 character-led cue is a private audition, not for integration or publication until he accepts the direction, and the studio will need its own clock-aligned arrangement. Sound defaults unchanged. Preview servers are loopback-only (work/audio/LOOPBACK-RECEIPT.md).
 
-**Open with Lukas:** the bible's five calls: (1) it was Roderick's turn below; (2) "the yet unscrewed lid" as a flagged misreading; (3) no retries; (4) act two about 28 min; (5) music on after the first tap, with a mute.
+**Open with Lukas:** seven calls on the journey page (work/fullgame/JOURNEY.html): the bible's five, (1) it was Roderick's turn below, (2) "the yet unscrewed lid" as a flagged misreading, (3) no retries, (4) act one about 52 min and act two about 28, (5) music on after the first tap, with a mute; and two from the coordinator's read, (6) act two is the same evening from below, with catalepsy as the custom, (7) the premise in three sentences, guaranteed in act one.
 
-**Next:** M2 (the spine both ways: interludes, letter, Nevertheless, tarn both ways). The lead designer is writing work/fullgame/MILESTONE-2.md on the bible's recommended answers to calls 1, 3 and 4, each marked so a different ruling flips cheaply; then the spine and tarn builders start in parallel. Lukas's own M1 playthrough and his five calls can land any time before the build. Then on through M9.
+**Next:** Lukas settles the dramaturgy first, from the journey page (the whole game on one sheet), then comments on the first games. The M2 spec is paused until then. After that: M2 (the spine both ways), and on through M9.
 
 **Rules:** builders don't commit; the coordinator checkpoints to public `main`, github.com/lamentierschweinchen/usher.

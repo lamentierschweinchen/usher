@@ -1,0 +1,511 @@
+<title>Usher: the Journey</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: the stage over its reflection. Each chapter is one plate: the lit house above (act one, the guest), a waterline, the tarn below (act two, Madeline). One column. */
+:root {
+  --cut: #0b0809;       /* black paper: the ground */
+  --paper: #ede2cb;     /* type */
+  --paper-dim: #b3a78f; /* secondary type */
+  --lamp: #f7d894;      /* calls, lit windows */
+  --glass: #13122a;     /* the tarn */
+  --gauze: #d8d0e6;     /* Madeline's side */
+  --red: #e0392b;       /* "not so", and nothing else */
+  --rule: rgba(237, 226, 203, .16);
+  --display: 'IM Fell English', Georgia, 'Times New Roman', serif;
+  --sc: 'IM Fell English SC', 'IM Fell English', Georgia, serif;
+  --body: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--cut); color: var(--paper); font: 17px/1.62 var(--body); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+em, i { font-style: italic; }
+a { color: var(--lamp); text-underline-offset: .18em; }
+a:focus-visible { outline: 2px solid var(--lamp); outline-offset: 2px; }
+.red { color: var(--red); }
+.eyebrow { font-family: var(--sc); letter-spacing: .08em; font-size: 15px; color: var(--paper-dim); }
+
+/* ---- the hero: house, waterline, reflection ---- */
+.hero .sky { background: linear-gradient(180deg, #1d1530 0%, #352646 26%, #6a4462 52%, #b46f5c 76%, #e3a157 92%, #f4cf86 100%); }
+.hero .sky .wrap { padding-block: 44px 0; display: grid; gap: 14px; }
+.hero h1 { font-size: clamp(36px, 7.4vw, 66px); line-height: 1.02; color: var(--paper); }
+.hero .lede-small { color: #d9c9b4; font-family: var(--display); font-style: italic; font-size: 19px; }
+.house { display: block; width: 100%; height: auto; margin-top: 18px; }
+.hero .tarn { background: linear-gradient(180deg, #1a1834 0%, var(--glass) 40%, #0c0b1b 100%); border-top: 1px solid rgba(243, 219, 162, .55); }
+.hero .tarn .wrap { padding-block: 0 40px; display: grid; gap: 10px; }
+.reflection { display: block; width: 100%; height: auto; filter: url(#ripple); opacity: .9; }
+.reflected { font-family: var(--display); font-size: clamp(36px, 7.4vw, 66px); line-height: 1.02; color: rgba(237, 226, 203, .5); transform: scaleY(-1); filter: url(#ripple); }
+.reflected .red { color: var(--red); }
+
+.intro { padding-block: 36px 8px; display: grid; gap: 18px; }
+.intro .lede { font-size: 20px; line-height: 1.55; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 20px; font-family: var(--sc); letter-spacing: .06em; color: var(--paper-dim); font-size: 15px; border-block: 1px solid var(--rule); padding-block: 10px; }
+.facts b { color: var(--paper); font-weight: 400; }
+.jump { color: var(--paper-dim); font-size: 15px; }
+
+/* ---- sections ---- */
+section { padding-block: 44px 8px; display: grid; gap: 18px; }
+section > h2 { font-size: clamp(28px, 5vw, 38px); line-height: 1.1; }
+.prose { display: grid; gap: 14px; max-width: 66ch; }
+.move { display: grid; grid-template-columns: 9.5rem 1fr; gap: 6px 18px; padding-block: 14px; border-top: 1px solid var(--rule); }
+.move:last-child { border-bottom: 1px solid var(--rule); }
+.move h3 { font-size: 21px; line-height: 1.2; }
+.move .len { display: block; font-family: var(--sc); font-size: 14px; letter-spacing: .06em; color: var(--paper-dim); margin-top: 2px; }
+.move > div { min-width: 0; }
+.secret { background: var(--glass); border: 1px solid rgba(216, 208, 230, .18); padding: 20px 22px; display: grid; gap: 12px; color: var(--gauze); }
+.secret h3 { font-size: 22px; color: var(--paper); }
+.call { font-family: var(--sc); font-size: 13px; letter-spacing: .05em; color: var(--lamp); white-space: nowrap; text-decoration: none; border: 1px solid rgba(247, 216, 148, .45); padding: 0 5px 1px; margin-left: 2px; vertical-align: 1px; }
+.call:hover { background: rgba(247, 216, 148, .12); }
+
+/* ---- the shape ---- */
+.chart { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.chart svg { display: block; min-width: 680px; width: 100%; height: auto; }
+.chart text { font-family: var(--display); }
+.legend { color: var(--paper-dim); font-size: 15px; max-width: 66ch; }
+
+/* ---- the journey: plates ---- */
+.journey-note { color: var(--paper-dim); max-width: 66ch; }
+.plates { display: grid; gap: 22px; }
+.plate { border: 1px solid var(--rule); overflow: hidden; }
+.plate-head { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 16px; align-items: center; padding: 14px 18px; background: var(--sky); color: var(--paper); }
+.plate-head .num { font-family: var(--display); font-size: 40px; line-height: 1; min-width: 1.4em; }
+.plate-head h3 { font-size: 23px; line-height: 1.15; font-style: italic; }
+.plate-head .game { font-family: var(--sc); font-size: 14px; letter-spacing: .06em; color: rgba(237, 226, 203, .8); }
+.plate-head > div { min-width: 0; }
+.chip { font-family: var(--sc); font-size: 13px; letter-spacing: .05em; padding: 1px 8px 2px; border: 1px solid rgba(237, 226, 203, .5); color: var(--paper); background: rgba(11, 8, 9, .35); white-space: nowrap; }
+.chip.built { border-color: var(--lamp); color: var(--lamp); }
+.half { padding: 16px 18px 18px; display: grid; gap: 10px; }
+.half .side { font-family: var(--sc); font-size: 14px; letter-spacing: .08em; color: var(--paper-dim); }
+.above { background: #15100f; }
+.waterline { height: 1px; background: rgba(243, 219, 162, .55); }
+.below { background: var(--glass); color: var(--gauze); }
+.below .side { color: #9d93b7; }
+.beats { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 2px 0 0; font-size: 15.5px; }
+.beats dt { font-family: var(--sc); letter-spacing: .05em; color: var(--paper-dim); }
+.beats dd { margin: 0; min-width: 0; }
+.reveal { border-left: 2px solid var(--red); padding-left: 12px; }
+.reveal b { font-family: var(--sc); font-weight: 400; letter-spacing: .06em; color: var(--paper); margin-right: 6px; }
+.quote { font-family: var(--display); font-style: italic; font-size: 18px; }
+
+.entr { display: grid; grid-template-columns: 9.5rem 1fr; gap: 4px 18px; padding: 4px 4px; color: var(--paper-dim); font-size: 15.5px; }
+.entr h4 { margin: 0; font-family: var(--sc); font-weight: 400; letter-spacing: .06em; font-size: 15px; color: var(--paper); }
+.entr .len { display: block; font-size: 13px; }
+.entr > div { min-width: 0; }
+.entr .below-note { color: #a49cbd; }
+
+/* ---- endings ---- */
+.slots { display: grid; gap: 0; }
+.slot { display: grid; grid-template-columns: 3.2rem 1fr; gap: 4px 16px; padding-block: 14px; border-top: 1px solid var(--rule); }
+.slot:last-child { border-bottom: 1px solid var(--rule); }
+.slot .n { font-family: var(--display); font-size: 30px; line-height: 1; border: 1px solid var(--rule); width: 2.6rem; height: 2.6rem; display: grid; place-items: center; }
+.slot h3 { font-size: 21px; }
+.slot h3 small { font-family: var(--sc); font-size: 14px; letter-spacing: .05em; color: var(--paper-dim); margin-left: 6px; }
+.slot > div { min-width: 0; display: grid; gap: 4px; }
+.slot .last { font-family: var(--display); font-style: italic; color: var(--paper-dim); }
+
+/* ---- witnesses ---- */
+.witnesses { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+.witness { padding-block: 10px; border-top: 1px solid var(--rule); display: grid; gap: 2px; font-size: 15.5px; }
+.witness h4 { margin: 0; font-family: var(--sc); font-weight: 400; letter-spacing: .06em; font-size: 16px; }
+.witness .tell { color: var(--paper-dim); font-style: italic; }
+
+/* ---- my read, and the calls ---- */
+.read { display: grid; gap: 16px; counter-reset: read; }
+.read article { display: grid; gap: 8px; padding: 18px 20px; border: 1px solid var(--rule); background: #15100f; }
+.read h3 { font-size: 22px; line-height: 1.2; }
+.read .rec { border-left: 2px solid var(--lamp); padding-left: 12px; }
+.read .rec b { font-family: var(--sc); font-weight: 400; letter-spacing: .06em; color: var(--lamp); margin-right: 6px; }
+.calls { display: grid; gap: 0; padding: 0; margin: 0; list-style: none; }
+.calls li { display: grid; grid-template-columns: 2.2rem 1fr; gap: 4px 12px; padding-block: 12px; border-top: 1px solid var(--rule); }
+.calls li:last-child { border-bottom: 1px solid var(--rule); }
+.calls .n { font-family: var(--display); font-size: 24px; line-height: 1.1; color: var(--lamp); }
+.calls h4 { margin: 0; font-family: var(--body); font-weight: 600; font-size: 17px; }
+.calls .why { color: var(--paper-dim); font-size: 15.5px; }
+.calls .group { font-family: var(--sc); letter-spacing: .07em; color: var(--paper-dim); font-size: 15px; padding-top: 18px; border-top: 0; display: block; }
+footer { padding-block: 40px 56px; color: var(--paper-dim); font-size: 14px; }
+
+@media (max-width: 560px) {
+  body { font-size: 16.5px; }
+  .move, .entr { grid-template-columns: 1fr; }
+  .witnesses { grid-template-columns: 1fr; }
+  .plate-head { grid-template-columns: auto 1fr; }
+  .plate-head .chip { grid-column: 1 / -1; justify-self: start; }
+  .beats { grid-template-columns: 1fr; gap: 0; }
+  .beats dd { margin-bottom: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="ripple" x="-5%" y="-10%" width="110%" height="120%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.008 0.16" numOctaves="1" seed="4"/>
+    <feDisplacementMap in="SourceGraphic" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <defs>
+    <g id="house">
+      <polygon points="150,170 150,98 186,66 222,98 222,170"/>
+      <polygon points="378,170 378,98 414,66 450,98 450,170"/>
+      <rect x="168" y="84" width="264" height="86"/>
+      <polygon points="166,86 300,56 434,86"/>
+      <rect x="280" y="40" width="40" height="130"/>
+      <polygon points="274,42 300,12 326,42"/>
+      <rect x="206" y="56" width="9" height="24"/>
+      <rect x="392" y="54" width="9" height="26"/>
+      <rect x="0" y="166" width="600" height="4"/>
+    </g>
+  </defs>
+</svg>
+
+<header class="hero">
+  <div class="sky">
+    <div class="wrap">
+      <p class="eyebrow">Usher · the whole journey, to settle the dramaturgy</p>
+      <h1>A Sojourn of Some Weeks</h1>
+      <p class="lede-small">a game in two acts, after Poe</p>
+      <svg class="house" viewBox="0 0 600 170" role="img" aria-label="The house of Usher in black paper against a dusk sky, a red fissure running down it, a dead tree standing beside it">
+        <use href="#house" fill="#0b0809"/>
+        <g fill="#f7d894">
+          <rect x="188" y="108" width="8" height="14"/><rect x="352" y="108" width="8" height="14"/><rect x="376" y="108" width="8" height="14"/><rect x="295" y="62" width="10" height="16"/>
+        </g>
+        <polyline points="322,56 317,74 326,92 315,112 324,132 313,152 318,170" fill="none" stroke="#e0392b" stroke-width="1.8" stroke-linejoin="round"/>
+        <g stroke="#0b0809" stroke-width="4" stroke-linecap="round" fill="none">
+          <path d="M92 168 L98 96"/><path d="M96 116 L76 96"/><path d="M97 104 L118 88"/><path d="M95 130 L113 120"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="tarn">
+    <div class="wrap">
+      <svg class="reflection" viewBox="0 0 600 170" role="img" aria-label="Its reflection in the tarn: one more window lit, and the tree already fallen">
+        <g transform="translate(0,170) scale(1,-1)">
+          <use href="#house" fill="#050409"/>
+          <g fill="rgba(247,216,148,.55)">
+            <rect x="188" y="108" width="8" height="14"/><rect x="352" y="108" width="8" height="14"/><rect x="376" y="108" width="8" height="14"/><rect x="295" y="62" width="10" height="16"/>
+            <rect x="240" y="108" width="8" height="14"/>
+          </g>
+          <polyline points="322,56 317,74 326,92 315,112 324,132 313,152 318,170" fill="none" stroke="rgba(224,57,43,.75)" stroke-width="1.8" stroke-linejoin="round"/>
+        </g>
+        <g stroke="#050409" stroke-width="4" stroke-linecap="round" fill="none">
+          <path d="M40 8 L112 14"/><path d="M70 10 L58 28"/><path d="M88 12 L102 30"/>
+        </g>
+      </svg>
+      <p class="reflected" aria-label="A Burial of Some Weeks">A <span class="red">Burial</span> of Some Weeks</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap intro">
+    <p class="lede">You come to a strange house to cheer up an old friend, and you're very good at explaining things away. For an evening the house, its reflection, your diary and everyone in it mislead you, each in one consistent way you can learn to see through. Then the house turns over. You become the woman you explained away, playing from under the floor against a recording of your own evening, and what she does decides how it ends.</p>
+    <p class="facts"><span><b>82</b> minutes</span><span><b>2</b> acts</span><span><b>7</b> chapters, each played twice</span><span><b>5</b> endings</span><span>built so far: the studio, both ways</span></p>
+    <p class="jump">This is the bible of 27 October laid out as one journey. My read and the seven things to settle are at the end: <a href="#read">jump there</a>.</p>
+  </div>
+
+  <section class="wrap" id="story">
+    <p class="eyebrow">The story</p>
+    <h2>Three moves</h2>
+    <div>
+      <div class="move">
+        <div><h3>Act one</h3><span class="len">A Sojourn of Some Weeks · 52 min</span></div>
+        <div class="prose"><p>You are the guest. Roderick Usher's frantic letter brings you to a house over a black tarn, and the tarn shows the house upside down and not quite the same. You play Poe's tale as the guest would tell it: you spot what's wrong, then explain it away, and your diary, the Account, writes it down. His sister Madeline crosses rooms without noticing you. She collapses, is laid in the vault, and you help screw down the lid. Some nights later the house falls and you ride away. All evening, you were being recorded.</p></div>
+      </div>
+      <div class="move">
+        <div><h3>The hinge</h3><span class="len">1 min</span></div>
+        <div class="prose"><p>The Account's last line writes itself: <i>Cheerfulness of my society: considerable.</i> Before you can tap, a back-slanted red hand strikes it. The curtain drops, the stage turns by itself, and <b>Nevertheless.</b> appears on the turned side. <a class="call" href="#c4">call 4</a></p></div>
+      </div>
+      <div class="move">
+        <div><h3>Act two</h3><span class="len">A Burial of Some Weeks · 28 min</span></div>
+        <div class="prose"><p>You are Madeline, under the floor, in the reflected house. Every chapter turns over. You play against a ghost of your own evening, which answers you with your old excuses. Each turn opens on a reveal and strikes one line of the Account, rewritten in her red. What she does, and what you did above, picks one of five endings.</p></div>
+      </div>
+    </div>
+
+    <div class="secret">
+      <p class="eyebrow">What really happened</p>
+      <h3>The secret</h3>
+      <p>The Ushers come in twins, and the house stands only while one of each pair lives below, in its reflection. At "the fortnight" the chosen twin is laid in the vault with the lid unscrewed: a fortnight to change their mind, then the way closes. A guest is always invited, to carry the coffin and to write it all up as a death. This time it was Roderick's turn. He sent his sister, <a class="call" href="#c1">call 1</a> and you screwed the lid down, taking her fortnight. She came up anyway, early. With nobody below, the house falls.</p>
+      <p><i>Left open on purpose:</i> did she go down for him meaning to stay, or to make him follow? And is the valet the house?</p>
+    </div>
+  </section>
+
+  <section class="wrap" id="shape">
+    <p class="eyebrow">The shape</p>
+    <h2>Eighty-two minutes, to scale</h2>
+    <div class="chart">
+      <svg viewBox="0 0 1000 172" role="img" aria-label="Timeline of the 82 minutes. Act one, 52 minutes, runs above the waterline: letter 3, tarn 5, interlude 2, door 5, gallery 3, studio 6, collapse 1, burial 7, nights 6, supper 1.5, trist 5, library 2.5, flight 4, Account 1. The hinge, 1 minute, crosses the waterline. Act two, 28 minutes, runs below it: tarn 2, interlude 1, door 2, interlude 1, studio 4, burial 5, nights 3, trist 4, interlude 1, flight and ending 5. Then the ending slots, 1 minute.">
+        <g fill="#b3a78f" font-size="13" text-anchor="middle">
+          <text x="60" y="22">0</text><text x="173.4" y="22">10</text><text x="286.8" y="22">20</text><text x="400.2" y="22">30</text><text x="513.6" y="22">40</text><text x="627.1" y="22">50</text><text x="740.5" y="22">60</text><text x="853.9" y="22">70</text><text x="967.3" y="22">80 min</text>
+        </g>
+        <g stroke="rgba(237,226,203,.3)" stroke-width="1">
+          <line x1="60" y1="27" x2="60" y2="34"/><line x1="173.4" y1="27" x2="173.4" y2="34"/><line x1="286.8" y1="27" x2="286.8" y2="34"/><line x1="400.2" y1="27" x2="400.2" y2="34"/><line x1="513.6" y1="27" x2="513.6" y2="34"/><line x1="627.1" y1="27" x2="627.1" y2="34"/><line x1="740.5" y1="27" x2="740.5" y2="34"/><line x1="853.9" y1="27" x2="853.9" y2="34"/><line x1="967.3" y1="27" x2="967.3" y2="34"/>
+        </g>
+        <rect x="60" y="95" width="930" height="62" fill="#13122a"/>
+        <g font-size="14" fill="#b3a78f" text-anchor="end">
+          <text x="52" y="72">above</text><text x="52" y="130">below</text>
+        </g>
+        <!-- act one, above the waterline -->
+        <g>
+          <rect x="60.5" y="40" width="33" height="52" fill="rgba(237,226,203,.22)"/>
+          <rect x="94.5" y="40" width="55.7" height="52" fill="#b46f5c"/>
+          <rect x="151.2" y="40" width="21.7" height="52" fill="rgba(237,226,203,.22)"/>
+          <rect x="173.9" y="40" width="55.7" height="52" fill="#7d5f92"/>
+          <rect x="230.6" y="40" width="33" height="52" fill="rgba(237,226,203,.22)"/>
+          <rect x="264.6" y="40" width="67.1" height="52" fill="#cf8752"/>
+          <rect x="332.7" y="40" width="10.3" height="52" fill="rgba(237,226,203,.22)"/>
+          <rect x="344" y="40" width="78.4" height="52" fill="#7a5a40"/>
+          <rect x="423.4" y="40" width="67.1" height="52" fill="#2f4a80"/>
+          <rect x="491.5" y="40" width="16" height="52" fill="rgba(237,226,203,.22)"/>
+          <rect x="508.5" y="40" width="55.7" height="52" fill="#6a5a8e"/>
+          <rect x="565.2" y="40" width="27.3" height="52" fill="rgba(237,226,203,.22)"/>
+          <rect x="593.5" y="40" width="44.4" height="52" fill="#7a2a22"/>
+          <rect x="638.9" y="40" width="10.3" height="52" fill="rgba(237,226,203,.22)"/>
+        </g>
+        <!-- the hinge crosses the water -->
+        <rect x="650.2" y="40" width="10.4" height="117" fill="#e0392b"/>
+        <!-- act two, below the waterline -->
+        <g>
+          <rect x="661.6" y="98" width="21.7" height="52" fill="#b46f5c" opacity=".6"/>
+          <rect x="684.3" y="98" width="10.3" height="52" fill="rgba(216,208,230,.2)"/>
+          <rect x="695.6" y="98" width="21.7" height="52" fill="#7d5f92" opacity=".6"/>
+          <rect x="718.3" y="98" width="10.3" height="52" fill="rgba(216,208,230,.2)"/>
+          <rect x="729.6" y="98" width="44.4" height="52" fill="#cf8752" opacity=".6"/>
+          <rect x="775" y="98" width="55.7" height="52" fill="#7a5a40" opacity=".6"/>
+          <rect x="831.7" y="98" width="33" height="52" fill="#2f4a80" opacity=".6"/>
+          <rect x="865.7" y="98" width="44.4" height="52" fill="#6a5a8e" opacity=".6"/>
+          <rect x="911.1" y="98" width="10.3" height="52" fill="rgba(216,208,230,.2)"/>
+          <rect x="922.4" y="98" width="55.7" height="52" fill="#7a2a22" opacity=".75"/>
+          <rect x="979.1" y="98" width="10.4" height="52" fill="rgba(237,226,203,.5)"/>
+        </g>
+        <line x1="60" y1="95" x2="990" y2="95" stroke="rgba(243,219,162,.6)" stroke-width="1"/>
+        <g font-size="19" text-anchor="middle" fill="#0b0809">
+          <text x="122.4" y="72">I</text><text x="201.8" y="72">II</text><text x="298.2" y="72">III</text><text x="383.2" y="72">IV</text>
+          <text x="457" y="72" fill="#ede2cb">V</text><text x="536.4" y="72" fill="#ede2cb">VI</text><text x="615.7" y="72" fill="#ede2cb">VII</text>
+        </g>
+        <g font-size="15" text-anchor="middle" fill="#ede2cb">
+          <text x="672.5" y="129">I</text><text x="706.5" y="129">II</text><text x="751.8" y="129">III</text><text x="802.9" y="129">IV</text><text x="848.2" y="129">V</text><text x="887.9" y="129">VI</text><text x="950.3" y="129">VII</text>
+        </g>
+      </svg>
+    </div>
+    <p class="legend">Act one runs above the waterline and act two below it, in the same chapter order; the red bar is the hinge. Pale blocks are the scenes between chapters: the letter and arrival, interludes, the gallery, her collapse, the supper, the library, the Account, and at the very end the ending slots.</p>
+  </section>
+
+  <section class="wrap" id="journey">
+    <p class="eyebrow">The journey</p>
+    <h2>Seven chapters, each played twice</h2>
+    <p class="journey-note">Each plate is one chapter: its act-one half above the waterline, its act-two half below. In play, all of act one comes first. Every chapter teaches one liar, ends on one choice, and in act two opens on a reveal that rewrites one line of the Account.</p>
+
+    <div class="plates">
+
+      <div class="entr">
+        <div><h4>The letter and the arrival</h4><span class="len">3 min · above</span></div>
+        <div>Roderick's frantic letter; its P.S. is mirror-written, the water's first trick. <i>Don't look in the tarn. Everyone does.</i> You just did. On the causeway: <i>Turn back.</i> The horse walks on as the band writes <i>Nevertheless, … a sojourn of some weeks</i>, and <b>Nevertheless.</b> becomes the refrain; never press it, and Madeline finds the unused page below. At the door: "Shall I stable him for some weeks, sir?" "A night or two." A peasant: "Twins, the family. Only ever one about."</div>
+      </div>
+
+      <article class="plate" style="--sky: linear-gradient(90deg, #1d1530 0%, #352646 30%, #6a4462 62%, #b46f5c 100%)">
+        <header class="plate-head"><span class="num">I</span><div><h3>A Somewhat Childish Experiment</h3><p class="game">the tarn · 5 min above, 2 below</p></div><span class="chip">act one prototype</span></header>
+        <div class="half above">
+          <p class="side">Above · the guest</p>
+          <p>Spot five differences between the house and its reflection. One find un-finds: the smoke stops, a pale rim pulses once, and you mutter "I'd have sworn." A tree lies fallen only in the water, until the tree above falls: <i>Not wrong. Early.</i> One portrait in a window above, two in the water. The sixth difference is you, taller in the water.</p>
+          <dl class="beats"><dt>Liar taught</dt><dd>The house edits.</dd><dt>Trick</dt><dd>It cheats.</dd><dt>Choice</dt><dd>Claim the vanity, and the Account answers in red: <i>Say, rather: 5.</i></dd></dl>
+        </div>
+        <div class="waterline"></div>
+        <div class="half below">
+          <p class="side">Below · Madeline</p>
+          <p>She plays spot-the-difference on you. To her it's one house, <i>0 differences</i>, and she stops the smoke so you'll look twice.</p>
+          <p class="reveal"><b>Reveal</b>The cheat was hers.</p>
+        </div>
+      </article>
+
+      <div class="entr">
+        <div><h4>The first interlude</h4><span class="len">2 min · above</span></div>
+        <div>The interlude verbs, taught here. Pin a difference in both halves, then explain it with an excuse card (<i>the draperies</i>, <i>the storm</i>, <i>catalepsy</i>, <i>family custom</i>, <i>merely electrical phenomena</i>, <i>coincidence</i>) or leave it be, and it goes on the Account's back page, <i>Unaccounted for</i>. Dither ten seconds and the guest explains it for you, in paler ink marked <i>m.</i> In the water's window a figure looks up. On the stair, the physician, lit from below: "If the sister dies, send for me. Before anyone does anything."
+          <p class="below-note" style="margin-top:6px">Below, each interlude is about a minute: Madeline walks the reflected house, where your excuses are things in her way and what you left be is an open door. Knock where an excuse can't reach, and the wall gives.</p></div>
+      </div>
+
+      <article class="plate" style="--sky: linear-gradient(90deg, #120e22 0%, #2a1f44 34%, #4b3566 66%, #7d5f92 100%)">
+        <header class="plate-head"><span class="num">II</span><div><h3>A Mere Different Arrangement</h3><p class="game">the door · 5 min above, 2 below</p></div><span class="chip">act one prototype</span></header>
+        <div class="half above">
+          <p class="side">Above · the guest</p>
+          <p>"The family don't use the door, sir." "Then how do they get out?" Drag her, the gap, along the crack to open the façade. On a second façade the water swaps sides, so the true branch looks wrong. Idle, and the house sets a stone wrong. On the last façade: a whole house, or her shorter route.</p>
+          <dl class="beats"><dt>Liar taught</dt><dd>The tarn mirrors.</dd><dt>Trick</dt><dd>It steers you.</dd><dt>Choice</dt><dd>The long route or the short.</dd></dl>
+        </div>
+        <div class="waterline"></div>
+        <div class="half below">
+          <p class="side">Below · Madeline</p>
+          <p>Your recorded drags slide stones into her way.</p>
+          <p class="reveal"><b>Reveal</b><i>P.S. in the hand of M.U.</i> She wanted a guest who looks; he wanted one who never hears.</p>
+        </div>
+      </article>
+
+      <div class="entr">
+        <div><h4>The gallery</h4><span class="len">3 min · above</span></div>
+        <div>Portraits hang in pairs, and each house shows the twin who lives in it. Drag the previous pair's water face into <i>___ went down</i>, and the physician on the stair says, without turning: "Twelve days. I counted." In the newest pair, Madeline's face above is wet black paint; in the water, Roderick's shows.</div>
+      </div>
+
+      <article class="plate" style="--sky: linear-gradient(90deg, #1f1630 0%, #4a3150 34%, #8e5560 68%, #cf8752 100%)">
+        <header class="plate-head"><span class="num">III</span><div><h3>The Cheerfulness of My Society</h3><p class="game">the studio · 6 min above, 4 below</p></div><span class="chip built">both ways built</span></header>
+        <div class="half above">
+          <p class="side">Above · the guest</p>
+          <p>Roderick plays, and the world torments him: sun, rose, band, a tapping. Hush the torments for him. A spared tap buys a stanza, because he sings only in silence. Before the KNOCK, he asks: "You'd tell me if you heard anything?"</p>
+          <dl class="beats"><dt>Liar taught</dt><dd>Roderick omits.</dd><dt>Trick</dt><dd>It rewards the wrong thing.</dd><dt>Choice</dt><dd>Hush the KNOCK, or not.</dd></dl>
+        </div>
+        <div class="waterline"></div>
+        <div class="half below">
+          <p class="side">Below · Madeline</p>
+          <p>She taps on beat three of his waltz, from under the floor, and your recorded hand hushes her exactly as it hushed then. Get three taps heard and the recording breaks; then hold a board for a bar and KNOCK.</p>
+        </div>
+      </article>
+
+      <div class="entr">
+        <div><h4>Her collapse</h4><span class="len">1 min · above</span></div>
+        <div>Madeline crosses the gallery and falls. The physician kneels: "Catalepsy. A trance that passes for death. It passes." Roderick: "She is dead." He says it twice.</div>
+      </div>
+
+      <article class="plate" style="--sky: linear-gradient(90deg, #0b0f11 0%, #1c2526 34%, #3a3f39 64%, #7a5a40 100%)">
+        <header class="plate-head"><span class="num">IV</span><div><h3>A Harmless Precaution</h3><p class="game">the burial · 7 min above, 5 below</p></div><span class="chip">act one prototype</span></header>
+        <div class="half above">
+          <p class="side">Above · the guest</p>
+          <p>Lure the physician away with your footsteps. A third pair of feet lifts the coffin: "You've got the heavy end?" "I thought you had." The old lids in the vault have screw holes and no screws. Roderick: "It's in the book: <i>the yet unscrewed lid</i>." You: "'Yet' means not yet." "Not in this house." <a class="call" href="#c2">call 2</a> Then the screws, a visible choice: after the third the screwdriver stops, the physician says from the vault door "Before anyone does anything," and Roderick's hands go to his ears. Turn the fourth, or walk out.</p>
+          <dl class="beats"><dt>Liar taught</dt><dd>The physician looks guilty.</dd><dt>Trick</dt><dd>It follows you.</dd><dt>Choice</dt><dd>Let him look; three screws or four.</dd></dl>
+        </div>
+        <div class="waterline"></div>
+        <div class="half below">
+          <p class="side">Below · Madeline</p>
+          <p>Carried in the coffin. Push to bear yourself, or kick to bring the physician. Then back out each screw you turned, one per heartbeat.</p>
+          <p class="reveal"><b>Reveal</b>Inside the lid, in her hand: <i>His turn. I went.</i> The screws were the crime, and the third bearer was her.</p>
+        </div>
+      </article>
+
+      <article class="plate" style="--sky: linear-gradient(90deg, #04060f 0%, #0b1430 40%, #1a2c5a 74%, #2f4a80 100%)">
+        <header class="plate-head"><span class="num">V</span><div><h3>The Seventh or Eighth Night</h3><p class="game">the nights · 6 min above, 3 below</p></div><span class="chip">act one prototype</span></header>
+        <div class="half above">
+          <p class="side">Above · the guest</p>
+          <p>Sleepless nights. Noises arrive as slips, and you stamp each one with an excuse card; your cards are the excuses you played in the interludes. Stay up past a slip to catch the valet's copperplate rewriting it. Then Roderick at the lamp. If he has had two true lines from you, he says it: "It was my turn. She went instead."</p>
+          <dl class="beats"><dt>Liar taught</dt><dd>The evidence agrees.</dd><dt>Trick</dt><dd>The evidence agrees.</dd><dt>Choice</dt><dd>What goes unaccounted for.</dd></dl>
+        </div>
+        <div class="waterline"></div>
+        <div class="half below">
+          <p class="side">Below · Madeline</p>
+          <p>The same desk from the smuggler's side: she forges noises your cards can't stamp, while the cards wear down from <i>coincidence</i> to <i>most extraordinary coincidence</i> to blank.</p>
+        </div>
+      </article>
+
+      <div class="entr">
+        <div><h4>The supper</h4><span class="len">1.5 min · above</span></div>
+        <div>Roderick reads one line of your Account and edits you: "Strike 'creaked'. Too loud."</div>
+      </div>
+
+      <article class="plate" style="--sky: linear-gradient(90deg, #0f0d1e 0%, #2c2650 40%, #6a5a8e 80%, #a796bf 100%)">
+        <header class="plate-head"><span class="num">VI</span><div><h3>One of Your Favorite Romances</h3><p class="game">the trist · 5 min above, 4 below</p></div><span class="chip">act one prototype</span></header>
+        <div class="half above">
+          <p class="side">Above · the guest</p>
+          <p>You read Roderick the <i>Mad Trist</i> and draw its blows in six-word captions, and the house echoes each one a moment early. You may close the book ("Go on."). The page doesn't turn: the shield is won, and Roderick sits facing the door.</p>
+          <dl class="beats"><dt>Liar taught</dt><dd>The book echoes.</dd><dt>Trick</dt><dd>It swaps who you are.</dd><dt>Choice</dt><dd>Strike, or let the gust.</dd></dl>
+        </div>
+        <div class="waterline"></div>
+        <div class="half below">
+          <p class="side">Below · Madeline</p>
+          <p>The page turns. Her climb out, on the heartbeat, with your strokes landing on her lid; missed beats cost stairs. At the threshold: strike, or let the gust. Your last excuse files <i>"the rushing gu—"</i> and stops.</p>
+        </div>
+      </article>
+
+      <div class="entr">
+        <div><h4>The library</h4><span class="len">2.5 min · above</span></div>
+        <div>The <i>Vigiliae Mortuorum</i> spells out the custom: <i>a fortnight, the lid unscrewed, a guest to carry and to write.</i>
+          <p class="below-note" style="margin-top:6px">Below, the last reveal before the flight: every generation had a guest. A top hat behind every reflected portrait, and a shelf of <i>An Account of My Sojourn</i> in other hands, each opening with your first line.</p></div>
+      </div>
+
+      <article class="plate" style="--sky: linear-gradient(90deg, #060405 0%, #140b10 34%, #2a1216 64%, #5e2219 100%)">
+        <header class="plate-head"><span class="num">VII</span><div><h3>A Thousand Waters</h3><p class="game">the flight · 4 min above, 5 below</p></div><span class="chip">act one prototype</span></header>
+        <div class="half above">
+          <p class="side">Above · the guest</p>
+          <p>The house is coming down. Flee in three runs, chased by what you hushed, then by your excuses as words, then by her. Looking back freezes them and drops the house faster. Caught, the servant fishes you out: <i>Fell in: once. Say, rather: the tarn gave you back.</i> <a class="call" href="#c3">call 3</a></p>
+          <dl class="beats"><dt>Liar taught</dt><dd>You.</dd><dt>Trick</dt><dd>It remembers.</dd><dt>Choice</dt><dd>Whether to look back.</dd></dl>
+        </div>
+        <div class="waterline"></div>
+        <div class="half below">
+          <p class="side">Below · Madeline</p>
+          <p>She can move only while your recorded self looks back. The house falls upward. Then she chooses: his door, or the causeway.</p>
+        </div>
+      </article>
+
+      <div class="entr">
+        <div><h4>The Account</h4><span class="len">1 min · above</span></div>
+        <div>Your scores read back as a confession, true counts under flattering labels: <i>taps hushed 41 · stones set 8 · Usher: 0</i>. Then the hinge.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="endings">
+    <p class="eyebrow">The endings</p>
+    <h2>Five slots; the first that fits wins</h2>
+    <div class="slots">
+      <div class="slot"><span class="n">1</span><div><h3>A Burial of Some Weeks <small>secret</small></h3><p>You looked down in every interlude and left the fourth screw out. Your recorded glance meets her eye, and the guest goes below instead.</p><p class="last">Guests: one. Say, rather: some weeks.</p></div></div>
+      <div class="slot"><span class="n">2</span><div><h3>The Swap</h3><p>Roderick heard her: you gave him two true lines, or her KNOCK in the studio was heard. He goes down himself. The house stands both ways up, and you ride off none the wiser.</p></div></div>
+      <div class="slot"><span class="n">3</span><div><h3>She Took the Horse</h3><p>Three or more openings (Account lines she struck, plus things you left be), and she lets the gust. She goes past his door to the causeway; he and the house go under.</p><p class="last">It's been some weeks, ma'am.</p></div></div>
+      <div class="slot"><span class="n">4</span><div><h3>The Fall <small>Poe's · the default</small></h3><p>She reaches his door. Nobody is below, and the house goes down.</p></div></div>
+      <div class="slot"><span class="n">5</span><div><h3>Considerable</h3><p>She struck one line of your Account, or none. She never got past you, and stays below; the house stands. You sign the register, and your volume joins the shelf.</p><p class="last">Some weeks, then, sir.</p></div></div>
+    </div>
+    <p class="prose" style="color:var(--paper-dim)">Every ending closes the same way: you drag the title's words into the tarn, which closes over "House of Usher", quotation marks and all. Then the five slots: yours filled, the others hinted (<i>Someone heard her.</i>), beside your Account with the guest's idle lines marked <i>m.</i> <b>Nevertheless.</b> returns to the letter, its P.S. upright now, in her hand.</p>
+  </section>
+
+  <section class="wrap" id="liars">
+    <p class="eyebrow">How it plays you</p>
+    <h2>Everyone lies one way, with one tell</h2>
+    <div class="witnesses">
+      <div class="witness"><h4>Your Account</h4><p>Counts truly, names falsely.</p><p class="tell">merely, naturally, no doubt</p></div>
+      <div class="witness"><h4>The house</h4><p>Edits what you aren't looking at, and keeps your excuses.</p><p class="tell">no lace; nothing old is that clean</p></div>
+      <div class="witness"><h4>The tarn</h4><p>True about everyone but the looker, whom it flatters. It mirrors, and it runs early.</p><p class="tell">if you're in the picture, that part is vanity</p></div>
+      <div class="witness"><h4>Roderick</h4><p>Omits in speech, and sings what he omits.</p><p class="tell">his hands go to his ears</p></div>
+      <div class="witness"><h4>The physician</h4><p>Never lies, but the house lights him from below, like a villain.</p><p class="tell">in the water he's lit from above, and kind</p></div>
+      <div class="witness"><h4>The valet</h4><p>Copies, and whatever passes through him comes back tidied.</p><p class="tell">copperplate too neat</p></div>
+      <div class="witness"><h4>Madeline</h4><p>Signals, not lies.</p><p class="tell">a gauze rim</p></div>
+      <div class="witness"><h4>Roderick's guitar</h4><p>Your excuses tune it (comfort); each thing you leave be buys one true line (candour). You can't have both at full.</p><p class="tell">act one gets easier, act two harder: your excuses are her walls</p></div>
+    </div>
+    <p class="prose" style="color:var(--paper-dim)"><span class="red">Red</span> means "not so": a disagreement with what's written, never a verdict on who's right.</p>
+  </section>
+
+  <section class="wrap" id="read">
+    <p class="eyebrow">My read</p>
+    <h2>Three things to fix before it's settled</h2>
+    <div class="read">
+      <article>
+        <h3>1. Act two has no clock, and the lore has a gap there</h3>
+        <p>The bible never says when act two happens. Madeline plays the tarn, the door and the studio from below, yet in act one she was still walking about above at those times. The lore has the matching hole: if one twin must always live below, who was down there before her burial?</p>
+        <p class="rec"><b>I'd fix it</b>with one rule that Poe already hands us: catalepsy is the custom. The twin below leaves the body above in a trance, "a trance that passes for death". Madeline went down when the fortnight began, before you arrived, which is why she crosses rooms without noticing you. Act two is that same evening from her side, so every odd thing you saw above was her doing it from below, a little early. The collapse and the burial are the house laying out her body for the guest to write up, and your fourth screw is what really shuts her out. The hinge can carry it in five words: <i>The same evening, from below.</i></p>
+      </article>
+      <article>
+        <h3>2. The premise needs to fit in three sentences</h3>
+        <p>The secret has about eight rules: twins, one below, the fortnight, the unscrewed lid, the guest who writes, whose turn, the physician's twelve days, a guest every generation. The bible says every player gets the premise but doesn't say which part is the premise.</p>
+        <p class="rec"><b>I'd fix it</b>by naming the three sentences a first-timer must be able to say by the hinge, and guaranteeing each on act one's main path. <i>The Ushers are twins, and one of them always lives below, in the reflection. Madeline went down, and was laid in the vault with the lid unscrewed so she could come back. I screwed it shut.</i> Everything else is reward for looking, never a requirement.</p>
+      </article>
+      <article>
+        <h3>3. The mirror arrives at minute 53</h3>
+        <p>The game's best idea, playing her against your own evening, starts after almost an hour. The title, her crossings, her three edits and the tarn's early pictures promise it, and the hinge only lands if act one was long enough to be worth recording.</p>
+        <p class="rec"><b>I'd keep</b>the shape and let your first playthrough judge it. If act one drags, cut act one before adding anything, rather than moving the turn earlier.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap" id="settle">
+    <p class="eyebrow">To settle</p>
+    <h2>Seven calls, each with my recommendation</h2>
+    <ol class="calls">
+      <li class="group">From the bible</li>
+      <li id="c1"><span class="n">1</span><div><h4>Whose turn was it? Roderick's: he sent his sister.</h4><p class="why">Recommend yes. Every player reads it in her hand (<i>His turn. I went.</i>); her motive stays open, the premise doesn't.</p></div></li>
+      <li id="c2"><span class="n">2</span><div><h4>"The yet unscrewed lid" read wrongly on purpose, and flagged.</h4><p class="why">Recommend keep. A wink for those who know Poe; "but they screw it down!" is the reader naming the crime.</p></div></li>
+      <li id="c3"><span class="n">3</span><div><h4>No retries anywhere, the flight included. Failure goes in the Account.</h4><p class="why">Recommend yes. It keeps the confession honest.</p></div></li>
+      <li id="c4"><span class="n">4</span><div><h4>Act one about 52 minutes, act two about 28, and a hinge that interrupts.</h4><p class="why">Recommend yes. A finished-looking act one is where a weeknight player stops; the stage turning by itself stops them stopping.</p></div></li>
+      <li id="c5"><span class="n">5</span><div><h4>Music on after the first tap, with a visible mute.</h4><p class="why">Recommend yes, though it can wait for the composer: it isn't dramaturgy, and nothing depends on it.</p></div></li>
+      <li class="group">From this read</li>
+      <li id="c6"><span class="n">6</span><div><h4>Act two is the same evening, from below; catalepsy is the custom.</h4><p class="why">Recommend yes. It closes the lore's gap, gives a first-timer one rule, and makes the act-one oddities her doing.</p></div></li>
+      <li id="c7"><span class="n">7</span><div><h4>The premise is three sentences, guaranteed in act one.</h4><p class="why">Recommend yes. The rest of the secret stays for the curious and for act two's reveals.</p></div></li>
+    </ol>
+  </section>
+</main>
+
+<footer class="wrap">From <i>A Sojourn of Some Weeks: the bible</i> (27 October 2026) and milestone 1. Poe's tale is the 1845 text, in the public domain.</footer>
