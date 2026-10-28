@@ -3,9 +3,10 @@
 //
 // Lifecycle (work/audio/LIFECYCLE-REVIEW.md): the music follows the game clock, never the audio clock.
 // - start(): from a trusted input only. Creates the context once; resumes it whenever it isn't running.
-// - schedule(T, speed): each frame. Nothing is queued unless the context is running. After any stall
-//   (suspended context, interruption, hidden page) the queued voices are cut and the cursor re-anchors to T:
-//   missed beats are skipped, never drained.
+// - schedule(T, speed): each frame. Nothing is queued unless the context is running. A stall (suspended
+//   context, interruption, hidden page) cancels the queued voices the moment it is seen, by a frame or by the
+//   context's statechange, so nothing queued before it can sound after it. The next running frame
+//   re-anchors the cursor to T: missed beats are skipped, never drained.
 // - suspend() / resync(): page hidden / shown. Fades what is sounding, cancels what is queued, halts scheduling.
 // - release(): the ending. Cancels queued notes and lets the ones already sounding ring out. No more music.
 // - close(): disposal. Stops every voice and closes the context for good.
@@ -41,6 +42,8 @@ export function makeWaltz(enabled, beat, AC = typeof window !== 'undefined' && (
     s.start(v.at);
   }
   // cut voices: queued ones never sound; sounding ones fade over FADE (or are kept, with `keepSounding`)
+  function stall() { stale = true; cut(false); }
+  function onState() { if (!closed && ctx && ctx.state !== 'running') stall(); }
   function cut(keepSounding) {
     if (!ctx) return voices.clear();
     const now = ctx.currentTime;
@@ -63,15 +66,16 @@ export function makeWaltz(enabled, beat, AC = typeof window !== 'undefined' && (
       if (!enabled || closed || !AC) return;
       if (!ctx) {
         try { ctx = new AC(); out = ctx.createGain(); out.gain.value = 0.22; out.connect(ctx.destination); } catch (e) { ctx = null; return; }
+        try { ctx.addEventListener('statechange', onState); } catch (e) { /* frames still see it */ }
       }
       if (ctx.state !== 'running') {
-        stale = true;
+        stall();
         try { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* retried on the next tap */ }
       }
     },
     schedule(T, speed) {
       if (!ctx || held || ended) return;
-      if (!running()) { stale = true; return; }
+      if (!running()) { stall(); return; }
       if (stale) { cut(false); stale = false; nextN = Math.ceil((T - LATE) / beat); }
       if (nextN * beat < T - LATE) nextN = Math.ceil((T - LATE) / beat);
       while (nextN * beat < T + LOOKAHEAD) {

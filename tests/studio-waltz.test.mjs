@@ -24,6 +24,9 @@ function fakeAudio(state = 'running') {
       s.gainNode = null;
       return s;
     },
+    listeners: [],
+    addEventListener(type, fn) { if (type === 'statechange') this.listeners.push(fn); },
+    setState(st) { this.state = st; for (const fn of this.listeners) fn(); },
     resume() { resumes++; return Promise.resolve(); },
     close() { closed = true; return Promise.resolve(); },
   };
@@ -59,18 +62,44 @@ test('on resuming, the cursor re-anchors to the game clock: missed beats are ski
   for (const s of A.sources) assert.ok(Math.abs(s.at - 4.05) < 0.05, 'on time against the resumed clock');
 });
 
-test('voices queued before an interruption never sound after it', () => {
+test('an interruption seen by a frame cancels the queued beat before the clock resumes', () => {
   const A = fakeAudio('running');
   const w = makeWaltz(true, BEAT, A.AC);
   w.start();
-  w.schedule(0.6, 1);                                // beat two, queued ~0.098 s ahead
+  w.schedule(0.60, 1);                               // beat two, queued at audio ≈ .09767
   const queued = A.sources.slice();
   assert.ok(queued.length > 0);
-  A.ctx.state = 'interrupted';                       // e.g. a phone call; the audio clock stops
-  run(w, 0.62, 3);
-  A.ctx.state = 'running';
-  w.schedule(3.01, 1);
-  for (const s of queued) assert.ok(s.stopAt !== null && s.stopAt <= s.at, 'the stale beat is cancelled');
+  A.ctx.currentTime = 0.09;
+  A.ctx.state = 'interrupted';                       // no statechange: only the next frame sees it
+  w.schedule(0.61, 1);
+  A.ctx.state = 'running'; A.ctx.currentTime = 0.2;  // the clock runs on before the first resumed frame
+  for (const s of queued) assert.ok(s.stopAt !== null && s.stopAt <= s.at, 'cancelled while interrupted, never sounds');
+  w.schedule(0.62, 1);
+  const again = A.audible().filter(s => s.at >= 0.2);
+  assert.ok(again.length > 0, 'the first resumed frame queues the beat again');
+  for (const s of again) assert.ok(Math.abs((s.at - 0.2) - (BEAT - 0.62)) < 0.05, 'on the game clock');
+});
+
+test('an interruption with no frame at all (statechange) cancels the queued beat', () => {
+  const A = fakeAudio('running');
+  const w = makeWaltz(true, BEAT, A.AC);
+  w.start();
+  w.schedule(0.60, 1);
+  const queued = A.sources.filter(s => s.at > 0.09);
+  assert.ok(queued.length > 0);
+  A.ctx.currentTime = 0.09;
+  A.ctx.setState('interrupted');                     // between frames: no schedule() call follows
+  A.ctx.setState('running');
+  A.ctx.currentTime = 0.2;                           // past the old note's time, still no frame
+  for (const s of queued) assert.ok(s.stopAt !== null && s.stopAt <= s.at, 'cancelled on the state change');
+});
+
+test('closing fires a statechange that is ignored', () => {
+  const A = fakeAudio('running');
+  const w = makeWaltz(true, BEAT, A.AC);
+  w.start();
+  w.close();
+  assert.doesNotThrow(() => A.ctx.setState('closed'));
 });
 
 test('hidden page: suspend cancels the queued beat, and resync plays it on the game clock', () => {

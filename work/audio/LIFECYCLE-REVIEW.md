@@ -1,5 +1,7 @@
 # Audio lifecycle review: fixes and tests (2026-10-28)
 
+**Status:** fixes at `3f6afab`; the interruption race (finding 1b) at the next commit. No composer asset is cleared for public integration yet, and none is in the repo.
+
 The Usher coordinator's answer to the composer team's `INTEGRATION-REVIEW.md` (read from Lukas's local sound studio; nothing copied from it). It covers the mirror studio's audio and input only.
 
 **Unchanged:**
@@ -16,8 +18,8 @@ No composer assets entered the repo.
     - It creates the context once.
     - It calls `resume()` whenever the context isn't running, so every later tap retries.
   - **`schedule(T, speed)`** queues nothing unless the context is `running`.
-    - After any stall (suspended, interrupted, or hidden), it cuts the voices queued before the stall.
-    - It then re-anchors the cursor to the current `T`. Missed beats are skipped, never drained.
+    - It cancels queued voices **the moment a stall is seen** (suspended, interrupted, or hidden). A frame or the context's `statechange` event can see it, so nothing queued before a stall sounds after it, even if the audio clock resumes before the next frame.
+    - The next running frame re-anchors the cursor to the current `T`. Missed beats are skipped, never drained.
   - **`tap()`** is immediate. It is dropped if the context isn't running, never played late.
   - **`suspend()` / `resync()`** pair with the page hiding and returning:
     - Queued voices are cancelled.
@@ -42,9 +44,10 @@ No composer assets entered the repo.
 
 | # | Audit finding | Reproduced? | Fix | Regression |
 |---|---|---|---|---|
-| 1 | A suspended context piles up voices; no `resume()` | Yes: 35 voices inside 147.8 ms, 0 resume calls (unchanged code, Node VM) | Schedule only while running; `start()` resumes; re-anchor on recovery | `tests/studio-waltz.test.mjs`, tests 1–3 |
-| 2 | Hidden page: a queued beat sounds while hidden, then its visual beat gets none | Yes: beat two queued at audio 0.09767; back at T = 0.65, no note for T = 0.6977 | `visibilitychange` → `suspend()`/`resync()`; the cursor re-anchors | test 4 (the audit's exact case), test 5 (fade) |
-| 3 | End and mute can't stop voices; one schedule after the ending | Yes, by reading: `play()` kept no handles; the frame scheduled after `step()` ended | Voice tracking; `release()` at the ending; `close()` stops all; no schedule once `ending` | tests 6, 8 |
+| 1 | A suspended context piles up voices; no `resume()` | Yes: 35 voices inside 147.8 ms, 0 resume calls (unchanged code, Node VM) | Schedule only while running; `start()` resumes; re-anchor on recovery | `tests/studio-waltz.test.mjs`: suspended, re-anchor |
+| 1b | Follow-up: an interruption was only marked stale, so a note queued at .09767 and interrupted at .09 could sound about 8 ms after resume, before the next frame faded it | Yes: both new regressions failed on `3f6afab` | `stall()` cancels queued voices when a frame sees a non-running context, and on `statechange`; a close's statechange is ignored | The interruption is seen by a frame; by `statechange` alone; on close. Each advances the audio clock past the old note before any resumed frame |
+| 2 | Hidden page: a queued beat sounds while hidden, then its visual beat gets none | Yes: beat two queued at audio 0.09767; back at T = 0.65, no note for T = 0.6977 | `visibilitychange` → `suspend()`/`resync()`; the cursor re-anchors | hidden page (the audit's exact case); suspend fades |
+| 3 | End and mute can't stop voices; one schedule after the ending | Yes, by reading: `play()` kept no handles; the frame scheduled after `step()` ended | Voice tracking; `release()` at the ending; `close()` stops all; no schedule once `ending` | the ending; close |
 | 4 | Decode and codec duties | Not applicable yet: no assets are loaded | Deferred to `score.js` integration (see below) | none |
 | 5 | `pointercancel` can launch a charged KNOCK | Yes: the self-test fails on the old binding (`knock=hushed` after a cancel) | Separate `onCancel` abandons the hold | `game/games/studio/selftest.html` |
 
@@ -54,7 +57,7 @@ No composer assets entered the repo.
 node --test tests/*.test.mjs
 ```
 
-**The Node tests: 10 of 10 pass.**
+**The Node tests: 12 of 12 pass.**
 - The AudioContext double has a hand-set clock and state.
 - Besides the findings above, they check the beat-three accent gains, sound-off, and a dropped tap while suspended.
 
@@ -71,6 +74,13 @@ node --test tests/*.test.mjs
 - On return it resumed (3, then 6 voices) on the game clock. `T` didn't jump while hidden.
 - The console stayed clean.
 - The full entry, `/?chapter=studio&through=studio`, loads clean and resolves `waltz.js`.
+- **The interruption fix, on a real Chromium AudioContext:**
+  - 3 voices queued.
+  - `ctx.suspend()` fired `statechange`, and the voices dropped to 0.
+  - On resume they stayed at 0 for 300 ms with no frame.
+  - The next frame queued the beat again (3).
+  - The game's own music ran at 4–7 voices on the new module, with a clean console.
+- **Reviewer's confirmation:** the `pointercancel` and hidden-page wiring address the original cases (relayed by the composer team, 2026-10-28).
 
 ## Not done, and why
 
