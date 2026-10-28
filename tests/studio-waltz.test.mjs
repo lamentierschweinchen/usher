@@ -137,9 +137,13 @@ test('the ending: queued notes are cancelled, sounding ones ring, and no more mu
   const A = fakeAudio('running');
   const w = makeWaltz(true, BEAT, A.AC);
   w.start();
-  w.schedule(2 * BEAT - 0.05, 1);                    // beat three is queued 0.05 s ahead
-  A.ctx.currentTime = 0.01;
-  const queued = A.sources.filter(s => s.at > 0.01), ringing = A.sources.filter(s => s.at <= 0.01);
+  w.schedule(BEAT - 0.05, 1);                        // beat two, queued at audio .05
+  A.ctx.currentTime = 0.10;                          // ...and now sounding
+  w.schedule(2 * BEAT - 0.05, 1);                    // beat three, queued at audio .15
+  A.ctx.currentTime = 0.12;
+  const queued = A.sources.filter(s => s.at > 0.12), ringing = A.sources.filter(s => s.at <= 0.12);
+  assert.ok(ringing.length > 0, 'a voice is sounding at the ending');
+  assert.ok(queued.length > 0, 'a voice is queued at the ending');
   w.release();
   for (const s of queued) assert.ok(s.stopAt <= s.at);
   for (const s of ringing) assert.equal(s.stopAt, null, 'left to ring into the tableau');

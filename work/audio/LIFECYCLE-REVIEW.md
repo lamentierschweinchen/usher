@@ -1,6 +1,11 @@
 # Audio lifecycle review: fixes and tests (2026-10-28)
 
-**Status:** fixes at `3f6afab`; the interruption race (finding 1b) at the next commit. No composer asset is cleared for public integration yet, and none is in the repo.
+**Status:** complete for this bounded pass.
+- The fixes are at `3f6afab`.
+- The interruption race (finding 1b) is at `93b05e1`.
+- The ending test's correction is at the next commit.
+
+The reviewer's final pass found no runtime blocker. No composer asset is cleared for public integration yet, and none is in the repo.
 
 The Usher coordinator's answer to the composer team's `INTEGRATION-REVIEW.md` (read from Lukas's local sound studio; nothing copied from it). It covers the mirror studio's audio and input only.
 
@@ -58,6 +63,9 @@ node --test tests/*.test.mjs
 ```
 
 **The Node tests: 12 of 12 pass.**
+- **The ending test was corrected after review.** Its "sounding voices ring" check was vacuous: every source started after the clock it was checked against, so nothing was sounding.
+  - Now beat two is sounding and beat three queued when `release()` runs, and the test asserts both sets are non-empty.
+  - To prove it, I temporarily made `release()` cut sounding voices. The test then failed with "left to ring into the tableau"; the code was restored unchanged.
 - The AudioContext double has a hand-set clock and state.
 - Besides the findings above, they check the beat-three accent gains, sound-off, and a dropped tap while suspended.
 
@@ -81,6 +89,7 @@ node --test tests/*.test.mjs
   - The next frame queued the beat again (3).
   - The game's own music ran at 4–7 voices on the new module, with a clean console.
 - **Reviewer's confirmation:** the `pointercancel` and hidden-page wiring address the original cases (relayed by the composer team, 2026-10-28).
+- **The reviewer's final pass** confirms `stall()`/`cut()` close the interruption race, with no new runtime blocker. The composer's listening page and sketches remain private drafts, not cleared for integration or public history.
 
 ## Not done, and why
 
