@@ -19,11 +19,14 @@ html,body{margin:0;background:#e7dcc4;color:#0b0809;font:14px/1.5 ui-monospace,M
 // Regression for work/audio/LIFECYCLE-REVIEW.md, finding 5: in the mirror studio's turn, a pointercancel
 // abandons a charged hold (no KNOCK), while a real pointerup on beat three still launches one.
 // Drives the game on a manual clock with synthetic pointers (so no audio starts). Result: window.__selftest.
+// A browser may run a cached older game.js (python's http.server sends no Cache-Control), so the modules are
+// refetched first, and a build without the fix is reported as such rather than as gameplay failures.
 let now = 0, id = 0, queue = new Map();
 window.requestAnimationFrame = cb => { queue.set(++id, cb); return id; };
 window.cancelAnimationFrame = n => { queue.delete(n); };
 const step = () => { now += 1000 / 60; const cbs = [...queue.values()]; queue = new Map(); cbs.forEach(cb => cb(now)); };
 
+for (const f of ['./game.js', './waltz.js', '../../shared/cuts.js']) { try { await fetch(f, { cache: 'reload' }); } catch (e) { /* the guard below still checks */ } }
 const { default: game } = await import('./game.js');
 const BEAT = 60 / 86, BAR = 3 * BEAT;
 const onBeat3 = t => { const k = Math.round((t - 2 * BEAT) / BAR); return Math.abs(t - (2 * BEAT + k * BAR)) <= 0.2; };
@@ -37,6 +40,13 @@ const root = stage.querySelector('.g-mirror'), svg = root.querySelector('svg'), 
 
 for (let i = 0; i < 200 && !M().ready; i++) { step(); await new Promise(r => setTimeout(r, 10)); }
 check('the ghost loads', M().ready);
+if (!('hold' in M())) {                   // the fix also added `hold` to this read-out
+  const msg = 'STALE BUILD: this page ran a game.js from before the pointercancel fix (likely a cached copy). Clear the cache or reload bypassing it, then rerun.';
+  window.__selftest = { pass: false, stale: true, results: [...results, { name: msg, ok: false }] };
+  out.textContent = 'FAIL\n' + msg;
+  cleanup();
+  throw new Error(msg);
+}
 const until = (pred, max = 60 * 60) => { for (let i = 0; i < max && !pred(); i++) step(); return pred(); };
 until(() => M().T >= 111, 60 * 120);
 
@@ -46,21 +56,21 @@ function pointer(type, board) {
 }
 function chargeOnBeat3(board) {           // press, then hold until charged and inside beat three's window
   for (let tries = 0; tries < 40 && !M().hold; tries++) { pointer('pointerdown', board); if (!M().hold) for (let i = 0; i < 20; i++) step(); }
-  if (!M().hold) return false;
-  return until(() => M().hold && M().hold.charged && onBeat3(M().T), 60 * 8);
+  if (!M().hold) return 'no hold registered';
+  return until(() => M().hold && M().hold.charged && onBeat3(M().T), 60 * 8) ? '' : 'held, but never charged on beat three';
 }
 
 // 1. a cancelled hold, charged and on beat three, must not knock
-const armed1 = chargeOnBeat3(3);
-check('a hold charges in the turn', armed1, `T=${M().T.toFixed(2)}`);
+const why1 = chargeOnBeat3(3);
+check('a hold charges in the turn', !why1, `T=${M().T.toFixed(2)}${why1 ? '; ' + why1 : ''}`);
 pointer('pointercancel', 3);
 check('pointercancel clears the hold', M().hold === null);
 for (let i = 0; i < 60 * 4; i++) step();
 check('a cancelled hold never knocks', M().knock === 'none' && !M().ending, `knock=${M().knock}`);
 
 // 2. the positive control: a real release on beat three launches the KNOCK
-const armed2 = chargeOnBeat3(5);
-check('the knock is still available after a cancel', armed2, `T=${M().T.toFixed(2)}`);
+const why2 = chargeOnBeat3(5);
+check('the knock is still available after a cancel', !why2, `T=${M().T.toFixed(2)}${why2 ? '; ' + why2 : ''}`);
 pointer('pointerup', 5);
 until(() => M().knock !== 'none', 60 * 5);
 check('a release on beat three knocks', M().knock === 'heard' || M().knock === 'hushed', `knock=${M().knock}`);

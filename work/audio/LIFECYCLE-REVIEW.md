@@ -3,9 +3,12 @@
 **Status:** complete for this bounded pass.
 - The fixes are at `3f6afab`.
 - The interruption race (finding 1b) is at `93b05e1`.
-- The ending test's correction is at the next commit.
+- The ending test's correction is at `a58157a`.
+- The self-test's stale-build guard is at the next commit.
 
 The reviewer's final pass found no runtime blocker. No composer asset is cleared for public integration yet, and none is in the repo.
+
+**Still on the integration checklist:** the browser self-test hasn't yet passed in the reviewer's Codex in-app browser (see "The browser self-test, by environment"). It isn't reported as universally passing.
 
 The Usher coordinator's answer to the composer team's `INTEGRATION-REVIEW.md` (read from Lukas's local sound studio; nothing copied from it). It covers the mirror studio's audio and input only.
 
@@ -75,6 +78,41 @@ node --test tests/*.test.mjs
 - Then it charges again and releases on beat three: KNOCK.
 - It prints PASS/FAIL and sets `window.__selftest`.
 - **Result:** PASS on the fix, and FAIL with `pointercancel` temporarily rebound to `onUp`. That rebinding was reverted.
+
+**The browser self-test, by environment (2026-10-28)**
+
+| Browser | Origin | Viewport | Build it ran | Result |
+|---|---|---|---|---|
+| Claude's Chromium pane | localhost:8300 | pane default | current | PASS |
+| Claude's Chromium pane | 127.0.0.1:8300 | narrow (294×265) | current | PASS |
+| Claude's Chromium pane | 127.0.0.1:8300 | 1180×820 | current | PASS |
+| Reviewer's Codex in-app browser | 127.0.0.1:8300 | narrow, and 1180×820 | **pre-fix game.js** (inferred; see below) | FAIL |
+| Claude's Chromium pane, pre-fix game.js served on purpose | 127.0.0.1:8300 | pane default | pre-fix | FAIL, identical to the reviewer's |
+
+**The diagnosis: a stale module in the test environment, not a gameplay defect.**
+- **The reviewer's pattern is only possible on the pre-fix build.**
+  - "No hold" for all 40 presses means `__mirror().hold` was always falsy.
+  - Yet "pointercancel clears the hold" failed, which needs `hold !== null`.
+  - Together, `hold` was `undefined`: the read-out had no `hold` field. That field arrived with the fix in `3f6afab`.
+- **Reproduced exactly.** Serving the pre-fix `game.js` gives their report line for line:
+  - the first hold not charged at T=124.35;
+  - the cancel check failing;
+  - the cancelled hold not knocking (PASS);
+  - the second hold unavailable at T=141.68;
+  - no knock on release.
+- **The mechanism, observed.** python's `http.server` sends no `Cache-Control`, and the browser reused a cached `game.js` without revalidating: 0 bytes transferred while a different file was on disk. `localhost` and `127.0.0.1` are separate caches. A browser that opened `127.0.0.1:8300` before the fix can keep the old module.
+
+**The fix to the self-test** (`selftest.html`; no game code changed):
+- It refetches `game.js`, `waltz.js` and `cuts.js` with `cache: 'reload'` before importing.
+- If the page still runs a build without the fix, it reports `STALE BUILD … clear the cache or reload bypassing it`, instead of five misleading gameplay failures.
+- Failures now say why: "no hold registered" or "held, but never charged on beat three".
+
+**Checked:**
+- A tab whose cache held the pre-fix `game.js` refreshed it and passed.
+- With the pre-fix build on disk, the guard reported STALE BUILD.
+- The current build was restored, unchanged.
+
+**Not verified:** a rerun in the reviewer's Codex browser. That one result decides the checklist item.
 
 **The live check** (Chromium browser pane, the harness at `?mode=burial&fixture=1`, speed 1):
 - A real click on a board started the waltz (1–4 voices).
