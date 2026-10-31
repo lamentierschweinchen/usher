@@ -9,6 +9,6 @@
 
 **Settled 31 Oct:** the journey (work/fullgame/JOURNEY.html) is the dramaturgy, and its seven calls stand as recommended (DECISIONS.md). New standing asks: dialogue and narration in Poe's own language; every recurring element earns its depth or goes; wordplay leans on Poe (double meanings, perhaps palindromes); the shadow cut-outs become a mechanism in at least one game, ideally several; games must prove themselves; the sleepwalking-shadow maze is in the back pocket.
 
-**Next:** the lead designer is writing work/fullgame/MILESTONE-2.md on the depth round: minutes 0–12 in Poe's voice, the first interlude teaching the shadow mechanism (proved on a phone before it spreads), and the tarn both ways. Then the spine and tarn builders start in parallel. Games are built one at a time and must earn their place.
+**Now building M2** (work/fullgame/MILESTONE-2.md, reviewed): the spine session builds package A (engine, shared/arrangement.js, the opening, the first interlude, the hinge); a tarn builder builds package B (the tarn both ways). The shadow stage must pass by touch on a phone before anything is built on it. Open with Lukas: the fissure is red in the water and hers (built that way; a colour, cheap to flip). The first-timer proof is the coordinator's, with Lukas.
 
 **Rules:** builders don't commit; the coordinator checkpoints to public `main`, github.com/lamentierschweinchen/usher.
