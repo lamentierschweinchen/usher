@@ -2,6 +2,26 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-31 — The journey holds; Poe's voice; depth in every element
+
+"i am quite happy with this! i think it has intrigue, it's clever, it's mysterious, it has enough of its own (re-)imagination and the playing from below is quite nice."
+
+"one thing we want to make sure is that the dialogues borrow poe's language as much as possible, and the game also speaks as him. there's a bunch of sample passages that you present that sound flat "His turn. I went." is just boring"
+
+"the games itself also will probably need some revision and prove themselves to be worth playing but not sure if it will change the game very much. we could think of something like guiding a shadow that is sleepwalking by adding stairs and other items that help the "ghost" find its way through a maze as something for our back pocket and explore some other possible scenes and games."
+
+"i'd also think it'd be interesting to use the design of the shadows and cutouts for at least one game or have even a mechanism that is seen across a few games."
+
+"for all aspects, like the "red" as not so, we need to make sure it adds something and isn't just a plain "gotcha" or something that's too simple to be worth an element at all. so for each element, i'd push on depth."
+
+"especially with words and wordplays, game mechanics will be very tricky because being actually clever with words is extremely hard. revising accounts and such exercises will need great care and cleverness that we'll see if you can devise — again here: i think leaning on the actual author will probably yield the greatest results. where we can add is "simple" deceptions like double meanings of words, perhaps palindromes."
+
+"and on the fixes, i agree with you on all, they seem good. we'll go over details scene by scene as we develop the game."
+
+**Settled:** the journey (work/fullgame/JOURNEY.html) is the dramaturgy. Its seven calls stand as recommended: (1) it was Roderick's turn, and he sent his sister; (2) "the yet unscrewed lid" read wrongly on purpose, and flagged; (3) no retries anywhere; (4) act one about 52 min, act two about 28, and a hinge that interrupts; (5) music on after the first tap, with a visible mute; (6) act two is the same evening from below, and catalepsy is the custom; (7) the premise is three sentences, guaranteed in act one. Details are revisited scene by scene.
+
+*Replaced:* the bible's sample lines as text. They're placeholders; the game speaks in Poe's language. Also replaced: any element kept only because it's a neat trick (red, the Account, excuses, wordplay); each must earn its depth.
+
 ## 2026-10-27 — The full game: the Mirror
 
 "i'd follow your recommendation here. we take all the useful and interseting ideas we've collected over these sessions and fold them into the full build. what's interesting gets improved, developed, and included, what's not gets discarded. we think mostly in the interest of a first-time player who isn't really familiar with the book (yet). the literary player delights herself in recognition, inside jokes, but also warm deception, misdirection, and the like."
