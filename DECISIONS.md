@@ -2,6 +2,22 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-31 — The depth round's six calls
+
+"this is good work. agreed on your calls. as said before, building the game will be per-game and we may discover that they aren't earning their place and go deeper or rearrange slightly in order to facilitate the flow of the story. but for now, this seems like good working foundation."
+
+**Settled** (work/depth/DEPTH-ROUND.html; working papers VOICE.md, ELEMENTS.md, SHADOWS.md):
+1. **The voice is Cut-outs:** Poe's sentences cut at his joints; new lines only where he's silent, from his words, under twelve.
+2. **Madeline's hand is the echo:** only the guest's words, only their ends; the lid ("You have put me living in his tomb.") is her one sentence of her own.
+3. **Red is hers alone:** the water disagrees in mirror-writing, Roderick by echo.
+4. **The shadow mechanism is A Mere Different Arrangement** (cut-outs on rods before a lamp; their shadows are what's there; below, light is floor), proved first in the first interlude. The shadow stage is act two's map; the Account is its key.
+5. **Three game changes:** the Sleepwalker replaces the door's slide puzzle (II); the Haunted Palace replaces the one-minute collapse (after III); Its Shadows Alone replaces the flight (VII).
+6. **The verdicts and cuts** as in ELEMENTS.md: deepen red, the Account and the excuse cards (each has a reach); simplify Nevertheless (one job) and the endings (one named act each); cut the unused Nevertheless page, red in three hands, *no lace* and the copperplate as tells, the 6:30 blank, the Account after every chapter, and *family custom*.
+
+Games are built one at a time and must earn their place; any may go deeper or move to help the story flow.
+
+*Replaced:* the bible's red in three hands, its door slide puzzle, one-minute collapse and walking flight, the unused Nevertheless page, the stray tells and the 6:30 blank. Where the bible and work/depth/ disagree, work/depth/ wins.
+
 ## 2026-10-31 — The journey holds; Poe's voice; depth in every element
 
 "i am quite happy with this! i think it has intrigue, it's clever, it's mysterious, it has enough of its own (re-)imagination and the playing from below is quite nice."
