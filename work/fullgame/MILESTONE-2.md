@@ -196,7 +196,7 @@ Needs from B: the tarn's `ghost` declaration, records and note. Until they land,
 ## Coordinator's notes (31 October)
 
 - **Reviewed and accepted** as the build spec. The contract additions in §1 are now in `work/design/CONTRACT.md`.
-- **The fissure:** build it as hers, red in the water, per the designer's recommendation. It's a colour, so a different ruling from Lukas is a cheap flip.
+- **The fissure:** hers, red in the water (Lukas agreed, 31 Oct), and **subtle**: a faint hairline, noticed when you look, never a bold zigzag. Full visual polish comes near the end.
 - **The proof in §7** (a first-timer on a phone, unhelped) is run by the coordinator with Lukas, not by the builders. Builders run every other check.
 - **If `arrangement.html` misses a rod on an upright phone,** enlarge the hit areas before building anything on them; 45 px is the floor, not the target.
 - **Builders don't commit.** The coordinator checkpoints. Preview servers listen on loopback only.

@@ -2,6 +2,12 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-10-31 — The fissure
+
+"the fissure should be more subtle visually by the way (we'll do a full visual polish version closer to the end but sure, it can be "hers" although i'm not sure what that changes?)"
+
+**Settled:** the fissure stays red in the water, as hers, and is drawn more subtly: a faint hairline, noticed when you look. Full visual polish comes near the end.
+
 ## 2026-10-31 — The depth round's six calls
 
 "this is good work. agreed on your calls. as said before, building the game will be per-game and we may discover that they aren't earning their place and go deeper or rearrange slightly in order to facilitate the flow of the story. but for now, this seems like good working foundation."

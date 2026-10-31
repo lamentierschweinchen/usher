@@ -9,6 +9,6 @@
 
 **Settled 31 Oct:** the journey (work/fullgame/JOURNEY.html) is the dramaturgy, and its seven calls stand as recommended (DECISIONS.md). New standing asks: dialogue and narration in Poe's own language; every recurring element earns its depth or goes; wordplay leans on Poe (double meanings, perhaps palindromes); the shadow cut-outs become a mechanism in at least one game, ideally several; games must prove themselves; the sleepwalking-shadow maze is in the back pocket.
 
-**Now building M2** (work/fullgame/MILESTONE-2.md, reviewed): the spine session builds package A (engine, shared/arrangement.js, the opening, the first interlude, the hinge); a tarn builder builds package B (the tarn both ways). The shadow stage must pass by touch on a phone before anything is built on it. Open with Lukas: the fissure is red in the water and hers (built that way; a colour, cheap to flip). The first-timer proof is the coordinator's, with Lukas.
+**M2 paused for the weekly usage cap** (Lukas: stop at 97%; it was at 93% on 31 Oct; the week resets 2 Nov, 08:00 UTC). Package A (the spine session): step 1, the ghost rule, done and checked; step 2, `shared/arrangement.js`, started; where it stopped is at the top of work/build/SPINE-REPORT.md. Package B (the tarn builder): stopped mid-work; partial edits in game/games/tarn/. All M2 work is uncommitted in the working tree until the builders finish. Resume both after the reset, with the subtler fissure note.
 
 **Rules:** builders don't commit; the coordinator checkpoints to public `main`, github.com/lamentierschweinchen/usher.
