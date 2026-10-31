@@ -1,0 +1,322 @@
+<title>Usher: the Depth Round</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: one column of three threads, each a row of options cut from black paper with the pick lit by the lamp; the calls at the end. Same stage as the journey page. */
+:root {
+  --cut: #0b0809; --paper: #ede2cb; --paper-dim: #b3a78f; --lamp: #f7d894;
+  --glass: #13122a; --gauze: #d8d0e6; --red: #e0392b; --panel: #15100f;
+  --rule: rgba(237, 226, 203, .16);
+  --display: 'IM Fell English', Georgia, 'Times New Roman', serif;
+  --sc: 'IM Fell English SC', 'IM Fell English', Georgia, serif;
+  --body: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--cut); color: var(--paper); font: 17px/1.62 var(--body); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 780px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+a { color: var(--lamp); text-underline-offset: .18em; }
+a:focus-visible { outline: 2px solid var(--lamp); outline-offset: 2px; }
+.red { color: var(--red); }
+s { text-decoration-color: var(--red); text-decoration-thickness: 2px; color: var(--paper-dim); }
+.her { color: var(--red); font-style: italic; }
+.eyebrow { font-family: var(--sc); letter-spacing: .08em; font-size: 15px; color: var(--paper-dim); }
+.cite { font-family: var(--sc); font-size: 13px; letter-spacing: .04em; color: var(--paper-dim); white-space: nowrap; }
+
+header.top { background: linear-gradient(180deg, #1d1530 0%, #352646 40%, #6a4462 78%, #8a5560 100%); border-bottom: 1px solid rgba(243, 219, 162, .55); }
+header.top .wrap { padding-block: 40px 30px; display: grid; gap: 12px; }
+header.top h1 { font-size: clamp(34px, 6.6vw, 58px); line-height: 1.04; }
+header.top .lede { font-size: 19px; line-height: 1.55; max-width: 64ch; color: #e6d8c2; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--sc); letter-spacing: .06em; color: #d9c9b4; font-size: 15px; }
+
+section { padding-block: 42px 6px; display: grid; gap: 18px; }
+section > h2 { font-size: clamp(27px, 4.8vw, 36px); line-height: 1.12; }
+.prose { display: grid; gap: 12px; max-width: 66ch; }
+.dim { color: var(--paper-dim); }
+
+/* options */
+.opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.opt { border: 1px solid var(--rule); background: var(--panel); padding: 14px 16px 16px; display: grid; gap: 8px; align-content: start; }
+.opt h3 { font-size: 21px; line-height: 1.15; }
+.opt .tag { font-family: var(--sc); font-size: 13px; letter-spacing: .06em; color: var(--paper-dim); }
+.opt.pick { border-color: rgba(247, 216, 148, .75); background: #1c1611; }
+.opt.pick .tag { color: var(--lamp); }
+.opt .risk { font-size: 15px; color: var(--paper-dim); }
+.opt .risk b, .opt .only b { font-family: var(--sc); font-weight: 400; letter-spacing: .05em; color: var(--paper); margin-right: 4px; }
+.opt p { font-size: 15.5px; }
+.why { border-left: 2px solid var(--lamp); padding-left: 12px; max-width: 66ch; }
+.why b { font-family: var(--sc); font-weight: 400; letter-spacing: .06em; color: var(--lamp); margin-right: 6px; }
+
+/* before and after */
+.ba { display: grid; gap: 0; }
+.ba .row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 4px 22px; padding-block: 11px; border-top: 1px solid var(--rule); }
+.ba .row:last-child { border-bottom: 1px solid var(--rule); }
+.ba .was { color: var(--paper-dim); text-decoration: line-through; text-decoration-color: rgba(224, 57, 43, .7); font-size: 15.5px; }
+.ba .now { font-family: var(--display); font-size: 19px; line-height: 1.35; }
+.ba .note { display: block; font-family: var(--body); font-size: 14.5px; color: var(--paper-dim); margin-top: 3px; }
+.ba .head { font-family: var(--sc); letter-spacing: .06em; font-size: 14px; color: var(--paper-dim); border-top: 0; padding-bottom: 4px; }
+
+/* lists */
+.bul { display: grid; gap: 8px; margin: 0; padding-left: 1.1em; max-width: 66ch; }
+.bul li::marker { color: var(--paper-dim); }
+.bul b { font-weight: 600; }
+
+/* verdicts */
+.verdicts { overflow-x: auto; }
+.verdicts table { width: 100%; border-collapse: collapse; min-width: 560px; font-size: 15.5px; }
+.verdicts th { font-family: var(--sc); font-weight: 400; letter-spacing: .06em; color: var(--paper-dim); text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule); }
+.verdicts td { padding: 9px 10px 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.verdicts td:first-child { font-family: var(--display); font-size: 17px; white-space: nowrap; padding-right: 16px; }
+.v { font-family: var(--sc); font-size: 13.5px; letter-spacing: .05em; padding: 0 6px 1px; border: 1px solid var(--rule); white-space: nowrap; }
+.v.deepen { border-color: rgba(247, 216, 148, .6); color: var(--lamp); }
+.v.cut { border-color: rgba(224, 57, 43, .6); color: #f0a49c; }
+
+/* echo strip */
+.echoes { display: grid; gap: 0; }
+.echo { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 4px 20px; padding-block: 10px; border-top: 1px solid var(--rule); }
+.echo:last-child { border-bottom: 1px solid var(--rule); }
+.echo .line { font-family: var(--display); font-size: 18px; }
+.echo .what { font-size: 14.5px; color: var(--paper-dim); }
+
+/* scenes */
+.scenes { display: grid; gap: 14px; }
+.scene { border: 1px solid var(--rule); overflow: hidden; }
+.scene .hd { padding: 12px 16px; background: var(--sky, #241a34); display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; justify-content: space-between; }
+.scene .hd h3 { font-size: 22px; font-style: italic; }
+.scene .hd span { font-family: var(--sc); font-size: 13.5px; letter-spacing: .05em; color: rgba(237, 226, 203, .85); }
+.scene .bd { padding: 14px 16px 16px; display: grid; gap: 9px; background: var(--panel); }
+.scene .below { background: var(--glass); color: var(--gauze); padding: 12px 16px 14px; border-top: 1px solid rgba(243, 219, 162, .45); }
+.scene .below b { font-family: var(--sc); font-weight: 400; letter-spacing: .06em; color: #9d93b7; margin-right: 6px; }
+
+/* my read and calls */
+.read { display: grid; gap: 14px; }
+.read article { display: grid; gap: 8px; padding: 16px 18px; border: 1px solid var(--rule); background: var(--panel); }
+.read h3 { font-size: 21px; line-height: 1.2; }
+.calls { display: grid; gap: 0; padding: 0; margin: 0; list-style: none; }
+.calls li { display: grid; grid-template-columns: 2.2rem 1fr; gap: 4px 12px; padding-block: 12px; border-top: 1px solid var(--rule); }
+.calls li:last-child { border-bottom: 1px solid var(--rule); }
+.calls .n { font-family: var(--display); font-size: 24px; line-height: 1.1; color: var(--lamp); }
+.calls h4 { margin: 0; font-family: var(--body); font-weight: 600; font-size: 17px; }
+.calls p { color: var(--paper-dim); font-size: 15.5px; }
+.next { border: 1px solid rgba(247, 216, 148, .5); padding: 14px 18px; background: #1c1611; max-width: 66ch; }
+footer { padding-block: 40px 56px; color: var(--paper-dim); font-size: 14px; }
+
+@media (max-width: 640px) {
+  body { font-size: 16.5px; }
+  .opts { grid-template-columns: 1fr; }
+  .ba .row, .echo { grid-template-columns: 1fr; }
+  .ba .head { display: none; }
+}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">Usher · 31 October · after the journey was settled</p>
+    <h1>The Depth Round</h1>
+    <p class="lede">Three specialists worked on Poe's voice, depth in every element, and the shadows. They wrote separately, then read and critiqued each other's work. They agreed on more than I expected, and where they fought, the fight improved the idea. Below: each thread's options with my pick, what changes in the journey, my own read, and six calls.</p>
+    <p class="facts"><span>3 threads</span><span>6 calls</span><span>full working papers in work/depth/</span></p>
+  </div>
+</header>
+
+<main>
+  <!-- ============ VOICE ============ -->
+  <section class="wrap" id="voice">
+    <p class="eyebrow">Thread one</p>
+    <h2>Poe's voice</h2>
+    <p class="prose dim">The tension: Poe's sentences are long and the screen holds a line or two.</p>
+    <div class="opts">
+      <div class="opt">
+        <span class="tag">Option A</span><h3>Recital</h3>
+        <p>Every line is Poe's own, recut, re-addressed or misread.</p>
+        <p class="risk"><b>Risk</b>Poe gave the servant, the physician, Madeline and the custom no words, so the narrator ends up narrating everyone: a wall of text in instalments.</p>
+      </div>
+      <div class="opt">
+        <span class="tag">Option B</span><h3>Ventriloquy</h3>
+        <p>New lines in his diction and rhythm.</p>
+        <p class="risk"><b>Risk</b>Pastiche. Nothing to recognise, every line must equal Poe's, and the flat line's twin is the purple one.</p>
+      </div>
+      <div class="opt pick">
+        <span class="tag">Option C · the pick</span><h3>Cut-outs</h3>
+        <p>Poe's sentences, cut at his own joints: the dash, the semicolon, the comma. Person or tense may change. Where he's silent, new lines are built from his words, under twelve of them.</p>
+        <p class="only"><b>The test</b>Could it be a lost line of the 1845 text?</p>
+      </div>
+    </div>
+    <p class="why"><b>I'd pick C</b>because Poe speaks wherever he spoke, and there's a rule for where he didn't. The voice is cut like the look, from black paper, and its wordplay is made of cuts: the simple deceptions you asked for, leaning on the author.</p>
+
+    <h3 style="font-size:22px;margin-top:8px">What that sounds like</h3>
+    <div class="ba">
+      <div class="row head"><span>The flat line</span><span>Cut from Poe</span></div>
+      <div class="row"><span class="was">His turn. I went.</span><span class="now">You have put me living in his tomb.<span class="note">Inside the lid, her one full sentence: Roderick's cry turned round [u48]. "His tomb" says whose turn it was; "living" says catalepsy. Your "Thus, thus, and not otherwise" moves to the fourth screw [u12], so the lid answers him.</span></span></div>
+      <div class="row"><span class="was">Don't look in the tarn. Everyone does.</span><span class="now">Look not down within the tarn.<span class="note">The P.S., mirror-written: reading it disobeys it. Tapped: <i>Such is the paradoxical law.</i> [u05]</span></span></div>
+      <div class="row"><span class="was">Turn back.</span><span class="now">Rein in.<span class="note">[u02]</span></span></div>
+      <div class="row"><span class="was">I'd have sworn.</span><span class="now">What <i>must</i> have been a dream.<span class="note">[u06]</span></span></div>
+      <div class="row"><span class="was">You'd tell me if you heard anything?</span><span class="now">And you have not heard it? — you have not then heard it?<span class="note">[u34], which sets up his "Not hear it?" at the door [u48].</span></span></div>
+      <div class="row"><span class="was">She is dead. She is dead.</span><span class="now">The lady Madeline is no more. … No more.<span class="note">[u28]</span></span></div>
+      <div class="row"><span class="was">It was my turn. She went instead.</span><span class="now">It was I who should have gone below. I dared not.<span class="note">[u48]. Even confessing, he leaves her out.</span></span></div>
+      <div class="row"><span class="was">That's only the wind.</span><span class="now">It was the work of the rushing gu—<span class="note">[u49]. Nothing finishes it; the ear supplies <i>guest</i>.</span></span></div>
+      <div class="row"><span class="was">The same evening, from below.</span><span class="now">The evening of your arrival. Immediately beneath.<span class="note">The hinge [u15, u29]: beneath your bedroom.</span></span></div>
+      <div class="row"><span class="was">taps hushed 41 · stones set 8 · Usher: 0</span><span class="now">Some alleviation of his malady: forty-one · A mere different arrangement: eight · Ushers: none.<span class="note">The Account's scores, as Poe's phrases [u03, u02].</span></span></div>
+      <div class="row"><span class="was">Unaccounted for</span><span class="now">Unaccountable<span class="note">The back page [u32]. Her echo of it is <i>accountable</i>.</span></span></div>
+      <div class="row"><span class="was">Guests: one. Say, rather: some weeks.</span><span class="now">I now proposed to myself a <s>sojourn</s> <span class="red">burial</span> of some weeks.<span class="note">The secret ending [u03]. The Fall ends on Poe's own last sentence, the only ending with no red.</span></span></div>
+    </div>
+
+    <ul class="bul">
+      <li><b>Who speaks how.</b> Roderick has Poe's two voices, the quaver and the leaden four words; when it hurts he says "him", and he never says "she" until the door. The physician only asks, or breaks off at a dash. The valet is silent. The interface uses the tale's verbs and numbers in words, but names the gesture once when it teaches.</li>
+      <li><b>Where Poe gave nothing:</b> the servant, the peasant, the physician's speech, the custom's rules, the interface. Those lines are new, short, and made of his nouns.</li>
+      <li><b>The game as built:</b> of the spine's 105 or so lines, 7 share four words with Poe. All of it needs this pass.</li>
+    </ul>
+  </section>
+
+  <!-- ============ DEPTH ============ -->
+  <section class="wrap" id="depth">
+    <p class="eyebrow">Thread two</p>
+    <h2>Depth in every element</h2>
+    <div class="prose">
+      <p><b>The test.</b> An element stays only if it does four things. It changes the player's next move. It returns three times: taught, turned on you in act one, handed to Madeline in act two. It gives the first-timer a decision and the Poe reader a recognition in that same decision. And it does something nothing else does.</p>
+      <p class="dim">A gotcha is a reveal with no next move. A chore is a move with no reveal.</p>
+    </div>
+    <div class="verdicts">
+      <table>
+        <thead><tr><th>Element</th><th>Verdict</th><th>What it becomes</th></tr></thead>
+        <tbody>
+          <tr><td>Red, "not so"</td><td><span class="v deepen">deepen</span></td><td>Hers alone. Act one pays you to put it out: hushing the red tap scores best, the fourth screw shuts the red sliver. Act two hands it to you. The water disagrees in mirror-writing instead, Roderick by echo.</td></tr>
+          <tr><td>The Account</td><td><span class="v deepen">deepen</span></td><td>Shown only when someone writes in it. Below, it's the key to her map (see the shadows).</td></tr>
+          <tr><td>Excuse cards</td><td><span class="v deepen">deepen</span></td><td>Each has a reach: an excuse explains only what its shadow covers. The guest's <i>m.</i> merges in: dither and he plays the likeliest card, and the evidence bends to fit.</td></tr>
+          <tr><td><b>Nevertheless.</b></td><td><span class="v">simplify</span></td><td>One job: it marks the guest's way on at each fork. At the hinge it turns hers: the same word, meaning the opposite. Never glossed, never red.</td></tr>
+          <tr><td>The tarn's rules</td><td><span class="v">keep</span></td><td>Early, mirror, flattery: three rules, one taught per scene, and never a fourth.</td></tr>
+          <tr><td>The ghost</td><td><span class="v">keep</span></td><td>A new job each turn, so it never becomes a replay: opponent, terrain, witness, ally, voice.</td></tr>
+          <tr><td>Comfort and candour</td><td><span class="v">merge</span></td><td>Into the Account, and spent once: in the Haunted Palace, comfort keeps the bright stanzas, candour reaches the dark ones.</td></tr>
+          <tr><td>Blanks</td><td><span class="v">cut to three</span></td><td>Filled with a figure you saw, never a word.</td></tr>
+          <tr><td>One liar per chapter</td><td><span class="v">keep the frame</span></td><td>Cut the tells that never return. The house's tell is now physical: whatever moves without a rod.</td></tr>
+          <tr><td>Ending slots</td><td><span class="v">simplify</span></td><td>Each hinges on one named act (the fourth screw, her KNOCK heard, candour, the gust, the look back). No hidden counts.</td></tr>
+          <tr><td>Cut outright</td><td><span class="v cut">cut</span></td><td>The unused Nevertheless page; red in three hands; <i>no lace</i> and the copperplate as tells; the 6:30 blank; the Account after every chapter; <i>family custom</i> (Poe has <i>a harmless precaution</i>).</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size:22px;margin-top:10px">The wordplay: the hard part</h3>
+    <p class="prose dim">Of seven candidate mechanics, four died on the elements specialist's desk. Three reached the critique.</p>
+    <div class="opts">
+      <div class="opt pick">
+        <span class="tag">Option A · the pick</span><h3>Echo</h3>
+        <p>Madeline can only give back the end of what the guest said, and the end is where his denials come undone.</p>
+        <p class="only"><b>Only this tale</b>Roderick's confession opens with an echo that strips a denial: "Not hear it? — yes, I hear it" [u48].</p>
+        <p class="risk"><b>Risk</b>Supply. It needs about a dozen great tails, one per turn and the ending; six are found.</p>
+      </div>
+      <div class="opt">
+        <span class="tag">Option B</span><h3>Turn the word</h3>
+        <p>Poe's double meanings as two-sided cut-outs: <i>House</i>, stones or twins; <i>descent</i>, lineage or going down; <i>without</i> the door, outside or lacking one; <i>rest</i>, repose or what's left.</p>
+        <p class="risk"><b>Verdict</b>The richest vein with the weakest verb: find the lit word, turn it. Killed as a system; its finds feed the voice and the echoes.</p>
+      </div>
+      <div class="opt">
+        <span class="tag">Option C</span><h3>The tarn reads backwards</h3>
+        <p>In the water, words reverse: <i>reined</i> comes back <i>denier</i>, <i>evil</i> comes back <i>live</i>, <i>pool</i> comes back <i>loop</i>.</p>
+        <p class="risk"><b>Verdict</b>Merely cute as a system, a word search. Three are planted as the water's remarks instead.</p>
+      </div>
+    </div>
+    <div class="echoes">
+      <div class="echo"><span class="line"><s>the yet un</s><span class="her">screwed lid.</span></span><span class="what">[u30] The Account's own line confesses. The screws line is struck, and the screw tips show through the wood.</span></div>
+      <div class="echo"><span class="line"><s>We have put her</s> <span class="her">living in the tomb.</span></span><span class="what">[u48] Roderick's recorded cry, answered from inside.</span></div>
+      <div class="echo"><span class="line"><s>Un</s><span class="her">accountable.</span></span><span class="what">[u32] Your back page. Every door left open was her, and you answer for them.</span></div>
+      <div class="echo"><span class="line"><s>I dared not</s> <span class="her">speak.</span></span><span class="what">[u48] If Roderick had one true line from you, he answers, and the Swap ending opens.</span></div>
+      <div class="echo"><span class="line"><s>the "House of Us</s><span class="her">her</span>"</span><span class="what">[u50] The last card: the tarn closes over the name and gives back one word.</span></div>
+    </div>
+    <p class="prose dim"><b style="color:var(--paper)">On palindromes, honestly:</b> the tale has two, <i>eye</i> and <i>did</i>. So the palindrome is one moment, not a system: <i>did</i>, which Poe italicised at her entrance [u49], is the one word the water can't change.</p>
+  </section>
+
+  <!-- ============ SHADOWS ============ -->
+  <section class="wrap" id="shadows">
+    <p class="eyebrow">Thread three</p>
+    <h2>The shadows, and new scenes</h2>
+    <div class="opts">
+      <div class="opt">
+        <span class="tag">Option A</span><h3>The Lamp</h3>
+        <p>You hold the light, and what it throws on the wall is what the guest writes down. Held low, the physician's shadow climbs the wall, a villain.</p>
+        <p class="risk"><b>Risk</b>A dial, not a puzzle; it gives the physician's tell away; every horror game has a lamp.</p>
+      </div>
+      <div class="opt pick">
+        <span class="tag">Option B · the pick</span><h3>A Mere Different Arrangement</h3>
+        <p>You move cut-outs on rods before a lamp, and their shadows are what's there. Two gestures: drag a rod to place a thing; tap to bring it nearer the lamp, bigger and softer. Whatever moves without a rod is the house.</p>
+        <p class="only"><b>Only this tale</b>It's the narrator's own theory, that "a mere different arrangement of the particulars of the scene" might undo its sorrow [u02].</p>
+      </div>
+      <div class="opt">
+        <span class="tag">Option C</span><h3>The Rods</h3>
+        <p>Every figure is a puppet, and the water shows whose hand moves it.</p>
+        <p class="risk"><b>Risk</b>It answers what should stay open (is the valet the house?) and makes every chapter puppetry.</p>
+      </div>
+    </div>
+    <p class="why"><b>I'd pick B</b>because a shadow becomes something you build with, so it makes puzzles rather than readings, and it crosses the waterline by a rule the look already keeps: <b>below, light is floor.</b> What you cast above, she stands on. What you hung to explain her away, she knocks at.</p>
+    <ul class="bul">
+      <li><b>Where it recurs:</b> taught in the first interlude (to hide her), then chapter II (to build her a way), the Haunted Palace (the lamp moves by itself), the burial (the bearers on the copper wall: three), the flight (the moon is the lamp), and every act-two interlude.</li>
+      <li><b>Act two's map, settled between all three:</b> the shadow stage is the map and the Account is its key. Each front-page line stands there as the cut-out it named, a wall; each back-page item is a gap of light, a door. Her echo strikes a line, and its cut-out falls.</li>
+    </ul>
+
+    <div class="scenes">
+      <article class="scene" style="--sky: linear-gradient(90deg, #120e22, #2a1f44 40%, #4b3566 80%, #7d5f92)">
+        <div class="hd"><h3>The Sleepwalker</h3><span>chapter II · replaces the door's slide puzzle</span></div>
+        <div class="bd">
+          <p><b>Set the room.</b> Her body walks above in a trance while she is below, so she passes "without having noticed my presence" [u14]. She walks on shadow, never on light; she turns at a wall; she climbs any slope a stair could be; at a drop she stops, arms out.</p>
+          <p><b>The first minute.</b> The valet sets down the lamp: "The family never venture forth, sir." A gauze figure comes through the wall, arms out, walking the wainscot's shadow toward a gap of lamplight. Drag the chair, and its back's shadow bridges the gap.</p>
+          <p><b>Then, one idea per wall:</b> lower the lamp and every shadow climbs; the house moves a piece without a rod; the floor shows her fall a moment early; and the choice, up to the window the long way, or down the bed's shadow to the vault immediately beneath.</p>
+          <p class="dim"><b style="color:var(--paper)">Risk</b> A borrowed genre (Lemmings, Sleepwalker). It lives or dies on walks under 40 seconds.</p>
+        </div>
+        <div class="below"><b>Below</b>A rod runs from her body down through the floorboards into the glass, where Madeline holds it. You walk the body while your recorded hand re-sets the room. Above, you set the stage for a walker you can't steer; below, you steer her on a stage you can't set.</div>
+      </article>
+
+      <article class="scene" style="--sky: linear-gradient(90deg, #1f1630, #4a3150 40%, #8e5560 80%, #cf8752)">
+        <div class="hd"><h3>The Haunted Palace</h3><span>after III · replaces the one-minute collapse with about three</span></div>
+        <div class="bd">
+          <p>Roderick sings his ballad and you stage it in his toy theatre while the lamp creeps closer. You stage only the stanzas you earned: comfort keeps the palace fair, candour brings the lamp in a notch a stanza, and your spirits become "vast forms that move fantastically" [u25].</p>
+          <p>Then a shadow you aren't working crosses the screen and falls. It's her collapse, inside your show, and you took it for a puppet. Play on (<b>Nevertheless.</b>), or go round the screen and look.</p>
+        </div>
+        <div class="below"><b>Below</b>A minute behind the screen, mirrored: her hand on the rod of the body that falls.</div>
+      </article>
+
+      <article class="scene" style="--sky: linear-gradient(90deg, #060405, #140b10 40%, #2a1216 75%, #5e2219)">
+        <div class="hd"><h3>Its Shadows Alone</h3><span>chapter VII · replaces the flight, the weakest game</span></div>
+        <div class="bd">
+          <p>The setting moon shines through the fissure and lays a red road across the causeway. You run, keeping to the road. Whatever lies in the house's shadow is the house: the taps you hushed, your excuses, then her. Look back and they freeze, but the moon sinks and every shadow lengthens.</p>
+          <p class="dim">Today's flight walks for you: you hold one key while a counter ticks.</p>
+        </div>
+        <div class="below"><b>Below</b>The house's shadow returns as light, so she runs on what chases you, and moves only while your recorded self looks back.</div>
+      </article>
+    </div>
+    <ul class="bul">
+      <li><b>Folded or killed:</b> the Pinhole (each screw she backs out opens a pinhole on the vault, inside the burial), and Held to the Lamp (a wall of text read backwards).</li>
+      <li><b>The games as played:</b> the studio held and is the best thing built; the nights held; the tarn and burial are kept; the trist held but needs one fix, because nothing says the aim runs from the mace.</li>
+      <li><b>Timing:</b> the Palace adds two minutes; trimming the gallery and library gives them back.</li>
+    </ul>
+  </section>
+
+  <!-- ============ MY READ ============ -->
+  <section class="wrap" id="read">
+    <p class="eyebrow">My read</p>
+    <h2>Where I'd be careful</h2>
+    <div class="read">
+      <article><h3>The shadow mechanism is now in six places</h3><p>That's its strength and its danger. If dragging rods is fiddly on a phone, six scenes suffer at once. So milestone 2 proves it in one place, the first interlude, before it spreads.</p></article>
+      <article><h3>Echo lives on supply</h3><p>Six great tails are found; it needs about a dozen. If the next six aren't as good, she echoes only at the reveals and the knocks, never as filler. A weak echo is exactly the gotcha you warned against.</p></article>
+      <article><h3>Red becoming hers alone is a real change</h3><p>It rewrites the bible's red rule, and I think it's right. Three slanted reds on a phone screen collapse into "red is the answer", the oracle you rejected. As hers, it stays unreliable: below, she's the looker the water flatters.</p></article>
+    </div>
+  </section>
+
+  <!-- ============ CALLS ============ -->
+  <section class="wrap" id="calls">
+    <p class="eyebrow">To settle</p>
+    <h2>Six calls, each with my recommendation</h2>
+    <ol class="calls">
+      <li><span class="n">1</span><div><h4>The voice is Cut-outs.</h4><p>Poe's sentences cut at his joints; new lines only where he's silent, from his words, under twelve. Recommend yes.</p></div></li>
+      <li><span class="n">2</span><div><h4>Madeline's hand is the echo.</h4><p>She has only the guest's words, and only their ends; the lid is her one sentence of her own. Recommend yes.</p></div></li>
+      <li><span class="n">3</span><div><h4>Red is hers alone.</h4><p>The water disagrees in mirror-writing, Roderick by echo. Recommend yes.</p></div></li>
+      <li><span class="n">4</span><div><h4>The shadow mechanism is A Mere Different Arrangement, proved first in the first interlude.</h4><p>Below, light is floor; the shadow stage is act two's map and the Account its key. Recommend yes.</p></div></li>
+      <li><span class="n">5</span><div><h4>Three game changes.</h4><p>The Sleepwalker replaces the door's slide puzzle; the Haunted Palace replaces the collapse; Its Shadows Alone replaces the flight. Recommend yes.</p></div></li>
+      <li><span class="n">6</span><div><h4>The verdicts and the cuts.</h4><p>As in the table: deepen red, the Account and the excuses; simplify Nevertheless and the endings; cut the unused page, red in three hands, the stray tells, the 6:30 blank, the Account after every chapter and <i>family custom</i>. Recommend yes.</p></div></li>
+    </ol>
+    <p class="next"><b>Then:</b> the milestone 2 spec. Minutes 0–12 in the new voice, the first interlude teaching the shadow mechanism, and the tarn both ways. Then the spine and tarn builders start.</p>
+  </section>
+</main>
+
+<footer class="wrap">Working papers: work/depth/VOICE.md, ELEMENTS.md and SHADOWS.md, each with its critique of the other two. Poe's tale is the 1845 text, in the public domain; block ids like [u48] point into it.</footer>

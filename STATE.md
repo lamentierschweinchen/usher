@@ -9,6 +9,6 @@
 
 **Settled 31 Oct:** the journey (work/fullgame/JOURNEY.html) is the dramaturgy, and its seven calls stand as recommended (DECISIONS.md). New standing asks: dialogue and narration in Poe's own language; every recurring element earns its depth or goes; wordplay leans on Poe (double meanings, perhaps palindromes); the shadow cut-outs become a mechanism in at least one game, ideally several; games must prove themselves; the sleepwalking-shadow maze is in the back pocket.
 
-**Next:** proposed to Lukas: a depth round (Poe's voice, depth per element, the shadow mechanism and new scenes) before the M2 spec, which it ends by writing. The M2 spec stays paused until he picks.
+**Next:** the depth round is done (work/depth/: VOICE, ELEMENTS, SHADOWS, each critiquing the others; distilled in DEPTH-ROUND.html). Six calls are with Lukas: the voice is Cut-outs; Madeline's hand is the echo; red is hers alone; the shadow mechanism is A Mere Different Arrangement, proved first in the first interlude; the Sleepwalker, the Haunted Palace and Its Shadows Alone replace the door puzzle, the collapse and the flight; the verdicts and cuts. Then the M2 spec.
 
 **Rules:** builders don't commit; the coordinator checkpoints to public `main`, github.com/lamentierschweinchen/usher.
