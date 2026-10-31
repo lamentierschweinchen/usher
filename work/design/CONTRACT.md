@@ -75,3 +75,10 @@ export default {
 - `api.ghost` (act two only): `{ events, synthetic }`, the chapter's act-one record. If it's missing or thin, the game's fixture `games/<id>/ghost.json` is used (`synthetic: true`).
 - `api.rewrite(label, text)`: her red correction for the Account row with that score label.
 - The save: `localStorage['usher.save.v1'] = {act, chapter, flags, results, records, rewrites}`, every access in try/catch. A refresh resumes at a chapter boundary.
+
+## Milestone 2 additions (full spec in work/fullgame/MILESTONE-2.md §1)
+- **A game declares its ghost:** `export default { id, title, mount, ghost: { event, min } }`. With fewer than `min` events of that name, the spine uses `games/<id>/ghost.json` if `GHOSTS` lists it, else the thin record (`synthetic: true` either way). Undeclared means `{ event: 'hush', min: 10 }`, so the studio is unchanged. The tarn declares `{ event: 'tap', min: 5 }`.
+- **New flags:** `causeway` (`'reined'|'nevertheless'|'idle'`), `excuses` (`[{ id, hand: 'guest'|'m', sighting }]`), `unaccountable` (`[{ sighting }]`), `stairLooked` (boolean), `tarnBelow` (`{ given, glimpsed, twice, seen }`). The tarn's three flags stand.
+- **The save gains `account`:** `{ front: [{ id, label, value, hand, cut }], back: [{ id, text, hand }] }`, with `hand` one of `'guest'`, `'m'`, `'hers'`; `cut` is how many words of `value` her echo strikes. A missing `account` starts empty.
+- **Shared, read-only for games:** `shared/arrangement.js` (the shadow stage: cut-outs on rods before a lamp) and `.sh-mirror` in `shared/shadow.css` (the water's script). The spine builder owns both.
+- **Text:** every on-screen string carries `// V|R|N [uNN]` (verbatim, recut or new, with its block in `source/usher-1845.md`); only the letter and the banner run over twelve words. Act one writes no red: red is Madeline's alone.
