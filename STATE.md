@@ -1,4 +1,4 @@
-# State — 2026-10-31
+# State — 2026-11-02
 
 **Direction: the Mirror**, about 80 minutes. Act one *A Sojourn of Some Weeks* (about 52 min), the hinge, act two *A Burial of Some Weeks* (about 28 min). The bible is work/fullgame/BIBLE.md (it overrides earlier docs); the settled journey is work/fullgame/JOURNEY.html; the depth round (work/depth/) overrides the bible where they disagree: Poe's voice as Cut-outs, Madeline's echo, red hers alone, the shadow mechanism, and three game changes.
 
@@ -9,6 +9,6 @@
 
 **Settled 31 Oct:** the journey (work/fullgame/JOURNEY.html) is the dramaturgy, and its seven calls stand as recommended (DECISIONS.md). New standing asks: dialogue and narration in Poe's own language; every recurring element earns its depth or goes; wordplay leans on Poe (double meanings, perhaps palindromes); the shadow cut-outs become a mechanism in at least one game, ideally several; games must prove themselves; the sleepwalking-shadow maze is in the back pocket.
 
-**M2 paused for the weekly usage cap** (Lukas: stop at 97%; it was at 93% on 31 Oct; the week resets 2 Nov, 08:00 UTC). Package A (the spine session): step 1, the ghost rule, done and checked; step 2, `shared/arrangement.js`, started; where it stopped is at the top of work/build/SPINE-REPORT.md. Package B (the tarn builder): stopped before it changed any file; it restarts from the brief. All M2 work is uncommitted in the working tree until the builders finish. Lukas said to resume after the reset: a one-shot check in the coordinator session fires 2 Nov, 02:23 local (08:23 UTC), confirms the reset, then resumes both builders with the subtler fissure note.
+**M2 resumed 2 Nov** after the weekly reset (usage 0%). Package A (the spine session) resumes at step 2's touch test of `shared/arrangement.js`, then steps 3–5; package B (the tarn builder) starts its brief over (it had changed no files). The spine's step 1 and step-2 files are still uncommitted in the working tree until the builders finish. The fissure: red in the water, hers, and subtle.
 
 **Rules:** builders don't commit; the coordinator checkpoints to public `main`, github.com/lamentierschweinchen/usher.
