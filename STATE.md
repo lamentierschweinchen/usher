@@ -9,6 +9,6 @@
 
 **Settled 31 Oct:** the journey (work/fullgame/JOURNEY.html) is the dramaturgy, and its seven calls stand as recommended (DECISIONS.md). New standing asks: dialogue and narration in Poe's own language; every recurring element earns its depth or goes; wordplay leans on Poe (double meanings, perhaps palindromes); the shadow cut-outs become a mechanism in at least one game, ideally several; games must prove themselves; the sleepwalking-shadow maze is in the back pocket.
 
-**M2 resumed 2 Nov** after the weekly reset (usage 0%). Package A (the spine session) resumes at step 2's touch test of `shared/arrangement.js`, then steps 3–5; package B (the tarn builder) starts its brief over (it had changed no files). The spine's step 1 and step-2 files are still uncommitted in the working tree until the builders finish. The fissure: red in the water, hers, and subtle.
+**M2 is built and committed (2 Nov):** package B, the tarn both ways (4d9f563), and package A, the opening in Poe's voice, the hall's shadow stage, the stair, the hinge and the reveal (fb49fb2). Play it at http://127.0.0.1:8300/?through=tarn. Open: the first-timer proof on a phone (the preview server is loopback-only, so a phone needs Lukas's word for a temporary LAN exception); the tarn can drop its local copy of the water's script now that `.sh-mirror` is shared; chapters II–VII still carry old, unmarked strings until their milestones.
 
 **Rules:** builders don't commit; the coordinator checkpoints to public `main`, github.com/lamentierschweinchen/usher.
