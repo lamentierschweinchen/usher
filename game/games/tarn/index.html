@@ -11,60 +11,108 @@
   main{padding:16px}
   .stage{position:relative;width:min(100%,calc((100vh - 150px) * 1.5));aspect-ratio:3/2;margin:0 auto;background:var(--sh-cut)}
   .frame{position:absolute;inset:0;pointer-events:none;outline:1px solid rgba(247,216,148,.25)}
-  .bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:center;margin:12px auto 0;font-size:16px}
-  button{font:inherit;font-size:13px;letter-spacing:.16em;text-transform:uppercase;padding:8px 16px;background:var(--sh-cut);color:var(--sh-lamp);border:1px solid rgba(247,216,148,.4);cursor:pointer}
+  .bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:center;margin:12px auto 0;font-size:15px}
+  .bar label{display:flex;gap:6px;align-items:center}
+  select,button{font:inherit;font-size:13px}
+  button{letter-spacing:.16em;text-transform:uppercase;padding:8px 16px;background:var(--sh-cut);color:var(--sh-lamp);border:1px solid rgba(247,216,148,.4);cursor:pointer}
   #log{max-width:900px;margin:10px auto 0;font:13px/1.45 ui-monospace,Menlo,monospace;white-space:pre-wrap;color:#a99c8e}
   #result{font-style:italic}
+  /* a phone held sideways is short: give the stage the whole height */
+  @media (max-height:500px){ main{padding:0} .stage{width:min(100%,calc(100vh * 1.5))} }
 </style>
 </head>
 <body>
 <main>
   <div class="stage" id="stage"></div>
   <div class="bar">
+    <label>act <select id="mode"><option value="sojourn">one · above (records)</option><option value="burial">two · below</option></select></label>
+    <label>ghost <select id="ghost"><option value="own">own (last act-one run)</option><option value="fixture">fixture (ghost.json)</option><option value="thin">thin (the game fetches its fixture)</option></select></label>
     <button id="restart" type="button">Restart</button>
     <label><input type="checkbox" id="rm"> reduced motion</label>
+    <label>speed <select id="speed"><option>1</option><option>2</option><option>4</option></select></label>
+    <button id="save" type="button" title="Download the last act-one record as ghost.json">Save ghost.json</button>
     <span id="result">playing</span>
   </div>
   <pre id="log"></pre>
 </main>
 <script type="module">
   import game from './game.js';
-  const stageEl = document.getElementById('stage');
-  const logEl = document.getElementById('log');
-  const resultEl = document.getElementById('result');
-  const rmEl = document.getElementById('rm');
+  // ?mode=burial · ?ghost=own|fixture|thin · ?rm=1 · ?speed=2 (act two only)
+  const $ = id => document.getElementById(id);
+  const stageEl = $('stage'), logEl = $('log'), resultEl = $('result');
+  const rmEl = $('rm'), modeEl = $('mode'), ghostEl = $('ghost'), speedEl = $('speed');
   const q = new URLSearchParams(location.search);
   rmEl.checked = q.has('rm') ? q.get('rm') !== '0' : matchMedia('(prefers-reduced-motion: reduce)').matches;
+  modeEl.value = q.get('mode') === 'burial' ? 'burial' : 'sojourn';
+  ghostEl.value = ['own', 'fixture', 'thin'].includes(q.get('ghost')) ? q.get('ghost') : 'own';
+  speedEl.value = ['1', '2', '4'].includes(q.get('speed')) ? q.get('speed') : '1';
 
-  let cleanup = null;
+  // the harness's save: the last act-one run, which act two plays against with ?ghost=own
+  const KEY = 'usher.tarn.harness.record';
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } };
+  const store = v => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) { /* private mode: in memory only */ } };
+  const taps = ev => (ev || []).filter(e => (e.event || e.type) === 'tap').length;
+
+  let cleanup = null, gen = 0;
   const log = s => { logEl.textContent += s + '\n'; };
-  // Exposed for automated checks in the harness only.
-  window.__tarn = { flags: {}, done: [] };
-
-  function start() {
+  async function start() {
+    const my = ++gen;
     if (cleanup) cleanup();
+    cleanup = null;
     stageEl.replaceChildren();
     logEl.textContent = '';
     resultEl.textContent = 'playing';
-    window.__tarn = { flags: {}, done: [] };
-    const frame = document.createElement('div'); frame.className = 'frame';
+    const mode = modeEl.value;
+    const T = window.__tarn = { mode, flags: {}, done: [], record: [], ghost: null };
     const api = {
+      mode,
       state: {},
       reducedMotion: rmEl.checked,
-      setFlag(k, v) { window.__tarn.flags[k] = v; log(`setFlag(${JSON.stringify(k)}, ${JSON.stringify(v)})`); },
+      setFlag(k, v) { T.flags[k] = v; log(`setFlag(${JSON.stringify(k)}, ${JSON.stringify(v)})`); },
       done(result) {
-        window.__tarn.done.push(result);
-        const n = window.__tarn.done.length;
+        T.done.push(result);
+        const n = T.done.length;
         log(`done #${n}: ${JSON.stringify(result)}`);
         resultEl.textContent = n === 1 ? `done: ${result.note}` : `ERROR: done called ${n} times`;
+        if (mode === 'sojourn') { store({ events: T.record, flags: T.flags }); log(`saved as "own": ${T.record.length} events, ${taps(T.record)} taps`); }
       },
     };
-    log(`mount ${game.id} · "${game.title}" · reducedMotion=${api.reducedMotion}`);
+    if (mode === 'sojourn') {
+      api.record = (type, data) => {
+        if (T.record.length >= 4000) return;
+        T.record.push({ type, ...data, event: type });          // as the spine keeps it
+        log(`record ${type} ${JSON.stringify(data)}`);
+      };
+    } else {
+      api.speed = Number(speedEl.value);
+      const src = ghostEl.value, own = load();
+      if (src === 'own' && own && taps(own.events) >= 5) { api.ghost = { events: own.events, synthetic: false }; T.ghost = `own: ${taps(own.events)} taps`; }
+      else if (src === 'thin') { api.ghost = { events: [], synthetic: true }; T.ghost = 'thin: the game fetches its own ghost.json'; }
+      else {
+        // what the spine does once 'tarn' is in GHOSTS: the fixture, marked synthetic
+        const r = await fetch('./ghost.json', { cache: 'no-store' });
+        const j = await r.json();
+        if (my !== gen) return;
+        api.ghost = { events: Array.isArray(j) ? j : j.events, synthetic: true };
+        T.ghost = `fixture: ${taps(api.ghost.events)} taps` + (src === 'own' ? ' (no act-one run of 5+ taps saved yet)' : '');
+      }
+    }
+    log(`mount ${game.id} · "${game.title}" · act ${mode === 'burial' ? 'two' : 'one'} · reducedMotion=${api.reducedMotion}` +
+      (T.ghost ? ` · ghost ${T.ghost}` : '') + ` · declares ghost ${JSON.stringify(game.ghost)}`);
     cleanup = game.mount(stageEl, api);
+    const frame = document.createElement('div'); frame.className = 'frame';
     stageEl.appendChild(frame);
   }
-  document.getElementById('restart').addEventListener('click', start);
-  rmEl.addEventListener('change', start);
+  $('save').onclick = () => {
+    const events = (load() || {}).events || window.__tarn.record;
+    const blob = new Blob([JSON.stringify({ note: 'A real act-one run of the tarn, recorded through games/tarn/index.html.', events })], { type: 'application/json' });
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'ghost.json' });
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  window.__ownRecord = () => load();
+  $('restart').addEventListener('click', start);
+  for (const el of [rmEl, modeEl, ghostEl, speedEl]) el.addEventListener('change', start);
   start();
 </script>
 </body>

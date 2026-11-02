@@ -1,0 +1,23 @@
+{"note":"A real act-one run of the tarn, recorded through games/tarn/index.html: real mouse presses in Chromium at a first-timer's pace (reactions 2.4-7 s, eleven misses in both halves, the cheat on the smoke caught unaided, the window tapped). Replace it by playing the harness's act one and pressing Save ghost.json.","events":[
+{"type":"tap","t":3.96,"x":759.2,"hy":120.6,"half":"above","hit":null,"kind":"miss","event":"tap"},
+{"type":"tap","t":7.09,"x":873,"hy":156.5,"half":"below","hit":null,"kind":"miss","event":"tap"},
+{"type":"tap","t":10.45,"x":198,"hy":253.7,"half":"above","hit":"tree","kind":"find","event":"tap"},
+{"type":"fall","t":11.96,"event":"fall"},
+{"type":"tap","t":14.46,"x":303.9,"hy":83.5,"half":"below","hit":null,"kind":"miss","event":"tap"},
+{"type":"tap","t":17.89,"x":503.6,"hy":284.4,"half":"above","hit":"door","kind":"find","event":"tap"},
+{"type":"tap","t":22.68,"x":662.8,"hy":238.7,"half":"above","hit":null,"kind":"miss","event":"tap"},
+{"type":"tap","t":25.71,"x":641.1,"hy":74,"half":"below","hit":"smoke","kind":"find","event":"tap"},
+{"type":"tap","t":30.58,"x":421.3,"hy":78.8,"half":"below","hit":null,"kind":"miss","event":"tap"},
+{"type":"tap","t":34.95,"x":242.2,"hy":114.3,"half":"below","hit":null,"kind":"miss","event":"tap"},
+{"type":"tap","t":40.7,"x":609.5,"hy":181.8,"half":"below","hit":"portrait","kind":"find","event":"tap"},
+{"type":"cheat","t":41.4,"id":"smoke","event":"cheat"},
+{"type":"tap","t":44.32,"x":147.2,"hy":210,"half":"below","hit":"tree","kind":"miss","event":"tap"},
+{"type":"tap","t":48.46,"x":498.4,"hy":212.1,"half":"below","hit":"crack","kind":"find","event":"tap"},
+{"type":"tap","t":53.39,"x":754.2,"hy":305.8,"half":"above","hit":null,"kind":"miss","event":"tap"},
+{"type":"tap","t":59.82,"x":876.9,"hy":120.1,"half":"below","hit":null,"kind":"miss","event":"tap"},
+{"type":"tap","t":64.44,"x":251,"hy":117.2,"half":"above","hit":null,"kind":"miss","event":"tap"},
+{"type":"tap","t":68.42,"x":694.1,"hy":154.9,"half":"above","hit":null,"kind":"miss","event":"tap"},
+{"type":"tap","t":73.38,"x":635.6,"hy":60.9,"half":"above","hit":"smoke","kind":"catch","event":"tap"},
+{"type":"tap","t":76.11,"x":353.1,"hy":191.3,"half":"below","hit":"window","kind":"window","event":"tap"},
+{"type":"window","t":74.38,"tapped":true,"event":"window"}
+]}
