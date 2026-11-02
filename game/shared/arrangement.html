@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Shadow Stage</title>
+<link rel="stylesheet" href="shadow.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #e7dcc4; color: #0b0809; font-family: var(--sh-serif); -webkit-font-smoothing: antialiased; }
+  main { max-width: 980px; margin: 0 auto; padding: 14px 16px 40px; }
+  .kicker { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: #6e5f57; }
+  h1 { font-weight: 400; font-size: 30px; margin: 4px 0 8px; }
+  .note { font-style: italic; font-size: 15px; color: #3b302c; margin: 0 0 10px; max-width: 70ch; }
+  /* at 390 wide the stage is 359 px, the narrowest the game gives it */
+  .plate { width: min(100%, calc(100vw - 31px)); background: #0b0809; box-shadow: 0 18px 40px -22px rgba(30, 15, 20, .55); }
+  .row { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 10px 0; font-size: 14px; }
+  .row b { font-weight: 400; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #6e5f57; margin-right: 4px; }
+  button { font: inherit; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; background: #0b0809; color: #f7d894; border: 0; padding: 8px 12px; cursor: pointer; }
+  #log { font-size: 13px; color: #3b302c; max-height: 9em; overflow: auto; white-space: pre-line; }
+  .defs { position: absolute; left: -10000px; top: 0; width: 960px; height: 640px; overflow: hidden; }
+</style>
+</head>
+<body>
+<svg id="defs" class="defs" width="960" height="640" aria-hidden="true"></svg>
+<main>
+  <div class="kicker">A Sojourn of Some Weeks · game/shared</div>
+  <h1>The shadow stage</h1>
+  <p class="note">Drag a rod along its groove. Tap a rod to bring it nearer the lamp, or back. Tap her shadow to let it be. This page is the phone test for <code>arrangement.js</code>.</p>
+  <div class="plate"><svg id="stage" aria-label="A lamp, a wall, three pieces on rods, and a woman's shadow"></svg></div>
+  <div class="row">
+    <span><b>taps</b><span id="taps">0</span></span>
+    <span><b>groove changes</b><span id="toggles">0</span></span>
+    <span><b>drags</b><span id="drags">0</span></span>
+    <span><b>let be</b><span id="her">0</span></span>
+    <span><b>best cover</b><span id="cover">—</span></span>
+  </div>
+  <div class="row">
+    <button id="s1" type="button">Sighting one</button>
+    <button id="s2" type="button">Sighting two</button>
+    <button id="glove" type="button">The glove</button>
+    <button id="house" type="button">The house</button>
+    <button id="reset" type="button">Reset</button>
+  </div>
+  <div id="log"></div>
+</main>
+<script type="module">
+import * as C from './cuts.js';
+import * as A from './arrangement.js';
+document.getElementById('defs').innerHTML = C.defs();
+const $ = id => document.getElementById(id);
+const count = { taps: 0, toggles: 0, drags: 0, her: 0 };
+const bump = k => { count[k]++; $(k).textContent = count[k]; };
+const say = s => { $('log').textContent = `${s}\n` + $('log').textContent; };
+const SIGHT = { one: [580, 130, 120, 270], two: [350, 40, 160, 360] };
+let st;
+function build() {
+  st = A.createStage($('stage'), {
+    still: matchMedia('(prefers-reduced-motion: reduce)').matches,
+    pieces: [{ id: 'chair', x: 260 }, { id: 'trophies', x: 480 }, { id: 'drape', x: 700 }],
+  });
+  st.setHer({ box: SIGHT.one });
+  st.on('tap', e => { bump('taps'); say(`tap ${e.id}`); });
+  st.on('toggle', e => { if (e.by === 'player') bump('toggles'); say(`${e.id} → ${e.groove} (${e.by})`); show(); });
+  st.on('drag', e => { bump('drags'); say(`drag ${e.id}`); });
+  st.on('release', show);
+  st.on('her', () => { bump('her'); say('let be'); });
+  window.__ar = st;
+  show();
+}
+function show() {
+  const best = st.pieces().map(p => ({ id: p.id, ...st.cover(p.id) })).sort((a, b) => b.n - a.n)[0];
+  $('cover').textContent = best ? `${best.id} ${best.n}/${best.of}, head ${best.head}/${best.headOf}` : '—';
+}
+build();
+$('s1').onclick = () => { st.setHer({ box: SIGHT.one }); show(); };
+$('s2').onclick = () => { st.setHer({ box: SIGHT.two }); show(); };
+$('glove').onclick = () => st.hand('chair', { dx: 90, by: 'glove' });
+$('house').onclick = () => st.slideShadow('drape', -60);
+$('reset').onclick = () => { st.destroy(); for (const k in count) { count[k] = 0; $(k).textContent = 0; } $('log').textContent = ''; build(); };
+document.body.dataset.ready = '1';
+</script>
+</body>
+</html>

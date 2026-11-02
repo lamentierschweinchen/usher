@@ -7,4 +7,8 @@ export const LIVE = ['tarn', 'door', 'studio', 'burial', 'nights', 'trist', 'fli
 
 // Act two: chapters whose builder has put a fixture run at games/<id>/ghost.json, used
 // when the player's own act-one record is missing or thin. Listed only once it exists.
-export const GHOSTS = [];
+export const GHOSTS = ['studio', 'tarn'];
+
+// Act two: chapters with a game below (api.mode 'burial'). The act-two map lights each one
+// played above; the rest are sealed.
+export const BELOW = ['tarn', 'studio'];

@@ -7,46 +7,65 @@
 // the next one); skipIf(flags) (drop it, e.g. when a game has already told it).
 
 export const TITLE = {
-  above: 'A Sojourn of Some Weeks',
-  below: 'A <tspan class="red">Burial</tspan> of Some Weeks',
+  above: 'A Sojourn of Some Weeks',                                                    // R [u03]
+  below: 'A <tspan class="red">Burial</tspan> of Some Weeks',                         // R [u03]
 };
 
+// The letter, in Roderick's hand: Poe's sentences re-addressed [u03]. ~~struck~~ is his own ink
+// (act one writes no red). The P.S. is in the water's script, unreadable here.
 export const LETTER = {
-  // ~~struck~~ and __underlined twice__ render in Roderick's agitated hand
   body: [
-    'My dear old friend — come. I am ill: the senses. Light cuts. Roses shout. Bring *nothing that rings*. Bring your cheerfulness; you always had extra.',
-    'My sister is ~~dying~~ ~~quiet~~ resting. The house is well. The house is __very__ well. Come within the fortnight.',
+    'Acute bodily illness — a mental disorder which oppresses me —',                   // R [u03]
+    'the approaching dissolution of a tenderly beloved ~~sister~~ —',                 // R [u14]
+    'an earnest desire to see you, as my best, and indeed my only personal friend.',   // R [u03]
   ],
-  sign: 'Your best, your only, R.U.',
-  ps: 'P.S. Don’t look in the tarn. Everyone does.',
+  sign: 'R. U.',                                                                      // R [u03]
+  psMark: 'P.S.',                                                                     // N
+  ps: 'Look not down within the tarn.',                                               // R [u05]
+  go: 'Forthwith.',                                                                   // R [u03]: "no room for hesitation"
+};
+
+// The approach, and the fork on the causeway [u02, u03]
+export const FORK = {
+  approach: 'I know not how it was —',                                                // R [u02]
+  rein: '*Rein in.*',                                                                 // R [u02]
+  on: 'Nevertheless.',                                                                // V [u03]
+  banner: 'Nevertheless, in this mansion of gloom I now proposed to myself a sojourn of some weeks.',   // V [u03]
+  idle: 10000,
+};
+// The first look down, wherever it falls: the P.S. in the water, the right way up
+export const PS = {
+  line: 'Look not down within the tarn.',                                             // R [u05]
+  law: 'Such is the paradoxical law.',                                                // R [u05]
 };
 
 export const CHAPTERS = [
   {
-    id: 'tarn', ord: 'Chapter the First', num: 'I', title: 'A Somewhat Childish Experiment',
+    id: 'tarn', ord: 'Chapter the First', num: 'I', title: 'A Somewhat Childish Experiment',   // N · R [u05]
+    sub: 'upon the re-modelled and inverted images',                                  // R [u02]
     room: 'causeway', target: 'tarn',
-    intro: 'The house regards you with vacant, eye-like windows. You regard it back. Someone has to.',
     cast: { horse: 'horse', peasant: 'peasant' },
+    // the door, then the brink
     encounters: [
-      { enter: { servant: 'servant' }, turn: { servant: -1 }, lines: [['Servant', 'Shall I stable him for some weeks, sir?'], ['You', 'A night or two.']] },
-      { turn: { guest: -1 }, lines: [['A peasant', 'The House of Usher, sir: the stones or the family?'], ['You', 'Is there a difference?']] },
-      { lines: [['Your horse', '*(will not look in the water.)*'], ['You', 'Sensible animal.']], exit: ['servant', 'horse', 'peasant'], turn: { guest: 1 } },
+      { enter: { servant: 'servant' }, turn: { servant: -1 }, lines: [['Servant', 'For some weeks, sir?'], ['You', 'A night or two.']] },   // R [u03] · N
+      { turn: { guest: -1 }, lines: [['A peasant', 'Twins, the Ushers. One keeps the house. You’ll see the other.']], exit: ['servant', 'horse', 'peasant'] },   // N
+      { turn: { guest: 1 }, lines: [['', 'Upon the mere house — upon the vacant eye-like windows —']] },   // R [u02]
     ],
-    outro: 'All differences accounted for. The crack is only in the water, and you aren’t staying in the water.',
-    branch: f => f.tarnSawHer ? { rather: 'you saw someone in that window, and crossed her out.' } : null,
-    // the tarn game ends on the lit window in the water, so the map's tarn doesn't repeat it
-    truth: null, tarn: 'A lit window, dark above. Someone in it looks down, as you did.',
+    outro: 'I entered the Gothic archway of the hall.',                                // R [u07]
+    // what the guest writes after the tarn: in ink if he tapped her window, else paler, m.
+    account: { id: 'tarn', label: 'In the water, a figure:', value: 'without having noticed my presence.', hand: f => (f.tarnSawHer ? 'guest' : 'm') },   // N · R [u14]
+    truth: null, tarn: 'One of the eye-like windows, lit.',                            // R [u02]
     stub: { line: 'Spot the differences between the house and its reflection.', score: { 'differences found': 5 } },
     hold: 4500,   // the game ends on the red window in the water: let it stay (a click goes on sooner)
+    after: ['interlude1', 'stair', 'room'],   // between I and II: the hall, the stair, your room
   },
   {
     id: 'door', ord: 'Chapter the Second', num: 'II', title: 'A Mere Different Arrangement',
     room: 'door', target: 'door', prompt: 'Try the door.',
     intro: 'Every stone is sound, and none is where it belongs. A sensible man could fix that.',
     encounters: [
-      { enter: { valet: 'valet' }, turn: { guest: -1 }, lines: [['The valet, of stealthy step', '*(has been behind you some time. Says nothing, at length.)*'], ['You', 'Good Lord.']] },
-      { enter: { physician: 'physician' }, turn: { guest: 1, physician: -1 }, lines: [['The physician', 'If the sister dies, send for me. Before anyone does anything.'], ['You', 'What would anyone do?']], exit: ['physician'] },
-      { enter: { servant: 'servantAway' }, lines: [['Servant', 'The family don’t use the door, sir.'], ['You', 'Then how do they get out?']], exit: ['servant', 'valet'] },
+      // the physician has moved to the stair and the servant to your room (milestone 2)
+      { enter: { valet: 'valet' }, turn: { guest: -1 }, lines: [['The valet, of stealthy step', '*(has been behind you some time. Says nothing, at length.)*']], exit: ['valet'] },
     ],
     outro: 'The last stone slides home. The door opens, very nearly by itself.',
     branch: f => (f.stonesAskew ?? 0) > 0 ? { rather: `${Cap(say(f.stonesAskew))} stones are still askew. She was in a hurry.` }
@@ -68,6 +87,8 @@ export const CHAPTERS = [
     branch: (f, r) => (f.knockSpared || (f.tapsSpared ?? 0) > 0 || (r?.score?.['taps let be'] ?? 0) > 0) ? { line: 'Roderick heard it. He did not thank you.' } : null,
     truth: 'cellar', tarn: 'Madeline lying down on a long table in the cellar. Very neatly. A little early.',
     stub: { line: 'Hush the sunbeams, the roses, the brass band — before they reach him.', score: { 'taps hushed': 41 } },
+    // the Account's row; her rewrite below prints under it
+    account: { id: 'studio', label: 'Some alleviation of his malady:', value: (f, r) => `${say(Object.entries(r?.score || {}).find(([k]) => /hush/i.test(k))?.[1] ?? 41)}.` },   // R [u03]
   },
   {
     id: 'burial', ord: 'Chapter the Fourth', num: 'IV', title: 'A Harmless Precaution',
@@ -133,7 +154,10 @@ export const CHAPTERS = [
 export const num = n => (n === 0 ? 'none' : String(n));
 // and small numbers in prose are words
 const WORDS = ['none', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
-export const say = n => WORDS[n] ?? String(n);
+const TEENS = ['thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+export const say = n => n < 13 ? WORDS[n] ?? String(n) : n < 20 ? TEENS[n - 13]
+  : n < 100 ? TENS[Math.floor(n / 10)] + (n % 10 ? `-${WORDS[n % 10]}` : '') : String(n);
 const Cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 // n: the number used when a game reports nothing that matches.
 export const ACCOUNT = {
@@ -161,10 +185,73 @@ export const ACCOUNT = {
   rather: 'Say, rather:',
 };
 
+// ---- milestone 2: the Account and the first interlude. Marks: V verbatim, R recut, N new (under
+// twelve words); [uNN] is the block in source/usher-1845.md. ----
+
+export const ACCOUNT_HEAD = 'I know not how it was —';           // R [u02]
+export const UNACCOUNTABLE = 'Unaccountable';                     // R [u32]
+
+// The first interlude: A Mere Different Arrangement [u02], a toy theatre in the hall [u07].
+export const INTERLUDE1 = {
+  head: 'The hall',                                               // R [u07]
+  drag: 'Drag a rod: a mere different arrangement.',              // N · R [u02]
+  reach: 'It does not reach.',                                    // N
+  tapRod: 'Tap a rod: nearer the lamp.',                          // N
+  house: 'A wild inconsistency.',                                 // R [u06]
+  second: 'Arrange it, or let it be.',                            // N
+  // what the Account writes when a shadow explains her
+  excuses: {
+    chair: 'The gloomy furniture of the room.',                  // R [u32]
+    drape: 'The dark and tattered draperies.',                   // R [u32]
+    trophies: 'The phantasmagoric armorial trophies.',           // R [u07]
+  },
+  // the back page, when she's let be: Poe's sentence in two instalments
+  fancy: [
+    'There grew in my mind a strange fancy —',                    // R [u05]
+    'a fancy so ridiculous, indeed, that I but mention it.',      // R [u05]
+  ],
+};
+
+// I → II, after the hall: the stair [u07] and your room [u13]
+export const STAIR = {
+  head: 'The stair',                                                                  // R [u07]
+  physician: ['The physician', 'Should the lady die, you will send for me? Before —'],   // N
+  passed: ['', 'He accosted me with trepidation and passed on.'],                     // V [u07]
+  look: 'Look down.',                                                                 // N
+  wait: 6000,
+  you: ['You', '*The cheerfulness of my society.*'],                                  // R [u03]
+};
+export const ROOM = {
+  head: 'Your room',                                                                  // N
+  servant: ['Servant', 'The family never venture forth, sir.'],                       // R [u13]
+  you: ['You', 'Then how do they go?'],                                               // N
+};
+
+// The hinge: the Account as written, two lines more, and her first nick
+export const HINGE = {
+  looks: 'My somewhat childish experiment:',                                          // R [u05]
+  society: 'Cheerfulness of my society:',                                             // R [u03]
+  considerable: 'considerable.',                                                      // R [u03]
+  on: 'Nevertheless.',                                                                // V [u03]
+  title: 'A <span class="red">Burial</span> of Some Weeks',                            // R [u03]
+  when: 'The evening of your arrival. Immediately beneath.',                          // R [u15, u29]
+};
+// Act two: her lines are the guest's own, cut; the head is struck and the tail is hers
+export const BELOW = {
+  first: { cut: 'I know not', tail: 'how it was.' },                                  // R [u02]
+  look: 'Look down.',                                                                 // N
+  sealed: 'Not yet.',                                                                 // N
+  again: 'Look down, again.',                                                         // N
+};
+// The reveal before each game below: which line of the Account she nicks, and how many words
+export const REVEALS = {
+  tarn: { id: 'tarn', cut: 1 },                                                       // ~~without~~ having noticed my presence. R [u14]
+};
+
 export const LAST = {
-  above: 'The tarn closed sullenly and silently over the House of Usher.',
-  below: 'The House of Usher closed sullenly and silently over the tarn.',
-  again: 'Nevertheless.',
+  above: 'The tarn closed sullenly and silently over the House of Usher.',            // R [u50]
+  below: 'The House of Usher closed sullenly and silently over the tarn.',            // R [u50]
+  again: 'Nevertheless.',                                                             // V [u03]
 };
 
 // Small things the guest says on the map. Spine's own, not STORY's: keep them few.
@@ -172,7 +259,8 @@ export const REMARKS = {
   // while a target waits, the strip says where to go; a click on it goes there
   // (a chapter's own `prompt` is used for its game's target)
   prompt: {
-    tarn: 'Look down. Everyone does.',
+    tarn: 'Look down.',                                                               // N
+    hall: 'The hall.',                                                                // N
     door: 'The door, then.',
     studio: 'To the studio.',
     vault: 'Down to the vault.',
@@ -180,18 +268,11 @@ export const REMARKS = {
     causeway: 'Out. Now.',
   },
   // after an outro the strip invites a look at the tarn (until the player takes one)
-  invite: [
-    'The tarn has something to say about that.',
-    'The water seems to have its own view.',
-    'The tarn is unconvinced.',
-    'Something stirs in the tarn. A fish, surely.',
-    'The tarn would like a word.',
-    'The water is doing that thing again.',
-  ],
-  leave: ['You', 'Some weeks, he said. It has been an afternoon.'],
+  invite: 'Look not down within the tarn.',                                           // R [u05]
+  leave: ['You', '*No room for hesitation.*'],                                        // R [u03]
   // act two
-  belowPrompt: 'Under the studio.',
-  sealedBelow: ['', '*Not yet. The rest of the house is still asleep.*'],
-  herPass: { again: 'Under the studio, again.' },
+  belowPrompt: 'Under the studio.',                                                  // N
+  sealedBelow: ['', 'Not yet.'],                                                     // N
+  herPass: { again: 'Under the studio, again.' },                                    // N
   sealed: ch => ['', `*${ch.num}. ${ch.title}* — a chapter to come.`],
 };

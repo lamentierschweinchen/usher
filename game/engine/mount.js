@@ -36,11 +36,14 @@ const debug = new URLSearchParams(location.search).has('debug');
 // Mount `game` into the empty `stage`. Returns { result, teardown }:
 // result resolves with the normalised outcome when the game calls api.done;
 // teardown runs the game's cleanup and clears the stage (call it under ink).
-// Act two's ghost: the chapter's act-one record, or the builder's fixture run if the
-// record is missing or thin (under 10 hushes), marked synthetic.
-const MIN_HUSHES = 10;
-export async function loadGhost(ch, record = []) {
-  if (record.filter(e => (e.event || e.type) === 'hush').length >= MIN_HUSHES) return { events: record, synthetic: false };
+// Act two's ghost: the chapter's act-one record, or the builder's fixture run if the record is
+// thin, marked synthetic. A game declares what counts: `ghost: { event, min }` on its module;
+// undeclared means { event: 'hush', min: 10 } (the studio). Thin and no fixture listed in
+// GHOSTS: the thin record itself, still synthetic.
+export const GHOST_DEFAULT = { event: 'hush', min: 10 };
+export async function loadGhost(ch, record = [], decl = GHOST_DEFAULT) {
+  const { event, min } = { ...GHOST_DEFAULT, ...decl };
+  if (record.filter(e => (e.event || e.type) === event).length >= min) return { events: record, synthetic: false };
   if (GHOSTS.includes(ch.id)) {
     try {
       const r = await fetch(`games/${ch.id}/ghost.json`);
@@ -100,11 +103,15 @@ export function mount(game, ch, stage, flags, act = {}) {
   return { result, teardown };
 }
 
+// The stub stands in for a game, so it keeps that game's ghost rule.
+const STUB_GHOSTS = { tarn: { event: 'tap', min: 5 } };
+
 // A stand-in until the real game lands: the chapter's title, one line, a "win".
 export function stub(ch) {
   return {
     id: ch.id,
     title: ch.title,
+    ghost: STUB_GHOSTS[ch.id],
     mount(stage, api) {
       const root = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       root.setAttribute('viewBox', '0 0 960 640');
@@ -121,16 +128,22 @@ export function stub(ch) {
         <a class="g-stub-win" href="#" role="button"><text x="480" y="430" text-anchor="middle">win</text></a>
         <text class="sh-score" x="912" y="600" text-anchor="end">${esc(Object.entries(ch.stub.score).map(([k, v]) => `${k} ${v === 0 ? 'none' : v}`).join(' · ').toUpperCase())}</text>`;
       const win = root.querySelector('.g-stub-win');
-      // act one: a few recorded moves, as a game would record them
-      if (!below) for (let i = 0; i < 12; i++) api.record('hush', { t: 2 + i * 4.5, type: i % 4 ? 'sun' : 'tap', board: i % 8, react: .6 });
+      // act one: a few recorded moves, as a game would record them (the studio's hushes,
+      // the tarn's taps), so act two runs on stubs too
+      if (!below) {
+        for (let i = 0; i < 12; i++) api.record('hush', { t: 2 + i * 4.5, type: i % 4 ? 'sun' : 'tap', board: i % 8, react: .6 });
+        const finds = [[608, 187], [300, 120], [700, 300], [150, 260], [480, 90], [560, 330]];
+        finds.forEach(([x, hy], i) => api.record('tap', { t: 3 + i * 5, x, hy, half: i % 2 ? 'below' : 'above', hit: true, kind: i === 5 ? 'window' : 'find' }));
+      }
       const go = e => {
         e.preventDefault();
         win.removeEventListener('click', go);
         win.classList.add('spent');
         if (below) {
           // act two: her pass, as a mirror game would rewrite it (taps heard: 2)
+          // (only the studio rewrites; the tarn's line was struck by the reveal before it)
           const n = api.state.tapsHushed ?? ch.stub.score['taps hushed'] ?? 0, k = 2;
-          api.rewrite('taps hushed', `she knocked ${n + k} times. He heard ${k}.`);
+          if (ch.id === 'studio') api.rewrite('taps hushed', `she knocked ${n + k} times. He heard ${k}.`);
           api.done({ won: true, score: { 'taps heard': k }, note: '' });
         } else api.done({ won: true, score: { ...ch.stub.score }, note: '' });
       };

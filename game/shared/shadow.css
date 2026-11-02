@@ -17,6 +17,7 @@
   --sh-glass: #13122a;  --sh-return: #f3dba2; --sh-red: #e0392b;
   /* type and Madeline */
   --sh-paper: #ede2cb;  --sh-gauze: #f6ead2;  --sh-speaker: #d79a6a;
+  --sh-shadow: #140d11;  /* a cast shadow on a lit wall */
   --sh-serif: 'IM Fell English', Georgia, serif;
   /* motion */
   --sh-bob: 1.5px; --sh-turn: 160ms; --sh-ease: cubic-bezier(.45, 0, .25, 1);
@@ -86,3 +87,21 @@
 }
 .sh-still .sh-moving .sh-pose, .sh-still .sh-sway .sh-pose, .sh-still .sh-flicker { animation: none !important; }
 .sh-still .touch { transition: none; }
+
+/* ---- the shadow stage (shared/arrangement.js): rods before a lamp ---- */
+.sh-arrangement { display: block; width: 100%; height: auto; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+.sh-arrangement .ar-piece { cursor: grab; outline: none; }
+.sh-arrangement .ar-piece:hover .sh-piece, .sh-arrangement .ar-piece:focus-visible .sh-piece { filter: url(#sh-rim); }
+.sh-arrangement .ar-piece.is-held { cursor: grabbing; }
+.sh-arrangement .ar-piece.is-held .sh-piece { filter: url(#sh-lift); }
+@media (hover: none) { .sh-arrangement .ar-piece .sh-stud { filter: url(#sh-rim-soft); } }   /* phones: studs keep a faint rim */
+.sh-arrangement .ar-her-hit { outline: none; }
+.sh-arrangement .ar-her-hit:focus-visible { stroke: var(--sh-gauze); stroke-width: 1.5; stroke-dasharray: 4 5; }
+.sh-arrangement .ar-hands, .sh-arrangement .ar-lamp { pointer-events: none; }
+
+/* ---- the water's script: written as the tarn returns things, flipped top to bottom like the
+   title's reflection. It rights itself in 400 ms (the spine adds .righted, on a tap or after two
+   seconds); .still never rights (the letter's P.S.). The water never writes in red: red is hers. ---- */
+.sh-mirror { display: inline-block; transform: scale(1, -.85); transition: transform .4s ease-in-out; color: var(--sh-return, #f3e3b8); }
+.sh-mirror.righted { transform: none; }
+@media (prefers-reduced-motion: reduce) { .sh-mirror { transition: opacity .2s; } }

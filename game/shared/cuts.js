@@ -146,8 +146,9 @@ export function returned(inner, { truth = '', still = false, transform = FLIP } 
   <g transform="${transform}" filter="url(#${still ? 'sh-ripple-still' : 'sh-ripple'})">${inner}</g></g>` +
     (truth ? `<g class="sh-truth" transform="${transform}">${truth}</g>` : '');
 }
+// hers, so red; but a faint hairline, noticed only when you look (Lukas, 31 Oct)
 export const truthFissure = (scale = 1) =>
-  `<path d="${FISSURE}" style="fill:none;stroke:var(--sh-red,#e0392b);stroke-width:${2.4 / scale};stroke-linecap:round;stroke-linejoin:round"/>`;
+  `<path class="sh-fissure" d="${FISSURE}" style="fill:none;stroke:var(--sh-red,#e0392b);stroke-width:${.7 / scale};opacity:.55;stroke-linecap:round;stroke-linejoin:round"/>`;
 export const moon = (x, y, r = 46) =>
   `<g class="sh-moon"><circle cx="${x}" cy="${y}" r="${r * 2.4}" style="fill:#c8321f;opacity:.16" filter="url(#sh-soft)"/><circle cx="${x}" cy="${y}" r="${r}" style="fill:var(--sh-red,#e0392b)" filter="url(#sh-glow)"/><path d="M${x - r * .5} ${y - r * .2}a${r * .22} ${r * .16} 0 1 0 1 0M${x + r * .2} ${y + r * .35}a${r * .16} ${r * .12} 0 1 0 1 0" style="fill:#000;opacity:.12"/></g>`;
 
@@ -427,13 +428,19 @@ ${o.shield ? `<path d="M-10.4-28H-3.6V-22C-3.6-19-5.6-17-7-16C-8.4-17-10.4-19-10
 export const FIGURES = Object.keys(FIG);
 export const figureInfo = name => ({ faces: FIG[name].faces, height: FIG[name].h, hinges: FIG[name].hinges || {} });
 
-// figure('guest', {x, y, scale, flip, pose, faint, heart, lamp, shield, cls, id, attrs})
+// figure('guest', {x, y, scale, flip, pose, faint, heart, lamp, shield, shadow, rim, cls, id, attrs})
 // Facing right unless flip. Madeline is gauze (pale paper): faint above water unless {faint:false}.
+// shadow: drawn as a shadow on a lit wall (--sh-shadow). rim: a 1.5-unit gauze edge outside the
+// silhouette; rim:'only' draws the edge alone (for masking it where something else covers her).
 export function figure(name, o = {}) {
   const f = FIG[name]; if (!f) throw new Error('no cut called ' + name);
   const { x = 0, y = 0, scale = 1, flip = false, cls = '', id = '', attrs = '' } = o;
   const sx = r1(f.faces * (flip ? -1 : 1) * scale * 1000) / 1000;
-  const fill = f.gauze ? `style="fill:var(--gauze,#f6ead2);${o.faint === false ? '' : 'opacity:var(--gauze-a,.42)'}"` : 'fill="currentColor"';
+  const rim = o.rim ? `stroke:var(--sh-gauze,#f6ead2);stroke-width:${r1(300 / scale) / 100};stroke-linejoin:round;paint-order:stroke;` : '';
+  const fill = o.rim === 'only' ? `style="fill:none;${rim}"`
+    : o.shadow ? `style="fill:var(--sh-shadow,#0b0809);${rim}"`
+    : f.gauze ? `style="fill:var(--gauze,#f6ead2);${o.faint === false ? '' : 'opacity:var(--gauze-a,.42)'};${rim}"`
+    : rim ? `fill="currentColor" style="${rim}"` : 'fill="currentColor"';
   // outer <g>: class and state only (safe for CSS transforms: .touch, lifts) › position › .sh-pose (bob, sway) › scale
   return `<g class="sh-fig sh-${name} ${cls}" data-fig="${name}"${id ? ` id="${id}"` : ''} ${attrs}><g class="sh-at" transform="translate(${r1(x)} ${r1(y)})"><g class="sh-pose"><g transform="scale(${sx} ${scale})" ${fill}>${f.draw(o)}</g></g></g></g>`;
 }
@@ -445,6 +452,56 @@ export function hinge(el, sel, deg) {
   const [hx, hy] = p.dataset.hinge.split(' ').map(Number);
   p.setAttribute('transform', `rotate(${deg} ${hx} ${hy})`);
 }
+
+/* ---------- the shadow stage: cut-outs on rods before a lamp (shared/arrangement.js) ----------
+   Each piece stands with its foot at (0,0) on its groove, centred, facing the lamp. `solid` is the
+   paper that stops light, as rectangles [x, y, w, h] in the same units: a shadow covers what its
+   solid covers once cast. Lace lets light through, so the trophies' solid is almost nothing. */
+export const PIECES = {
+  // a high-backed chair, its seat skirted nearly to the floor: "the gloomy furniture of the room" [u32]
+  chair: {
+    w: 84, h: 110,
+    solid: [[-27, -108, 54, 62], [-42, -48, 84, 8], [-38, -40, 76, 32], [-38, -8, 7, 8], [31, -8, 7, 8], [-15, -8, 5, 8], [10, -8, 5, 8]],
+    draw: () => `<path d="M-27-46V-98Q-27-106-18-108Q0-116 18-108Q27-106 27-98V-46Z"/>` +
+      curl(-27, -100, -PI / 2 - .5, 14, -.9, 3.4, .5, 18) + curl(27, -100, -PI / 2 + .5, 14, .9, 3.4, .5, 18) + `<circle cx="0" cy="-114" r="3"/>` +
+      `<path d="M-42-48H42V-40H-42Z"/><path d="M-38-40H38V-10H-38Z"/>${scallops(-36, 36, -10, 2.2, 6)}` +
+      `<path d="M-38-10h7v10h-7ZM31-10h7v10h-7ZM-15-10h5v10h-5ZM10-10h5v10h-5Z"/>` +
+      `<path d="M-14-92h28v4h-28ZM-14-66h28v4h-28Z" style="fill:var(--lit,#f7d894);opacity:.18"/>`,
+  },
+  // the dark and tattered draperies [u32], hung from a cross-bar on a stand
+  drape: {
+    w: 104, h: 150,
+    solid: [[-48, -145, 96, 137]],
+    draw: () => `<path d="M-52-150H52V-145H-52Z"/>${circPath(-53, -147.5, 3.2)}${circPath(53, -147.5, 3.2)}` +
+      `<path d="M-48-145C-46-110-50-60-47-12Q-40-5-32-10Q-24-5-16-10Q-8-5 0-10Q8-5 16-10Q24-5 32-10Q40-5 47-12C50-60 46-110 48-145Z"/>` +
+      `<path d="M-24-140C-22-100-26-60-22-16M2-140C4-100 0-60 3-14M26-140C28-96 24-58 27-16" style="fill:none;stroke:var(--lit,#f7d894);stroke-width:.8;opacity:.35"/>` +
+      `<path d="M-2-10V0H2V-10ZM-14 0L-3-6H3L14 0Z"/>`,
+  },
+  // the phantasmagoric armorial trophies [u07]: a shield and two lances, cut with lace
+  trophies: {
+    w: 96, h: 120,
+    solid: [[-27, -94, 54, 5], [-5, -68, 10, 10]],
+    draw: () => {
+      let holes = '';
+      for (let r = 0; r < 6; r++) for (let c = 0; c < 5; c++) {
+        const x = -18 + c * 9 + (r % 2 ? 4.5 : 0), y = -86 + r * 9;
+        if (Math.abs(x) <= 20 - Math.max(0, y + 60) * .5) holes += circ(x, y, 2.6);
+      }
+      return `<path d="M-44 0L38-114L40.6-112L-41.4 2ZM44 0L-38-114L-40.6-112L41.4 2Z"/>` +
+        `<path d="M38-114l5-9 2 11zM-38-114l-5-9-2 11z"/>${curl(41, -118, -.4, 12, .9, 2.4, .4, 12)}${curl(-41, -118, PI + .4, 12, -.9, 2.4, .4, 12)}` +
+        `<path fill-rule="evenodd" d="M-27-94H27V-62Q27-36 0-28Q-27-36-27-62Z${holes}"/>${circPath(0, -63, 4.5)}` +
+        `<path d="M-16 0L-10-6H10L16 0Z"/>`;
+    },
+  },
+};
+const circPath = (x, y, r) => `<path d="${circ(x, y, r)}"/>`;
+export const piece = (id, o = {}) => g(PIECES[id].draw(o), `class="sh-piece sh-piece-${id}"`);
+// the rod under a piece, down through its groove to a lamp-lit stud: the handle
+export const rod = (L = 30) =>
+  `<path d="M-1.3 0H1.3V${L}H-1.3Z"/><circle cx="0" cy="${L}" r="6.4"/><circle class="sh-stud" cx="0" cy="${L}" r="3.8" style="fill:var(--lit-stud,url(#sh-lamp))"/>`;
+// a pale glove, cut after the studio's hand: the guest's own, or the teacher's
+export const glove = () =>
+  `<g class="sh-glove" style="fill:var(--sh-gauze,#f6ead2);stroke:var(--sh-cut,#0b0809);stroke-width:1.4;stroke-linejoin:round"><path d="M-4.5 22V4Q-4.5-1 0-1Q4.5-1 4.5 4V19Q10 16 13 21Q18 20 19 25Q23 26 22 31Q24 36 21 40L19 46H-5L-6 37Q-13 31-10 25Q-7 22-4.5 26Z"/><path d="M-6 46H20V52H-6Z"/></g>`;
 
 /* ---------- type on light, frames, iris ---------- */
 // A lit card in a cut frame with scroll ends: black type on lamplight (titles, intertitles above water).

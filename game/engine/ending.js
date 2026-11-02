@@ -3,8 +3,9 @@
 // over and the reflected house stands upright.
 
 import * as C from '../shared/cuts.js';
-import { ACCOUNT, CHAPTERS, LAST, REMARKS, num } from './story.js';
+import { ACCOUNT, CHAPTERS, LAST, num } from './story.js';
 import { md, esc, sleep, tapOrWait, reducedMotion } from './util.js';
+import { sheet, pen } from './account.js';
 
 const BLOT = `<svg class="blot" viewBox="0 0 40 30" aria-hidden="true"><path d="M20 3c6 0 7 5 11 6s7 5 4 9-2 9-8 9-8-3-12-2-10-1-11-6 3-6 2-10 8-6 14-6Z"/><circle cx="36" cy="5" r="1.6"/><circle cx="5" cy="25" r="1.1"/></svg>`;
 
@@ -117,51 +118,21 @@ export async function lastCard(stage, map) {
   return new Promise(resolve => card.querySelector('.again').addEventListener('click', () => resolve(card), { once: true }));
 }
 
-// Her pass on the Account, after a chapter below: the account as written, and on each row
-// she rewrote, the act-one red struck through and her back-slanted red line beneath.
-// Resolves 'again' (back under the studio) or 'nevertheless' (back to the letter).
-export async function herPass(stage, results, flags, rewrites = {}) {
-  const rows = accountRows(results, flags);
-  const sheet = document.createElement('div');
-  sheet.className = 'account';
-  sheet.innerHTML = `<div class="sheet">
-    <h2 class="acc-title">${esc(ACCOUNT.title)}</h2>
-    <ol class="acc-rows">
-      ${rows.map(r => {
-        const hers = r.key && rewrites[r.ch]?.[r.key];
-        return `<li><div class="acc-entry"><span>${esc(r.label)}</span><span class="dots"></span><span>${esc(r.value)}</span></div>` +
-          `<div class="acc-rather">${esc(`${ACCOUNT.rather} ${r.rather}`)}</div>` +
-          (hers ? `<div class="acc-rather hers" data-text="${esc(`${ACCOUNT.rather} ${stop(hers)}`)}"></div>` : '') + '</li>';
-      }).join('')}
-      <li class="acc-last"><div class="acc-entry"><span>${esc(ACCOUNT.last.label)}</span><span class="dots"></span><span>${esc(ACCOUNT.last.value)}</span></div><div class="acc-rather">${esc(ACCOUNT.rather)}${BLOT}</div></li>
-    </ol>
-    <div class="acc-choices">
-      <button class="acc-nevertheless" type="button" data-choice="nevertheless">${md(LAST.again)}</button>
-      <button class="acc-replay" type="button" data-choice="again">${esc(REMARKS.herPass.again)}</button>
-    </div>
-  </div>`;
-  stage.append(sheet);
-  const hers = [...sheet.querySelectorAll('.acc-rather.hers')];
-  fit(sheet.querySelector('.sheet'), stage, hers);
-  await sleep(50);
-  sheet.classList.add('on');
-  await sleep(reducedMotion ? 100 : 900);
-  // the choices work at once, even while her pen is still moving
-  const chosen = new Promise(resolve => {
-    for (const b of sheet.querySelectorAll('[data-choice]')) b.addEventListener('click', () => resolve(b.dataset.choice), { once: true });
+// Her pass on the Account, after a chapter below that rewrote her line (M1's studio): the
+// Account as written, and under the row she rewrote, her line in her back-slanted red.
+export async function herPass(stage, acc, rewrites = {}) {
+  await sheet(stage, acc, {
+    before: async el => {
+      for (const [id, by] of Object.entries(rewrites)) {
+        let row = el.querySelector(`.acc-front [data-id="${CSS.escape(id)}"]`);
+        if (!row) continue;
+        for (const text of Object.values(by)) {
+          row.insertAdjacentHTML('afterend', '<li class="acc-line hand-hers acc-rewrite"><span class="acc-value"></span></li>');
+          row = row.nextElementSibling;
+          row.scrollIntoView({ block: 'nearest' });
+          await pen(row.querySelector('.acc-value'), stop(text));
+        }
+      }
+    },
   });
-  let picked = false;
-  chosen.then(() => { picked = true; });
-  for (const el of hers) {
-    if (picked) break;
-    el.previousElementSibling.classList.add('struck');
-    el.scrollIntoView({ block: 'nearest' });
-    await sleep(reducedMotion ? 0 : 500);
-    await write(el, el.dataset.text);
-  }
-  const choice = await chosen;
-  sheet.classList.remove('on');
-  await sleep(500);
-  sheet.remove();
-  return choice;
 }

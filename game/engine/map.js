@@ -3,6 +3,8 @@
 
 import { svg, tween, sleep, reducedMotion } from './util.js';
 import { mapMarkup, actorFigure, placeFigure, ROOMS, TRUTH_IDS, TURNED_HOUSE, turnedY } from './drawing.js';
+import * as C from '../shared/cuts.js';
+import { castShadow } from '../shared/arrangement.js';
 
 // Walkable points (feet), and how they join: over the bank, up the arched
 // causeway (it climbs from 350 to 336), through the hall's arch, the stair's two flights.
@@ -42,6 +44,10 @@ const GLIDE = 30;     // Madeline
 
 const VIEW_WIDE = '0 0 960 640';
 const VIEW_TALL = '110 30 576 640';   // portrait phones: the house and the whole causeway
+// map.zoom(room): the map leans in, about 1.9×, on a room and its reflection
+const ZOOM = {
+  stair: { wide: '228 182 505 337', tall: '329 182 303 337' },
+};
 
 function route(from, to) {
   if (from === to) return [from];
@@ -196,7 +202,9 @@ export class MapView {
 
   // ---- layout -------------------------------------------------------------
   setTall(tall) {
-    this.el.setAttribute('viewBox', tall ? VIEW_TALL : VIEW_WIDE);
+    this.tall = tall;
+    const z = ZOOM[this.zoomed];
+    this.el.setAttribute('viewBox', z ? (tall ? z.tall : z.wide) : tall ? VIEW_TALL : VIEW_WIDE);
     this.el.classList.toggle('tall', tall);
     // the title cartouche and its reflection, narrowed to fit the portrait crop
     const fit = (y) => tall ? `translate(398 ${y}) scale(.84) translate(-480 ${-y})` : '';
@@ -217,6 +225,42 @@ export class MapView {
   resume() {
     this.el.classList.remove('paused');
     if (!reducedMotion) { this.el.unpauseAnimations(); this.defsEl?.unpauseAnimations(); }
+  }
+
+  // lean in on a room and its reflection (null: back out), over a second
+  async zoom(room) {
+    const to = (ZOOM[room] ? ZOOM[room][this.tall ? 'tall' : 'wide'] : this.tall ? VIEW_TALL : VIEW_WIDE).split(' ').map(Number);
+    const from = this.el.getAttribute('viewBox').split(' ').map(Number);
+    this.zoomed = ZOOM[room] ? room : null;
+    this.el.classList.toggle('zoomed', !!this.zoomed);
+    if (reducedMotion) { this.el.setAttribute('viewBox', to.join(' ')); return; }
+    await tween(1100, k => {
+      const e = k * k * (3 - 2 * k);
+      this.el.setAttribute('viewBox', from.map((v, i) => (v + (to[i] - v) * e).toFixed(1)).join(' '));
+    });
+  }
+  // a figure's shadow on the lit wall behind it, scaled about a lamp held low (castShadow, as the
+  // hall's toy theatre casts them); null clears it
+  wallShadow(id, lamp, k = 2) {
+    const g = this.el.querySelector('#wall-shadow');
+    g.innerHTML = '';
+    if (!id) return;
+    const a = this.actors[id];
+    const fig = C.figure(FIG[id], { x: a.x, y: a.y, flip: a.dir === -1, shadow: true });
+    g.innerHTML = castShadow(fig, lamp, k, .8, .55, { prefix: 'map' });
+  }
+  // the flattering water: the returned cast is drawn apart, each shown figure at the size the water
+  // gives it ({ id: scale }, else life size). null puts the water's own reflection back.
+  flatter(sizes) {
+    const g = this.el.querySelector('#cast-flatter');
+    g.innerHTML = '';
+    this.el.classList.toggle('flattering', !!sizes);
+    if (!sizes) return;
+    for (const [id, a] of Object.entries(this.actors)) {
+      if (!a.shown || id === 'her') continue;
+      const lit = id === 'physician' ? ' filter="url(#sh-glow)" style="color:var(--sh-return)"' : '';
+      g.insertAdjacentHTML('beforeend', `<g${lit}>${C.figure(FIG[id], { x: a.x, y: a.y, scale: sizes[id] ?? 1, flip: a.dir === -1 })}</g>`);
+    }
   }
 
   // ---- the target: its room's lamp turned up and a lamp rim on its doorway ----

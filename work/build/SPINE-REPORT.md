@@ -1,15 +1,25 @@
 # Spine report
 
-**Act one plays start to end; milestone 1's loop runs.** Headless Chrome at 1280×800 and 844×390 (landscape), with stubs, plus all seven real games: no console errors.
+**Milestone 2, package A: done (2 November).** Not committed.
 
-**Run:** `cd game && python3 -m http.server 8790`. Milestone: `?chapter=studio&through=studio`. Also `?games=none` stubs, `?debug` skips.
+**What works.**
+- The letter (the P.S. in the water's script; **Forthwith.**).
+- The fork: *Rein in.*, **Nevertheless.**, or idle, which writes it paler as m.
+- The first look, card I and the tarn's Account slip.
+- The hall interlude, the stair (zoom, wall shadow, flattering water) and your room.
+- The hinge: her nick, the turn, **Nevertheless.**
+- Act two: her first line, the reveal (~~without~~) and her way on.
+- The fissure: a faint red hairline in the water.
+- The tarn is in `GHOSTS`, now that its `ghost.json` has landed.
 
-**Milestone §1–2, done:**
-- Save in `localStorage['usher.save.v1']` (guarded; old save migrated). Refresh resumes a plain run or a `through` entry, act two included.
-- `api.mode`, `api.record` (act one, capped 4,000), `api.ghost` (act two; fixture if under 10 hushes), `api.rewrite`.
-- **Nevertheless.** fades the ribbons; *A **Burial** of Some Weeks*; the act-two map: the turned world, light house above (studio lit, rest sealed), black house below, Madeline walking from the vault.
-- Her pass: act-one red struck, her back-slanted red line beneath; then **Nevertheless.** (letter) or the studio again.
+**How to run it.** `127.0.0.1:8300/?through=tarn` (`&games=none` for stubs). M1's path: `?chapter=studio&through=studio`. One scene: `?scene=interlude1|stair|room|hinge`.
 
-**For the studio builder:** records are `{type, t, ...data}` plus `event`, the recorded name, since a `hush`'s own `type` (the pest) wins. Add `'studio'` to `GHOSTS` in `engine/registry.js` when `ghost.json` lands.
+**§7 results.** All pass; the first-timer proof is yours to run.
+- **The path:** the letter to her way on, then **Nevertheless.** back to the letter. On stubs (mouse 1280×800; touch 844×390, 667×375, 390×844; reduced motion) and the live tarn, both ways. Every fork branch; consoles clean, no 404s.
+- **M1's path** still plays.
+- **A refresh** resumes before the tarn, before the interlude and in act two.
+- **`arrangement.html`:** 20/20 taps, 0/20 drags, 10/10 catches.
+- **The interlude:** each branch writes the right line, hand and flag; the house moves.
+- **The voice:** this path's strings are marked; only the letter and the banner run over twelve words.
 
-**Known:** at 10:41 `games/studio/game.js` had no exports (mid-rewrite), so the loop was checked with my two-way stub.
+**Deferred and known issues.** Chapters II–VII keep old, unmarked strings, and the house shuts again for II's door. The flattering reflections are faint under the ripple.

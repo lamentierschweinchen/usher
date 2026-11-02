@@ -4,6 +4,7 @@
 // The spine draws nothing of its own here except the invisible hit areas.
 
 import * as C from '../shared/cuts.js';
+import { blurDef } from '../shared/arrangement.js';
 
 export const { WATER, FLIP, FISSURE } = C;
 
@@ -72,6 +73,7 @@ export function mapMarkup(titles, { act = 'sojourn' } = {}) {
   <g id="grounds">${C.bank()}${C.shore()}</g>
   <g id="house" class="house-def">${C.shell({ crack: 6 })}<g class="rooms">${C.rooms()}</g><g class="facade">${C.facadeWindows()}</g></g>
   <g id="cast"></g>
+  ${blurDef(.8, 'map')}
   <!-- a target room's lamp, turned up -->
   <radialGradient id="sp-hot" cx=".5" cy=".6" r=".75"><stop offset="0" stop-color="#fffaea"/><stop offset=".6" stop-color="#fde9b8"/><stop offset="1" stop-color="#f6cf7e"/></radialGradient>
 </defs>
@@ -84,6 +86,8 @@ export function mapMarkup(titles, { act = 'sojourn' } = {}) {
   <use href="#grounds"/>
   <g clip-path="url(#clip-above)">
     <use id="house-whole" href="#house"/>
+    <!-- a shadow on a lit wall (the physician's, on the stair), inside the house, not returned by the tarn -->
+    <g id="wall-shadow" class="wall-shadow"></g>
     <g id="sink-left" class="half"><use href="#house" clip-path="url(#clip-left)"/></g>
     <g id="sink-right" class="half"><use href="#house" clip-path="url(#clip-right)"/></g>
   </g>
@@ -92,7 +96,7 @@ export function mapMarkup(titles, { act = 'sojourn' } = {}) {
 <g id="cartouche" class="cartouche">${C.card({ text: titles.above, x: 206, y: 30, w: 548, h: 92, size: 40 })}</g>
 
 <g id="glasses">${lights(ch => C.glass(ch))}</g>
-${C.returned('<use href="#grounds"/><g class="ret-house"><use href="#house"/></g><use href="#cast"/>', { truth: `<g id="truths" class="truths">${TRUTHS}</g><g id="cast-below" class="cast-below"></g>` })}
+${C.returned('<use href="#grounds"/><g class="ret-house"><use href="#house"/></g><use class="ret-cast" href="#cast"/><g id="cast-flatter" class="cast-flatter"></g>', { truth: `<g id="truths" class="truths">${TRUTHS}</g><g id="cast-below" class="cast-below"></g>` })}
 <g id="title-below" class="title-below" filter="url(#sh-ripple)">
   <text class="t-title-below" transform="translate(480 590) scale(1 -.85)" text-anchor="middle">${titles.below}</text>
 </g>
