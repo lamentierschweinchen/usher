@@ -2,6 +2,14 @@
 
 Lukas's calls, newest first, in his words. Nothing here is locked; each entry is current until replaced.
 
+## 2026-11-05 — A live home for testing
+
+"we can't test anything on phone unless we have a home for this that's live and accessible. maybe put that somewhere and i'll play it on phone (before the laptop) and give you my feedback?"
+
+**Done:** a test build at https://lamentierschweinchen.github.io/usher/ , on GitHub Pages from the existing public repo. The coordinator chose the place. It publishes only by hand, and asks search engines not to index it.
+
+*Replaced:* "Deploying … is a separate call" for this test build only. Announcing or sharing the game is still his call.
+
 ## 2026-10-31 — The fissure
 
 "the fissure should be more subtle visually by the way (we'll do a full visual polish version closer to the end but sure, it can be "hers" although i'm not sure what that changes?)"
